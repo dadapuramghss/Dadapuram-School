@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, X, Send, Loader2, MessageSquare, Sparkles } from 'lucide-react';
+import { Bot, X, Send, Loader2, MessageSquare, Sparkles, Mic, MicOff, Volume2 } from 'lucide-react';
 import { api } from '../../lib/api';
 
 export function AiChatWidget() {
@@ -9,7 +9,38 @@ export function AiChatWidget() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const startListening = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert("Your browser does not support voice input.");
+      return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+    };
+    recognition.start();
+  };
+
+  const speakText = (text) => {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text.replace(/\*/g, '').replace(/#/g, ''));
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -33,6 +64,7 @@ export function AiChatWidget() {
     try {
       const response = await api.askAI(userQuery);
       setMessages(prev => [...prev, { role: 'assistant', content: response.answer }]);
+      speakText(response.answer);
     } catch (error) {
       console.error("AI Error:", error);
       // Try to extract the backend error message if available
@@ -112,6 +144,14 @@ export function AiChatWidget() {
             className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 dark:text-white"
             disabled={isLoading}
           />
+          <button
+            type="button"
+            onClick={startListening}
+            className={`p-2.5 rounded-xl transition-colors ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+          >
+            {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+          </button>
+          
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
