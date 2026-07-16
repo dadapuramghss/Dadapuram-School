@@ -35,9 +35,11 @@ export function AiChatWidget() {
       setMessages(prev => [...prev, { role: 'assistant', content: response.answer }]);
     } catch (error) {
       console.error("AI Error:", error);
+      // Try to extract the backend error message if available
+      const errorMessage = error.response?.data?.error || error.message || 'Unknown error occurred.';
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'Sorry, I encountered an error. Please make sure the OpenRouter API key is configured in the backend.' 
+        content: `Error: ${errorMessage}. (Please check your backend Render logs for more details)` 
       }]);
     } finally {
       setIsLoading(false);
