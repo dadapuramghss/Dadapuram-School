@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, Bot } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { AiChatWidget } from '../ui/AiChatWidget';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -22,6 +21,7 @@ export function AdminLayout() {
     { name: 'Gradebook', path: '/admin/gradebook', exact: false, icon: GraduationCap },
     { name: 'Leaderboard', path: '/admin/leaderboard', exact: false, icon: BarChart3 },
     { name: 'Certificates', path: '/admin/certificates', exact: false, icon: FileText },
+    { name: 'AI Analyst', path: '/admin/ai', exact: false, icon: Bot },
   ];
 
   return (
@@ -154,7 +154,6 @@ export function AdminLayout() {
           <Outlet />
         </div>
       </main>
-      <AiChatWidget />
     </div>
   );
 }

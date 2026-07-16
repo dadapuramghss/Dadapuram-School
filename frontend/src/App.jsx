@@ -11,6 +11,7 @@ import { Gradebook } from './pages/Gradebook';
 import { Leaderboard } from './pages/Leaderboard';
 import { Certificates } from './pages/Certificates';
 import { Profile } from './pages/Profile';
+import { AiDashboard } from './pages/AiDashboard';
 
 import { Register } from './pages/Register';
 import { PendingApproval } from './pages/PendingApproval';
@@ -66,6 +67,7 @@ function AppRoutes() {
         <Route path="leaderboard" element={<Leaderboard />} />
         <Route path="certificates" element={<Certificates />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="ai" element={<AiDashboard />} />
       </Route>
 
       {/* Admin Routes */}
@@ -81,6 +83,7 @@ function AppRoutes() {
         <Route path="gradebook" element={<Gradebook />} />
         <Route path="leaderboard" element={<Leaderboard />} />
         <Route path="certificates" element={<Certificates />} />
+        <Route path="ai" element={<AiDashboard />} />
       </Route>
     </Routes>
   );
