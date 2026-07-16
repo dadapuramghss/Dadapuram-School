@@ -74,7 +74,7 @@ export function AiDashboard() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-6rem)] md:h-[calc(100vh-3rem)]">
+    <div className="flex flex-col h-[calc(100vh-6rem)] md:h-[calc(100vh-3rem)] w-full max-w-full overflow-hidden">
       {/* Header */}
       <div className="mb-4">
         <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
@@ -126,31 +126,31 @@ export function AiDashboard() {
         </div>
 
         {/* Input Area */}
-        <div className="p-4 bg-white dark:bg-[#0B0F19] border-t border-slate-100 dark:border-slate-800">
-          <form onSubmit={handleSubmit} className="flex gap-3 items-center max-w-4xl mx-auto">
+        <div className="p-3 md:p-4 bg-white dark:bg-[#0B0F19] border-t border-slate-100 dark:border-slate-800">
+          <form onSubmit={handleSubmit} className="flex gap-2 md:gap-3 items-center max-w-4xl mx-auto w-full">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything about the school's data..."
-              className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-6 py-4 text-base focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:text-white transition-all shadow-sm"
+              placeholder="Ask anything..."
+              className="flex-1 min-w-0 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl md:rounded-2xl px-4 py-3 md:px-6 md:py-4 text-sm md:text-base focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:text-white transition-all shadow-sm"
               disabled={isLoading}
             />
             <button
               type="button"
               onClick={startListening}
-              className={`p-4 rounded-2xl transition-all shadow-sm ${isListening ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+              className={`p-3 md:p-4 shrink-0 rounded-xl md:rounded-2xl transition-all shadow-sm ${isListening ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
               title="Speak"
             >
-              {isListening ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+              {isListening ? <MicOff className="w-5 h-5 md:w-6 md:h-6" /> : <Mic className="w-5 h-5 md:w-6 md:h-6" />}
             </button>
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="p-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-2xl transition-all shadow-md hover:shadow-lg"
+              className="p-3 md:p-4 shrink-0 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl md:rounded-2xl transition-all shadow-md hover:shadow-lg"
               title="Send Message"
             >
-              <Send className="w-6 h-6" />
+              <Send className="w-5 h-5 md:w-6 md:h-6" />
             </button>
           </form>
         </div>
