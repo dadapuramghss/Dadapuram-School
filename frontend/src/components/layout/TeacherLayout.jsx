@@ -5,7 +5,7 @@ import { LayoutDashboard, Users, GraduationCap, LogOut, BarChart3, ShieldAlert, 
 import { cn } from '../../lib/utils';
 
 export function TeacherLayout() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const { logout, dbUser } = useAuth();
 
   const handleNavClick = () => {

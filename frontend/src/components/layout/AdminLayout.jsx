@@ -5,7 +5,7 @@ import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileTex
 import { cn } from '../../lib/utils';
 
 export function AdminLayout() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const { logout, dbUser } = useAuth();
 
   const handleNavClick = () => {
