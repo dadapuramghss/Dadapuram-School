@@ -11,6 +11,7 @@ export function Profile() {
   const [name, setName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (dbUser) {
@@ -26,6 +27,7 @@ export function Profile() {
     try {
       await api.updateProfile({ name });
       setMessage({ text: 'Profile updated successfully!', type: 'success' });
+      setIsEditing(false);
       // Note: In a full app, we might want to refresh dbUser in AuthContext here, 
       // but a reload or next login will pick it up anyway.
     } catch (error) {
@@ -39,70 +41,86 @@ export function Profile() {
   if (!dbUser) return null;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-[#2E1C40] font-black drop-shadow-sm  ">
-        My Profile
-      </h1>
+    <div className="space-y-8 max-w-5xl mx-auto">
+      <div className="mb-2">
+        <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 drop-shadow-sm tracking-tight mb-2">
+          My Profile
+        </h1>
+        <p className="text-gray-400 font-medium">Manage your account settings and teaching responsibilities.</p>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Profile Details Form */}
-        <GlassCard className="p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-gradient-to-br from-indigo-100 to-indigo-50 shadow-inner rounded-full">
-              <User className="w-6 h-6 text-[#62D4CA]" />
+        <GlassCard className="p-6 md:p-8 relative overflow-hidden group border-white/10 bg-[#0B132B]/60 shadow-2xl">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#62D4CA]/5 rounded-full blur-3xl -z-10 group-hover:bg-[#62D4CA]/10 transition-all duration-700"></div>
+
+          <div className="flex items-center gap-5 mb-8">
+            <div className="p-4 bg-gradient-to-br from-[#62D4CA]/20 to-[#62D4CA]/5 border border-[#62D4CA]/30 shadow-[0_0_20px_rgba(98,212,202,0.15)] rounded-2xl">
+              <User className="w-7 h-7 text-[#62D4CA]" />
             </div>
-            <h2 className="text-xl font-bold text-[#2E1C40]">Account Details</h2>
+            <div>
+              <h2 className="text-2xl font-bold text-white tracking-tight">Account Details</h2>
+              <p className="text-sm text-gray-400 mt-1">Personal information & settings</p>
+            </div>
           </div>
 
-          <form onSubmit={handleSave} className="space-y-4">
+          <form onSubmit={handleSave} className="space-y-6">
             <div>
-              <label className="block text-sm font-bold text-[#4C677C]  mb-1 flex items-center gap-2">
-                <User className="w-4 h-4 text-indigo-500 " />
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <User className="w-4 h-4 text-[#62D4CA]" />
                 Display Name
               </label>
               <input 
                 type="text" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="glass-input w-full font-bold text-[#2E1C40] bg-white shadow-sm border border-[#E5D9C4] focus:ring-indigo-400"
+                disabled={!isEditing}
+                className={`w-full px-5 py-4 rounded-xl font-bold text-white transition-all outline-none 
+                  ${!isEditing 
+                    ? 'bg-white/5 border border-white/5 opacity-80 cursor-not-allowed text-gray-300' 
+                    : 'bg-white/10 border border-[#62D4CA]/50 focus:border-[#62D4CA] focus:ring-4 focus:ring-[#62D4CA]/10 shadow-[0_0_15px_rgba(98,212,202,0.1)]'
+                  }`}
                 placeholder="Enter your name"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#4C677C]  mb-1 flex items-center gap-2">
-                <Mail className="w-4 h-4 text-indigo-500 " />
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#FA7848]" />
                 Email Address
               </label>
               <input 
                 type="email" 
                 value={dbUser.email}
-                className="glass-input w-full opacity-60 font-bold text-[#2E1C40] bg-[#F2FCFA] border border-slate-200 cursor-not-allowed"
+                className="w-full px-5 py-4 rounded-xl font-bold text-gray-400 bg-black/20 border border-white/5 cursor-not-allowed"
                 disabled
               />
-              <p className="text-xs text-[#4C677C]/60  mt-1 font-medium">Email cannot be changed.</p>
+              <p className="text-xs text-gray-500 mt-2.5 font-medium flex items-center gap-1.5">
+                <AlertCircle className="w-3.5 h-3.5" /> Email cannot be changed for security reasons.
+              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#4C677C]  mb-1 flex items-center gap-2">
-                <Shield className="w-4 h-4 text-indigo-500 " />
-                Role
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <Shield className="w-4 h-4 text-[#AE634A]" />
+                Role & Status
               </label>
-              <div className="flex items-center gap-2 mt-2">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+              <div className="flex items-center gap-3">
+                <span className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-widest border shadow-sm ${
                   dbUser.role === 'admin' 
-                    ? 'bg-purple-50 text-[#2E1C40] border-purple-200   ' 
-                    : 'bg-blue-50 text-blue-700 border-blue-200   '
+                    ? 'bg-purple-500/10 text-purple-300 border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)]' 
+                    : 'bg-blue-500/10 text-blue-300 border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
                 }`}>
                   {dbUser.role.toUpperCase()}
                 </span>
                 
-                <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                <span className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-widest border shadow-sm ${
                   dbUser.status === 'approved' 
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200   ' 
-                    : 'bg-amber-50 text-amber-700 border-amber-200   '
+                    ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]' 
+                    : 'bg-amber-500/10 text-amber-300 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
                 }`}>
                   {dbUser.status.toUpperCase()}
                 </span>
@@ -110,62 +128,107 @@ export function Profile() {
             </div>
 
             {message.text && (
-              <div className={`p-3 rounded-lg flex items-center gap-2 text-sm ${
-                message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
+              <div className={`p-4 rounded-xl flex items-center gap-3 text-sm font-bold border ${
+                message.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'
               }`}>
-                {message.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                {message.type === 'success' ? <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> : <AlertCircle className="w-5 h-5 flex-shrink-0" />}
                 {message.text}
               </div>
             )}
 
-            <div className="pt-4 border-t border-[#E5D9C4] ">
-              <NeonButton type="submit" disabled={isSaving || !name.trim()}>
-                {isSaving ? 'Saving...' : 'Update Profile'}
-              </NeonButton>
+            <div className="pt-8 mt-4 border-t border-white/10 flex flex-wrap gap-4">
+              {!isEditing ? (
+                <button 
+                  type="button" 
+                  onClick={(e) => { e.preventDefault(); setIsEditing(true); }}
+                  className="px-8 py-3.5 rounded-xl font-bold text-[#0B132B] bg-[#62D4CA] hover:bg-[#4ebab0] hover:shadow-[0_0_25px_rgba(98,212,202,0.4)] transition-all duration-300 flex items-center gap-2 transform hover:-translate-y-0.5"
+                >
+                  <User className="w-5 h-5" />
+                  Edit Profile
+                </button>
+              ) : (
+                <>
+                  <button 
+                    type="submit" 
+                    disabled={isSaving || !name.trim()}
+                    className="px-8 py-3.5 rounded-xl font-bold text-[#0B132B] bg-[#62D4CA] hover:bg-[#4ebab0] hover:shadow-[0_0_25px_rgba(98,212,202,0.4)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transform hover:-translate-y-0.5 flex items-center gap-2"
+                  >
+                    {isSaving ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => { setIsEditing(false); setName(dbUser.name || ''); setMessage({text: '', type: ''}); }}
+                    className="px-8 py-3.5 rounded-xl font-bold text-gray-300 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300"
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
             </div>
           </form>
         </GlassCard>
 
         {/* Assigned Classes */}
-        <GlassCard className="p-6 h-fit">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-gradient-to-br from-sky-100 to-sky-50 shadow-inner rounded-full">
-              <BookOpen className="w-6 h-6 text-sky-600" />
+        <GlassCard className="p-6 md:p-8 h-fit relative overflow-hidden group border-white/10 bg-[#0B132B]/60 shadow-2xl">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#FA7848]/5 rounded-full blur-3xl -z-10 group-hover:bg-[#FA7848]/10 transition-all duration-700"></div>
+
+          <div className="flex items-center gap-5 mb-8">
+            <div className="p-4 bg-gradient-to-br from-[#FA7848]/20 to-[#FA7848]/5 border border-[#FA7848]/30 shadow-[0_0_20px_rgba(250,120,72,0.15)] rounded-2xl">
+              <BookOpen className="w-7 h-7 text-[#FA7848]" />
             </div>
-            <h2 className="text-xl font-bold text-[#2E1C40]">Assigned Classes</h2>
+            <div>
+              <h2 className="text-2xl font-bold text-white tracking-tight">Assigned Classes</h2>
+              <p className="text-sm text-gray-400 mt-1">Your teaching responsibilities</p>
+            </div>
           </div>
 
           {dbUser.role === 'admin' ? (
-            <div className="bg-[#F2FCFA]  p-4 rounded-xl border border-[#E5D9C4]  text-center">
-              <p className="text-[#4C677C] ">As an Admin, you have full access to all classes and sections.</p>
+            <div className="bg-gradient-to-r from-[#62D4CA]/10 to-transparent border-l-4 border-[#62D4CA] p-6 rounded-r-2xl">
+              <div className="flex items-start gap-4">
+                <Shield className="w-6 h-6 text-[#62D4CA] mt-0.5 flex-shrink-0 drop-shadow-[0_0_8px_rgba(98,212,202,0.5)]" />
+                <div>
+                  <h3 className="font-bold text-white text-lg mb-2">Full Administrator Access</h3>
+                  <p className="text-gray-300 leading-relaxed">
+                    As an Admin, you have unrestricted access to all classes, sections, and records within the institution.
+                  </p>
+                </div>
+              </div>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {dbUser.assignedClasses && dbUser.assignedClasses.length > 0 ? (
                 dbUser.assignedClasses.map((ac, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 bg-[#D8FDF6]/40/50  rounded-xl border border-[#E5D9C4]  hover:bg-[#D8FDF6]/40 hover:shadow-sm transition-all">
-                    <div>
-                      <span className="font-bold text-indigo-950 ">Standard {ac.standard}</span>
-                      <span className="mx-2 text-indigo-200 ">|</span>
-                      <span className="text-indigo-800 font-bold ">Section {ac.section}</span>
+                  <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 rounded-2xl transition-all duration-300 gap-4 group/item">
+                    <div className="flex items-center gap-5">
+                      <div className="w-12 h-12 rounded-xl bg-[#62D4CA]/10 border border-[#62D4CA]/20 flex items-center justify-center text-[#62D4CA] font-black text-lg group-hover/item:scale-105 transition-transform">
+                        {ac.standard}
+                      </div>
+                      <div>
+                        <div className="font-bold text-white text-lg">Standard {ac.standard}</div>
+                        <div className="text-gray-400 font-medium">Section {ac.section}</div>
+                      </div>
                     </div>
                     <div>
                       {ac.accessLevel === 'view' ? (
-                        <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-50 text-blue-700 border border-blue-200  ">
-                          View Only
+                        <span className="px-4 py-1.5 text-xs font-bold tracking-wider rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/30">
+                          VIEW ONLY
                         </span>
                       ) : (
-                        <span className="px-2 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200  ">
-                          Full Access
+                        <span className="px-4 py-1.5 text-xs font-bold tracking-wider rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+                          FULL ACCESS
                         </span>
                       )}
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center p-6 bg-[#F2FCFA]  rounded-2xl border border-[#E5D9C4] ">
-                  <p className="text-[#4C677C]/60  font-medium italic">No classes assigned yet.</p>
-                  <p className="text-xs text-[#4C677C]/60/80  mt-1 font-medium">Please contact an administrator.</p>
+                <div className="text-center p-10 bg-white/5 rounded-3xl border border-white/10 border-dashed">
+                  <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <BookOpen className="w-8 h-8 text-gray-500" />
+                  </div>
+                  <p className="text-gray-300 font-bold text-lg mb-2">No classes assigned</p>
+                  <p className="text-gray-500">Please contact an administrator to get your classes assigned.</p>
                 </div>
               )}
             </div>

@@ -25,7 +25,7 @@ export function Dashboard() {
   return (
     <div className="space-y-6 pb-10">
       {/* Premium Vibrant Hero Header */}
-      <div className="relative overflow-hidden rounded-2xl p-6 md:p-8 shadow-lg flex flex-col items-start justify-center isolate bg-[#2E1C40]">
+      <div className="relative overflow-hidden rounded-2xl p-6 md:p-8 shadow-lg border border-[#E5D9C4]/20 dark:border-white/5 flex flex-col items-center text-center justify-center isolate bg-gradient-to-br from-[#1A2942] to-[#0F172A] dark:from-[#131E3A] dark:to-[#0B132B]">
         {/* Decorative background elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#732A26]/40 rounded-full blur-3xl -z-10"></div>
         <div className="absolute bottom-0 right-32 w-64 h-64 bg-[#4C677C]/40 rounded-full blur-3xl -z-10"></div>

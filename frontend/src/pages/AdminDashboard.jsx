@@ -25,7 +25,7 @@ export function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Admin Hero Header */}
-      <div className="relative overflow-hidden rounded-2xl p-6 md:p-8 shadow-lg border border-white/5 flex flex-col items-start justify-center isolate bg-[#131E3A]">
+      <div className="relative p-6 md:p-8 bg-[#18263B] rounded-[24px] overflow-hidden border border-[#5D7D9A]/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_10px_30px_-10px_rgba(11,19,43,0.5)] flex flex-col items-center text-center">
         {/* Decorative background elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#F9CB84]/5 rounded-full blur-3xl -z-10"></div>
         <div className="absolute bottom-0 right-32 w-64 h-64 bg-[#5D7D9A]/10 rounded-full blur-3xl -z-10"></div>

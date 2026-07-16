@@ -181,7 +181,7 @@ export function Students() {
   return (
     <div className="space-y-6 relative">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-[#2E1C40] font-black drop-shadow-sm  ">
+        <h1 className="text-3xl font-bold text-[#2E1C40] dark:text-white font-black drop-shadow-sm  ">
           Student Management
         </h1>
       </div>
@@ -189,11 +189,11 @@ export function Students() {
       {/* Class & Section Selectors (Always visible) */}
       <GlassCard className="flex flex-wrap gap-6 items-end   ">
         <div className="space-y-2 flex-1 min-w-[200px]">
-          <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Class / Standard</label>
+          <label className="block text-sm font-medium text-[#4C677C] dark:text-[#E5D9C4] font-semibold ">Class / Standard</label>
           <select 
             value={formData.standard}
             onChange={(e) => setFormData({...formData, standard: e.target.value})}
-            className="glass-input w-full dark:!text-white [&>option]:bg-white "
+            className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
             disabled={availableStandards.length === 0}
           >
             {availableStandards.map(std => (
@@ -203,11 +203,11 @@ export function Students() {
         </div>
         
         <div className="space-y-2 flex-1 min-w-[200px]">
-          <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Section</label>
+          <label className="block text-sm font-medium text-[#4C677C] dark:text-[#E5D9C4] font-semibold ">Section</label>
           <select 
             value={formData.section}
             onChange={(e) => setFormData({...formData, section: e.target.value})}
-            className="glass-input w-full dark:!text-white [&>option]:bg-white "
+            className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
             disabled={availableSections.length === 0}
           >
             {availableSections.map(sec => (
@@ -220,7 +220,7 @@ export function Students() {
       {/* STUDENT LIST */}
       <GlassCard className="  ">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h2 className="text-xl font-bold text-[#2E1C40] ">
+          <h2 className="text-xl font-bold text-[#2E1C40] dark:text-white">
             Students in {formData.standard}-{formData.section}
           </h2>
           {hasFullAccess && (
@@ -232,26 +232,26 @@ export function Students() {
         </div>
 
         {listLoading ? (
-          <p className="text-[#4C677C]/60   text-center py-8">Loading students...</p>
+          <p className="text-[#4C677C]/60 dark:text-gray-400 text-center py-8">Loading students...</p>
         ) : studentsList.length === 0 ? (
-          <p className="text-[#4C677C]/60   text-center py-8">No students found in this section.</p>
+          <p className="text-[#4C677C]/60 dark:text-gray-400 text-center py-8">No students found in this section.</p>
         ) : (
           <div className="overflow-x-auto max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
             <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-[#F2FCFA]  sticky top-0 backdrop-blur-md">
-                <tr className="border-b border-[#E5D9C4]  text-[#2E1C40]  uppercase text-xs tracking-wider">
+              <thead className="bg-[#F2FCFA] dark:bg-[#0B132B] sticky top-0 backdrop-blur-md">
+                <tr className="border-b border-[#E5D9C4] dark:border-[#4C677C]/30 text-[#2E1C40] dark:text-[#E5D9C4] uppercase text-xs tracking-wider">
                   <th className="p-3 rounded-tl-lg font-medium">Roll No</th>
                   <th className="p-3 font-medium">Name</th>
                   <th className="p-3 font-medium">Medium</th>
                   {hasFullAccess && <th className="p-3 rounded-tr-lg font-medium text-right">Actions</th>}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 ">
+              <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                 {studentsList.map((s) => (
-                  <tr key={s._id} className="hover:bg-[#F2FCFA] :bg-gray-800/50 transition-colors">
-                    <td className="p-3 text-[#4C677C] ">{s.rollNumber}</td>
-                    <td className="p-3 font-medium text-[#2E1C40] ">{s.name}</td>
-                    <td className="p-3 text-[#4C677C] ">{s.medium}</td>
+                  <tr key={s._id} className="hover:bg-[#F2FCFA] dark:hover:bg-[#2E1C40]/20 transition-colors">
+                    <td className="p-3 text-[#4C677C] dark:text-gray-300">{s.rollNumber}</td>
+                    <td className="p-3 font-medium text-[#2E1C40] dark:text-white">{s.name}</td>
+                    <td className="p-3 text-[#4C677C] dark:text-gray-300">{s.medium}</td>
                     {hasFullAccess && (
                       <td className="p-3 text-right">
                         <div className="flex justify-end gap-2">
@@ -285,11 +285,11 @@ export function Students() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
           <div className="relative w-full max-w-2xl my-auto">
             <GlassCard className="w-full max-h-[90vh] overflow-y-auto custom-scrollbar  ">
-              <div className="flex justify-between items-center mb-6 sticky top-0 bg-white  backdrop-blur-md py-2 border-b border-[#E5D9C4]  z-10 -mx-6 px-6 -mt-6">
-                <h2 className="text-xl font-bold text-[#2E1C40] ">
+              <div className="flex justify-between items-center mb-6 sticky top-0 bg-white dark:bg-[#0B132B] backdrop-blur-md py-4 border-b border-[#E5D9C4] dark:border-[#4C677C]/30 z-10 -mx-6 px-6 -mt-6">
+                <h2 className="text-xl font-bold text-[#2E1C40] dark:text-white">
                   {editingId ? 'Edit Student' : 'Add New Student'}
                 </h2>
-                <button onClick={closeForm} className="p-2 text-[#4C677C]/60   hover:text-[#2E1C40]   transition-colors rounded-full hover:bg-[#E5D9C4]  ">
+                <button onClick={closeForm} className="p-2 text-[#4C677C]/60 hover:text-[#2E1C40] dark:text-gray-400 dark:hover:text-white transition-colors rounded-full hover:bg-[#E5D9C4] dark:hover:bg-[#2E1C40]/50">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -307,7 +307,7 @@ export function Students() {
                     <select 
                       value={formData.standard}
                       onChange={(e) => setFormData({...formData, standard: e.target.value})}
-                      className="glass-input w-full dark:!text-white [&>option]:bg-white "
+                      className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
                       disabled={availableStandards.length === 0}
                     >
                       {availableStandards.map(std => (
@@ -321,7 +321,7 @@ export function Students() {
                     <select 
                       value={formData.section}
                       onChange={(e) => setFormData({...formData, section: e.target.value})}
-                      className="glass-input w-full dark:!text-white [&>option]:bg-white "
+                      className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
                       disabled={availableSections.length === 0}
                     >
                       {availableSections.map(sec => (
@@ -335,7 +335,7 @@ export function Students() {
                     <select 
                       value={formData.medium}
                       onChange={(e) => setFormData({...formData, medium: e.target.value})}
-                      className="glass-input w-full dark:!text-white [&>option]:bg-white "
+                      className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
                     >
                       <option value="TAMIL">TAMIL</option>
                       <option value="ENGLISH">ENGLISH</option>
@@ -349,7 +349,7 @@ export function Students() {
                     <select 
                       value={formData.gender}
                       onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                      className="glass-input w-full dark:!text-white [&>option]:bg-white "
+                      className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
                     >
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
@@ -473,7 +473,7 @@ export function Students() {
                     </div>
                   )}
                   <div className="flex gap-3">
-                    <label className="flex-1 text-center cursor-pointer py-3 px-4 rounded-xl font-bold text-sm bg-[#62D4CA]/20 text-[#2E1C40]   hover:bg-indigo-200 :bg-white/20 transition-colors">
+                    <label className="flex-1 text-center cursor-pointer py-3 px-4 rounded-xl font-bold text-sm bg-[#62D4CA]/20 text-[#2E1C40] hover:bg-[#62D4CA]/40 dark:text-white dark:hover:bg-[#62D4CA]/40 transition-colors">
                       <input 
                         type="file" 
                         accept="image/*"
@@ -483,7 +483,7 @@ export function Students() {
                       />
                       Take Photo
                     </label>
-                    <label className="flex-1 text-center cursor-pointer py-3 px-4 rounded-xl font-bold text-sm bg-[#2E1C40]/10 text-[#2E1C40]   hover:bg-purple-200 :bg-white/20 transition-colors">
+                    <label className="flex-1 text-center cursor-pointer py-3 px-4 rounded-xl font-bold text-sm bg-[#2E1C40]/10 text-[#2E1C40] hover:bg-[#2E1C40]/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 transition-colors">
                       <input 
                         type="file" 
                         accept="image/*"
@@ -499,7 +499,7 @@ export function Students() {
                   <button 
                     type="button" 
                     onClick={closeForm}
-                    className="flex-1 py-3 px-4 rounded-lg font-medium text-[#4C677C]   bg-[#F2FCFA]   hover:bg-[#E5D9C4]   transition-colors"
+                    className="flex-1 py-3 px-4 rounded-lg font-medium text-[#4C677C] bg-[#F2FCFA] hover:bg-[#E5D9C4] dark:bg-[#131E3A] dark:text-[#E5D9C4] dark:hover:bg-[#2E4657] transition-colors"
                   >
                     Cancel
                   </button>
