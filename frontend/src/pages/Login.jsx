@@ -118,20 +118,21 @@ export function Login() {
   };
 
   return (
-    <div className="dark min-h-screen flex items-center justify-center p-4">
-      {/* Decorative background elements */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-secondary/60 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/40 rounded-full blur-[120px] pointer-events-none" />
+    <div className="dark min-h-screen flex items-center justify-center p-4 bg-[#080808] relative overflow-hidden">
+      {/* Premium ambient glows */}
+      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#2E4657]/40 via-[#122C46]/20 to-[#080808] pointer-events-none" />
+      <div className="absolute -top-32 -right-32 w-[600px] h-[600px] bg-[#FA7848]/10 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute -bottom-32 -left-32 w-[600px] h-[600px] bg-[#122C46]/40 rounded-full blur-[150px] pointer-events-none" />
       
-      <GlassCard className="w-full max-w-md p-8 relative z-10">
+      <GlassCard className="w-full max-w-md p-8 md:p-10 relative z-10 !bg-[#080808]/80 !border-[#2E4657]/50 shadow-2xl shadow-black/50">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-24 h-24 mb-4">
             <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
           </div>
-          <h1 className="text-4xl font-bold mb-2 tracking-tight text-white drop-shadow-md">
-            Edu<span className="text-transparent bg-clip-text bg-gradient-to-r from-primaryGlow to-secondaryGlow">Pulse</span>
+          <h1 className="text-4xl font-black mb-2 tracking-tighter text-[#F2F2F2] drop-shadow-md">
+            Edu<span className="text-[#FA7848]">Pulse</span>
           </h1>
-          <p className="text-white/60 text-sm">Academic Analytics & Ranking Dashboard</p>
+          <p className="text-[#CDD3C6] text-sm font-medium tracking-wide uppercase">Academic Analytics Dashboard</p>
         </div>
 
         {error && (
@@ -146,53 +147,53 @@ export function Login() {
           </div>
         )}
 
-        <div className="flex bg-white/5 p-1 rounded-xl mb-6">
+        <div className="flex bg-[#080808]/60 border border-[#2E4657]/50 p-1.5 rounded-2xl mb-8">
           <button
             type="button"
-            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+            className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${
               selectedRole === 'teacher' 
-                ? 'bg-primaryGlow text-slate-900 shadow-lg shadow-primaryGlow/25' 
-                : 'text-white/60 hover:text-white hover:bg-white/5'
+                ? 'bg-[#2E4657] text-[#F2F2F2] shadow-lg shadow-[#080808]/50' 
+                : 'text-[#CDD3C6]/70 hover:text-[#F2F2F2]'
             }`}
             onClick={() => setSelectedRole('teacher')}
           >
-            Login as Teacher
+            Teacher
           </button>
           <button
             type="button"
-            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+            className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${
               selectedRole === 'admin' 
-                ? 'bg-primary text-white shadow-lg shadow-primary/40' 
-                : 'text-white/60 hover:text-white hover:bg-white/5'
+                ? 'bg-[#885D40] text-[#EFE6D5] shadow-lg shadow-[#080808]/50' 
+                : 'text-[#CDD3C6]/70 hover:text-[#F2F2F2]'
             }`}
             onClick={() => setSelectedRole('admin')}
           >
-            Login as Admin
+            Admin
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-white/80">Email</label>
+          <div className="space-y-2.5">
+            <label className="block text-xs font-bold uppercase tracking-widest text-[#CDD3C6]">Email Address</label>
             <input 
               type="email" 
               required 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="glass-input w-full"
+              className="w-full bg-[#080808]/40 border border-[#2E4657] rounded-xl px-4 py-3.5 text-[#F2F2F2] placeholder-[#2E4657] focus:outline-none focus:border-[#FA7848] focus:ring-1 focus:ring-[#FA7848]/50 transition-all"
               placeholder="admin@school.edu"
               autoComplete="off"
             />
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <div className="flex justify-between items-center">
-              <label className="block text-sm font-medium text-white/80">Password</label>
+              <label className="block text-xs font-bold uppercase tracking-widest text-[#CDD3C6]">Password</label>
               <button 
                 type="button" 
                 onClick={handleResetPassword}
                 disabled={resetting}
-                className="text-xs text-primaryGlow hover:text-secondaryGlow transition-colors"
+                className="text-xs font-medium text-[#FA7848] hover:text-[#F2F2F2] transition-colors"
               >
                 {resetting ? 'Sending...' : 'Forgot Password?'}
               </button>
@@ -202,27 +203,27 @@ export function Login() {
               required 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="glass-input w-full"
+              className="w-full bg-[#080808]/40 border border-[#2E4657] rounded-xl px-4 py-3.5 text-[#F2F2F2] placeholder-[#2E4657] focus:outline-none focus:border-[#FA7848] focus:ring-1 focus:ring-[#FA7848]/50 transition-all"
               placeholder="••••••••"
               autoComplete="new-password"
             />
           </div>
 
-          <NeonButton type="submit" disabled={loading} className="w-full">
+          <button type="submit" disabled={loading} className="w-full py-4 rounded-xl font-bold bg-[#FA7848] text-[#080808] hover:bg-[#F2F2F2] hover:-translate-y-0.5 transition-all duration-300 shadow-[0_0_20px_rgba(250,120,72,0.3)] hover:shadow-[0_0_25px_rgba(242,242,242,0.4)] disabled:opacity-50 disabled:hover:translate-y-0 text-base">
             {loading ? 'Authenticating...' : 'Sign In'}
-          </NeonButton>
+          </button>
         </form>
 
-        <div className="mt-6 flex items-center justify-between">
-          <span className="w-1/5 border-b border-white/10 lg:w-1/4"></span>
-          <span className="text-xs text-center text-gray-400 uppercase">or</span>
-          <span className="w-1/5 border-b border-white/10 lg:w-1/4"></span>
+        <div className="mt-8 flex items-center justify-between">
+          <span className="w-1/5 border-b border-[#2E4657] lg:w-1/4"></span>
+          <span className="text-[10px] font-bold text-[#CDD3C6]/50 uppercase tracking-widest">or continue with</span>
+          <span className="w-1/5 border-b border-[#2E4657] lg:w-1/4"></span>
         </div>
 
         <button 
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="mt-6 w-full flex items-center justify-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-white font-medium"
+          className="mt-6 w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-[#122C46]/30 hover:bg-[#2E4657]/80 border border-[#2E4657] rounded-xl transition-all duration-300 text-[#F2F2F2] font-semibold text-sm hover:-translate-y-0.5 hover:shadow-lg"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -233,9 +234,9 @@ export function Login() {
           Sign in with Google
         </button>
 
-        <div className="mt-8 text-center text-sm text-gray-400">
+        <div className="mt-10 text-center text-sm font-medium text-[#CDD3C6]">
           Don't have an account?{' '}
-          <Link to="/register" className="text-primaryGlow hover:text-secondaryGlow transition-colors font-medium">
+          <Link to="/register" className="text-[#FA7848] hover:text-[#F2F2F2] transition-colors border-b border-transparent hover:border-[#F2F2F2] pb-0.5">
             Register for access
           </Link>
         </div>
