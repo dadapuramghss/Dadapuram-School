@@ -140,6 +140,21 @@ const updateStudent = async (req, res) => {
   }
 };
 
+const getStudentById = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+    // Optional: check if authorized for this class, but maybe allow any teacher to view profile if they can see top 3
+    res.status(200).json(student);
+  } catch (error) {
+    console.error('Error fetching student:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // Delete student
 const deleteStudent = async (req, res) => {
   try {
@@ -165,6 +180,7 @@ const deleteStudent = async (req, res) => {
 module.exports = {
   addStudent,
   getStudentsByClass,
+  getStudentById,
   updateStudentMarks,
   updateStudent,
   deleteStudent

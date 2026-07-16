@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { Users, GraduationCap, Award } from 'lucide-react';
+import { StudentProfileModal } from '../components/ui/StudentProfileModal';
 
 export function Dashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -89,7 +91,10 @@ export function Dashboard() {
                 const isThird = idx === 2;
                 
                 return (
-                  <div key={student._id} className={`relative flex flex-col items-center p-6 rounded-[1.5rem] border transition-all duration-300 hover:-translate-y-1 ${
+                  <div 
+                    key={student._id} 
+                    onClick={() => setSelectedStudentId(student._id)}
+                    className={`relative flex flex-col items-center p-6 rounded-[1.5rem] border cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
                     isFirst ? 'bg-gradient-to-b from-yellow-50 to-white border-yellow-100 shadow-[0_4px_20px_rgba(234,179,8,0.1)]' : 
                     isSecond ? 'bg-gradient-to-b from-slate-50 to-white border-slate-200' : 
                     'bg-gradient-to-b from-orange-50 to-white border-orange-100'
@@ -134,6 +139,13 @@ export function Dashboard() {
             </div>
           </div>
         </>
+      )}
+      
+      {selectedStudentId && (
+        <StudentProfileModal 
+          studentId={selectedStudentId} 
+          onClose={() => setSelectedStudentId(null)} 
+        />
       )}
     </div>
   );

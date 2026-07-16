@@ -40,6 +40,8 @@ export const api = {
   
   getStudents: (standard, section) => fetchWithAuth(`/students?standard=${standard}&section=${section}`),
   
+  getStudentById: (studentId) => fetchWithAuth(`/students/${studentId}`),
+  
   updateMarks: (studentId, termName, marks) => fetchWithAuth(`/students/${studentId}/marks`, {
     method: 'PUT',
     body: JSON.stringify({ termName, marks })

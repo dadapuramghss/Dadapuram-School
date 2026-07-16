@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { Users, GraduationCap, ShieldAlert, Activity, Trophy } from 'lucide-react';
+import { StudentProfileModal } from '../components/ui/StudentProfileModal';
 
 export function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -82,7 +84,11 @@ export function AdminDashboard() {
               ) : (
                 <div className="space-y-4">
                   {stats.topStudents.map((student, index) => (
-                    <div key={student._id || index} className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
+                    <div 
+                      key={student._id || index} 
+                      onClick={() => setSelectedStudentId(student._id)}
+                      className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700/50 cursor-pointer hover:bg-gray-700/50 transition-colors"
+                    >
                       <div className="flex items-center gap-4">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
                           index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
@@ -107,6 +113,13 @@ export function AdminDashboard() {
             </div>
           </div>
         </>
+      )}
+
+      {selectedStudentId && (
+        <StudentProfileModal 
+          studentId={selectedStudentId} 
+          onClose={() => setSelectedStudentId(null)} 
+        />
       )}
     </div>
   );
