@@ -462,19 +462,39 @@ export function Students() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Profile Photo (Camera or Upload)</label>
+                  <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Profile Photo</label>
                   {editingId && formData.photoUrl && (
                     <div className="mb-2">
                       <img src={formData.photoUrl} alt="Current" className="w-16 h-16 rounded-full object-cover border border-white/20" />
                       <p className="text-xs text-slate-400 dark:text-slate-400 dark:text-white/50 mt-1">Upload new to replace</p>
                     </div>
                   )}
-                  <input 
-                    type="file" 
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="glass-input w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primaryGlow hover:file:bg-primary/30"
-                  />
+                  {file && (
+                    <div className="mb-2">
+                      <p className="text-sm font-medium text-green-600 dark:text-green-400">Photo selected!</p>
+                    </div>
+                  )}
+                  <div className="flex gap-3">
+                    <label className="flex-1 text-center cursor-pointer py-3 px-4 rounded-xl font-bold text-sm bg-indigo-100 text-indigo-700 dark:bg-white/10 dark:text-white hover:bg-indigo-200 dark:hover:bg-white/20 transition-colors">
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        capture="environment"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      Take Photo
+                    </label>
+                    <label className="flex-1 text-center cursor-pointer py-3 px-4 rounded-xl font-bold text-sm bg-purple-100 text-purple-700 dark:bg-white/10 dark:text-white hover:bg-purple-200 dark:hover:bg-white/20 transition-colors">
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      Upload Photo
+                    </label>
+                  </div>
                 </div>
 
                 <div className="flex gap-4 pt-4">
