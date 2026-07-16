@@ -1,0 +1,17 @@
+{
+  "name": "DGHSS 360",
+  "short_name": "DGHSS 360",
+  "description": "Academic Analytics & Ranking Dashboard",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#111827",
+  "icons": [
+    {
+      "src": "/dpm_logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

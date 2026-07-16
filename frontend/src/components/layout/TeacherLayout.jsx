@@ -28,8 +28,8 @@ export function TeacherLayout() {
       {/* Mobile Topbar */}
       <div className="md:hidden absolute top-0 left-0 w-full h-16 bg-white/80 backdrop-blur-md border-b border-indigo-100 flex items-center justify-between px-4 z-40 shadow-sm">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0">
-            <span className="text-white font-bold">E</span>
+          <div className="w-8 h-8 shrink-0 flex items-center justify-center">
+            <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 tracking-tight">
             EduPulse
@@ -61,8 +61,8 @@ export function TeacherLayout() {
           <div className={cn("p-6 flex items-center h-24", isSidebarOpen ? "justify-between" : "justify-center")}>
             {isSidebarOpen && (
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0">
-                  <span className="text-white font-bold text-lg">E</span>
+                <div className="w-10 h-10 shrink-0 flex items-center justify-center">
+                  <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain" />
                 </div>
                 <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 tracking-tight">
                   EduPulse

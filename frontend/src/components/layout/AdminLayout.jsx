@@ -29,8 +29,8 @@ export function AdminLayout() {
       {/* Mobile Topbar */}
       <div className="md:hidden absolute top-0 left-0 w-full h-16 bg-[#111827]/90 backdrop-blur-md border-b border-gray-800 flex items-center justify-between px-4 z-40 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
-            <span className="text-white font-bold text-sm">EA</span>
+          <div className="w-8 h-8 shrink-0 flex items-center justify-center">
+            <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-white">
             EduAdmin
@@ -62,8 +62,8 @@ export function AdminLayout() {
           <div className={cn("p-6 flex items-center h-24", isSidebarOpen ? "justify-between" : "justify-center")}>
             {isSidebarOpen && (
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
-                  <span className="text-white font-bold text-lg">EA</span>
+                <div className="w-10 h-10 shrink-0 flex items-center justify-center">
+                  <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain" />
                 </div>
                 <h1 className="text-2xl font-bold tracking-tight text-white">
                   EduAdmin
