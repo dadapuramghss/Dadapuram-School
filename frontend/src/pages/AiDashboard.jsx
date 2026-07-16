@@ -4,7 +4,7 @@ import { api } from '../lib/api';
 
 export function AiDashboard() {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Hi! I am your Data Analyst AI. Ask me anything about the school\'s records, like "Who is the top student in Class 6-A?"' }
+    { role: 'assistant', content: 'Hi! I am your Data Analyst AI. Ask me anything about the school records and Student\'s Detail' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
