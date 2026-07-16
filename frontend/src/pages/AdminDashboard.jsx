@@ -95,7 +95,7 @@ export function AdminDashboard() {
                           index === 1 ? 'bg-gray-400/20 text-gray-300' :
                           'bg-amber-700/20 text-amber-500'
                         }`}>
-                          #{index + 1}
+                          {index + 1}
                         </div>
                         <div>
                           <p className="font-semibold text-gray-100">{student.name}</p>

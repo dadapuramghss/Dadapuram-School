@@ -105,7 +105,7 @@ export function Dashboard() {
                       isSecond ? 'bg-gradient-to-br from-slate-300 to-slate-400 text-white' : 
                       'bg-gradient-to-br from-orange-400 to-orange-500 text-white'
                     }`}>
-                      #{idx + 1}
+                      {idx + 1}
                     </div>
 
                     <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 mt-3 shadow-inner ${
