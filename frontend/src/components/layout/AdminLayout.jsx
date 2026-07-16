@@ -3,6 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { AiChatWidget } from '../ui/AiChatWidget';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -153,6 +154,7 @@ export function AdminLayout() {
           <Outlet />
         </div>
       </main>
+      <AiChatWidget />
     </div>
   );
 }

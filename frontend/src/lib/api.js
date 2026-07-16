@@ -60,6 +60,12 @@ export const api = {
   getLeaderboard: (standard, section) => fetchWithAuth(`/analytics/leaderboard?standard=${standard}&section=${section}`),
   getDashboardStats: () => fetchWithAuth('/analytics/dashboard'),
 
+  // AI Assistant
+  askAI: (question) => fetchWithAuth('/ai/ask', {
+    method: 'POST',
+    body: JSON.stringify({ question })
+  }),
+
   // Auth
   post: (url, data) => fetchWithAuth(url, { method: 'POST', body: JSON.stringify(data || {}) }),
   get: (url) => fetchWithAuth(url),
