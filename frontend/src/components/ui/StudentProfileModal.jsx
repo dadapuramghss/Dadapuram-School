@@ -125,7 +125,10 @@ export function StudentProfileModal({ studentId, onClose }) {
                   </div>
                 </div>
                 <div className="text-2xl font-black text-amber-600 dark:text-amber-400">
-                  {student.terms.reduce((acc, term) => acc + (term.marks ? term.marks.score : 0), 0)}
+                  {student.terms.reduce((totalAcc, term) => {
+                    const termTotal = (term.marks || []).reduce((termAcc, m) => termAcc + (Number(m.score) || 0), 0);
+                    return totalAcc + termTotal;
+                  }, 0)}
                 </div>
               </div>
             )}

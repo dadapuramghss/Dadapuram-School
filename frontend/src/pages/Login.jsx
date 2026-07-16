@@ -126,8 +126,8 @@ export function Login() {
       
       <GlassCard className="w-full max-w-md p-8 md:p-10 relative z-10 !bg-[#080808]/80 !border-[#2E4657]/50 shadow-2xl shadow-black/50">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-24 h-24 mb-4">
-            <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
+          <div className="inline-flex items-center justify-center w-24 h-24 mb-4 rounded-full bg-white overflow-hidden ring-4 ring-white/10 shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+            <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain p-1.5" />
           </div>
           <h1 className="text-4xl font-black mb-2 tracking-tighter text-[#F2F2F2] drop-shadow-md">
             Edu<span className="text-[#FA7848]">Pulse</span>
