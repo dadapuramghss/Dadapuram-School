@@ -31,10 +31,10 @@ export function Leaderboard() {
 
   const renderRankIcon = (rank) => {
     switch(rank) {
-      case 1: return <Trophy className="w-8 h-8 text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]" />;
-      case 2: return <Medal className="w-8 h-8 text-gray-300 drop-shadow-[0_0_10px_rgba(209,213,219,0.8)]" />;
-      case 3: return <Medal className="w-8 h-8 text-amber-600 drop-shadow-[0_0_10px_rgba(217,119,6,0.8)]" />;
-      default: return <div className="w-8 h-8 flex items-center justify-center font-bold text-xl text-slate-400 dark:text-slate-400 dark:text-white/50">{rank}</div>;
+      case 1: return <Trophy className="w-8 h-8 text-[#AE634A] drop-shadow-sm" />;
+      case 2: return <Medal className="w-8 h-8 text-[#62D4CA] drop-shadow-sm" />;
+      case 3: return <Medal className="w-8 h-8 text-[#732A26] drop-shadow-sm" />;
+      default: return <div className="w-8 h-8 flex items-center justify-center font-bold text-xl text-[#4C677C]/60  ">{rank}</div>;
     }
   };
 
@@ -47,7 +47,7 @@ export function Leaderboard() {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500 drop-shadow-sm">
+        <h1 className="text-3xl font-bold text-[#2E1C40] drop-shadow-sm">
           {getTitle()}
         </h1>
         
@@ -60,7 +60,7 @@ export function Leaderboard() {
                 setSelectedSection('All');
               }
             }}
-            className="glass-input w-full sm:w-auto dark:!text-white [&>option]:bg-white dark:[&>option]:bg-gray-800 dark:bg-gray-800/50"
+            className="glass-input w-full sm:w-auto dark:!text-white [&>option]:bg-white &>option]:bg-gray-800 "
           >
             <option value="All">All Standards (Whole School)</option>
             <option value="6">Standard 6</option>
@@ -74,7 +74,7 @@ export function Leaderboard() {
           <select 
             value={selectedSection} 
             onChange={e => setSelectedSection(e.target.value)}
-            className="glass-input w-full sm:w-auto dark:!text-white [&>option]:bg-white dark:[&>option]:bg-gray-800 dark:bg-gray-800/50"
+            className="glass-input w-full sm:w-auto dark:!text-white [&>option]:bg-white &>option]:bg-gray-800 "
             disabled={selectedClass === 'All'}
           >
             <option value="All">All Sections</option>
@@ -89,16 +89,17 @@ export function Leaderboard() {
 
       <div className="space-y-4 mt-8">
         {loading ? (
-          <div className="text-center py-10 text-slate-500 dark:text-slate-500 dark:text-white/60">Calculating Ranks...</div>
+          <div className="text-center py-10 text-[#4C677C]  ">Calculating Ranks...</div>
         ) : (
           leaderboard.map((student) => (
             <div 
               key={student._id} 
               className={cn(
                 "glass-card p-4 flex flex-row items-center gap-3 sm:gap-6 transition-all duration-300 hover:scale-[1.02]",
-                student.rank === 1 ? "border-yellow-400/50 shadow-[0_0_20px_rgba(250,204,21,0.2)] bg-yellow-400/5" : "",
-                student.rank === 2 ? "border-gray-300/50 bg-gray-300/5" : "",
-                student.rank === 3 ? "border-amber-600/50 bg-amber-600/5" : ""
+                student.rank === 1 ? "border-[#AE634A]/50 shadow-md bg-[#FDF9F7]" : "",
+                student.rank === 2 ? "border-[#62D4CA]/50 bg-[#F2FCFA]" : "",
+                student.rank === 3 ? "border-[#732A26]/50 bg-[#FCF9F9]" : "",
+                student.rank > 3 ? "border-[#E5D9C4]" : ""
               )}
             >
               <div className="w-10 sm:w-16 flex justify-center shrink-0">
@@ -112,11 +113,11 @@ export function Leaderboard() {
               />
               
               <div className="flex-1 min-w-0">
-                <h3 className="text-xl font-bold truncate">{student.name}</h3>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-slate-500 dark:text-slate-500 dark:text-white/60 text-xs sm:text-sm mt-1">
+                <h3 className="text-xl font-bold truncate text-[#2E1C40]">{student.name}</h3>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[#4C677C]   text-xs sm:text-sm mt-1">
                   <span className="whitespace-nowrap">Roll No: {student.rollNumber}</span>
                   {(selectedClass === 'All' || selectedSection === 'All') && (
-                    <span className="bg-indigo-50 text-indigo-700 dark:bg-white/10 dark:text-white/80 px-2 py-0.5 rounded-full text-xs font-bold whitespace-nowrap inline-block">
+                    <span className="bg-[#D8FDF6]/40 text-[#2E1C40]   px-2 py-0.5 rounded-full text-xs font-bold whitespace-nowrap inline-block">
                       Std {student.standard} - {student.section}
                     </span>
                   )}
@@ -124,8 +125,12 @@ export function Leaderboard() {
               </div>
               
               <div className="text-right shrink-0">
-                <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-500 dark:text-white/60 mb-1 whitespace-nowrap">Total Marks</div>
-                <div className="text-xl sm:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primaryGlow to-secondaryGlow">
+                <div className="text-xs sm:text-sm text-[#4C677C]   mb-1 whitespace-nowrap">Total Marks</div>
+                <div className={`text-xl sm:text-2xl font-black ${
+                  student.rank === 1 ? 'text-[#AE634A]' : 
+                  student.rank === 2 ? 'text-[#62D4CA]' : 
+                  student.rank === 3 ? 'text-[#732A26]' : 'text-[#2E1C40]'
+                }`}>
                   {student.totalMarks}
                 </div>
               </div>

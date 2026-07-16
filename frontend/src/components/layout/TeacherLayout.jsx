@@ -24,21 +24,21 @@ export function TeacherLayout() {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-50 via-white to-purple-50 text-slate-800 font-sans relative z-10">
+    <div className="flex h-screen overflow-hidden bg-[#F4F8F7] text-[#2E1C40] font-sans relative z-10">
       
       {/* Mobile Topbar */}
-      <div className="md:hidden absolute top-0 left-0 w-full h-16 bg-white/80 backdrop-blur-md border-b border-indigo-100 flex items-center justify-between px-4 z-40 shadow-sm">
+      <div className="md:hidden absolute top-0 left-0 w-full h-16 bg-[#2E1C40] border-b border-[#4C677C]/30 flex items-center justify-between px-4 z-40 shadow-md">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 shrink-0 flex items-center justify-center">
+          <div className="w-8 h-8 shrink-0 flex items-center justify-center bg-[#D8FDF6] rounded-lg p-1">
             <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 tracking-tight">
+          <h1 className="text-xl font-bold text-[#E5D9C4] tracking-tight">
             Edu Teacher
           </h1>
         </div>
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"
+          className="p-2 bg-[#62D4CA] text-[#2E1C40] rounded-lg"
         >
           {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -47,14 +47,14 @@ export function TeacherLayout() {
       {/* Mobile Sidebar Overlay Backdrop */}
       {isSidebarOpen && (
         <div 
-          className="md:hidden fixed inset-0 bg-indigo-900/20 backdrop-blur-sm z-40"
+          className="md:hidden fixed inset-0 bg-[#2E1C40]/40 backdrop-blur-sm z-40"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside className={cn(
-        "bg-white m-4 rounded-3xl shadow-[0_8px_30px_rgba(99,102,241,0.08)] border border-indigo-50/50 flex flex-col justify-between transition-all duration-300 z-50",
+        "bg-[#2E1C40] m-4 rounded-2xl shadow-xl border border-[#4C677C]/30 flex flex-col justify-between transition-all duration-300 z-50 shrink-0",
         "fixed md:relative h-[calc(100vh-2rem)]",
         isSidebarOpen ? "translate-x-0 w-64" : "-translate-x-[150%] md:translate-x-0 w-[5.5rem]"
       )}>
@@ -62,17 +62,17 @@ export function TeacherLayout() {
           <div className={cn("p-6 flex items-center h-24", isSidebarOpen ? "justify-between" : "justify-center")}>
             {isSidebarOpen && (
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="w-10 h-10 shrink-0 flex items-center justify-center">
+                <div className="w-10 h-10 shrink-0 flex items-center justify-center bg-[#D8FDF6] rounded-xl p-1 shadow-sm">
                   <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain" />
                 </div>
-                <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 tracking-tight">
+                <h1 className="text-2xl font-bold text-[#E5D9C4] tracking-tight">
                   Edu Teacher
                 </h1>
               </div>
             )}
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="hidden md:block p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+              className="hidden md:block p-2 rounded-xl hover:bg-[#4C677C]/40 text-[#D8FDF6]/70 hover:text-[#D8FDF6] transition-colors"
             >
               {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
             </button>
@@ -87,11 +87,11 @@ export function TeacherLayout() {
                 onClick={handleNavClick}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center rounded-2xl transition-all duration-300",
+                    "flex items-center rounded-xl transition-all duration-300",
                     isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mb-2 mx-auto w-12",
                     isActive 
-                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-[0_4px_15px_rgba(79,70,229,0.3)] font-semibold" 
-                      : "text-slate-500 hover:bg-indigo-50 hover:text-indigo-700 font-medium"
+                      ? "bg-[#62D4CA] text-[#2E1C40] shadow-md font-bold border-l-4 border-[#D8FDF6]" 
+                      : "text-[#E5D9C4]/70 hover:bg-[#4C677C]/40 hover:text-[#E5D9C4] font-medium border-l-4 border-transparent"
                   )
                 }
                 title={!isSidebarOpen ? item.name : undefined}
@@ -107,17 +107,17 @@ export function TeacherLayout() {
           </nav>
         </div>
 
-        <div className={cn("p-4 space-y-2", !isSidebarOpen && "flex flex-col items-center")}>
+        <div className={cn("p-4 space-y-2 border-t border-[#4C677C]/30", !isSidebarOpen && "flex flex-col items-center")}>
           <NavLink
             to="/teacher/profile"
             onClick={handleNavClick}
             className={({ isActive }) =>
               cn(
-                "flex items-center rounded-2xl transition-all duration-300 w-full",
+                "flex items-center rounded-xl transition-all duration-300 w-full",
                 isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12",
                 isActive 
-                  ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-[0_4px_15px_rgba(79,70,229,0.3)] font-semibold" 
-                  : "text-slate-500 hover:bg-indigo-50 hover:text-indigo-700 font-medium"
+                  ? "bg-[#62D4CA] text-[#2E1C40] shadow-md font-bold border-l-4 border-[#D8FDF6]" 
+                  : "text-[#E5D9C4]/70 hover:bg-[#4C677C]/40 hover:text-[#E5D9C4] font-medium border-l-4 border-transparent"
               )
             }
             title={!isSidebarOpen ? "My Profile" : undefined}
@@ -132,7 +132,7 @@ export function TeacherLayout() {
           <button 
             onClick={logout}
             className={cn(
-              "flex items-center rounded-2xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all duration-300 w-full font-medium",
+              "flex items-center rounded-xl text-[#E5D9C4]/70 hover:bg-[#732A26] hover:text-[#E5D9C4] transition-all duration-300 w-full font-medium border border-transparent hover:border-[#AE634A]/50",
               isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12"
             )}
             title={!isSidebarOpen ? "Logout" : undefined}

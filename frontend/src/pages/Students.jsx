@@ -181,19 +181,19 @@ export function Students() {
   return (
     <div className="space-y-6 relative">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold bg-clip-text text-transparent text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 font-black drop-shadow-sm dark:from-white dark:to-white/70">
+        <h1 className="text-3xl font-bold text-[#2E1C40] font-black drop-shadow-sm  ">
           Student Management
         </h1>
       </div>
 
       {/* Class & Section Selectors (Always visible) */}
-      <GlassCard className="flex flex-wrap gap-6 items-end dark:bg-[#111827] dark:border-gray-800 dark:shadow-none">
+      <GlassCard className="flex flex-wrap gap-6 items-end   ">
         <div className="space-y-2 flex-1 min-w-[200px]">
-          <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Class / Standard</label>
+          <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Class / Standard</label>
           <select 
             value={formData.standard}
             onChange={(e) => setFormData({...formData, standard: e.target.value})}
-            className="glass-input w-full dark:!text-white [&>option]:bg-white dark:bg-[#0B0F19]"
+            className="glass-input w-full dark:!text-white [&>option]:bg-white "
             disabled={availableStandards.length === 0}
           >
             {availableStandards.map(std => (
@@ -203,11 +203,11 @@ export function Students() {
         </div>
         
         <div className="space-y-2 flex-1 min-w-[200px]">
-          <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Section</label>
+          <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Section</label>
           <select 
             value={formData.section}
             onChange={(e) => setFormData({...formData, section: e.target.value})}
-            className="glass-input w-full dark:!text-white [&>option]:bg-white dark:bg-[#0B0F19]"
+            className="glass-input w-full dark:!text-white [&>option]:bg-white "
             disabled={availableSections.length === 0}
           >
             {availableSections.map(sec => (
@@ -218,9 +218,9 @@ export function Students() {
       </GlassCard>
 
       {/* STUDENT LIST */}
-      <GlassCard className="dark:bg-[#111827] dark:border-gray-800 dark:shadow-none">
+      <GlassCard className="  ">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h2 className="text-xl font-bold text-indigo-900 dark:text-white">
+          <h2 className="text-xl font-bold text-[#2E1C40] ">
             Students in {formData.standard}-{formData.section}
           </h2>
           {hasFullAccess && (
@@ -232,32 +232,32 @@ export function Students() {
         </div>
 
         {listLoading ? (
-          <p className="text-slate-400 dark:text-slate-400 dark:text-white/50 text-center py-8">Loading students...</p>
+          <p className="text-[#4C677C]/60   text-center py-8">Loading students...</p>
         ) : studentsList.length === 0 ? (
-          <p className="text-slate-400 dark:text-slate-400 dark:text-white/50 text-center py-8">No students found in this section.</p>
+          <p className="text-[#4C677C]/60   text-center py-8">No students found in this section.</p>
         ) : (
           <div className="overflow-x-auto max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
             <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-slate-50 dark:bg-gray-800/30 sticky top-0 backdrop-blur-md">
-                <tr className="border-b border-gray-100 dark:border-gray-800 text-indigo-900 dark:text-purple-400 uppercase text-xs tracking-wider">
+              <thead className="bg-[#F2FCFA]  sticky top-0 backdrop-blur-md">
+                <tr className="border-b border-[#E5D9C4]  text-[#2E1C40]  uppercase text-xs tracking-wider">
                   <th className="p-3 rounded-tl-lg font-medium">Roll No</th>
                   <th className="p-3 font-medium">Name</th>
                   <th className="p-3 font-medium">Medium</th>
                   {hasFullAccess && <th className="p-3 rounded-tr-lg font-medium text-right">Actions</th>}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              <tbody className="divide-y divide-gray-100 ">
                 {studentsList.map((s) => (
-                  <tr key={s._id} className="hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors">
-                    <td className="p-3 text-slate-500 dark:text-gray-400">{s.rollNumber}</td>
-                    <td className="p-3 font-medium text-slate-800 dark:text-gray-200">{s.name}</td>
-                    <td className="p-3 text-slate-500 dark:text-gray-400">{s.medium}</td>
+                  <tr key={s._id} className="hover:bg-[#F2FCFA] :bg-gray-800/50 transition-colors">
+                    <td className="p-3 text-[#4C677C] ">{s.rollNumber}</td>
+                    <td className="p-3 font-medium text-[#2E1C40] ">{s.name}</td>
+                    <td className="p-3 text-[#4C677C] ">{s.medium}</td>
                     {hasFullAccess && (
                       <td className="p-3 text-right">
                         <div className="flex justify-end gap-2">
                           <button 
                             onClick={() => handleEdit(s)}
-                            className="p-2 text-primaryGlow hover:bg-primaryGlow/20 rounded-md transition-colors"
+                            className="p-2 text-[#62D4CA] hover:bg-[#62D4CA]/20 rounded-md transition-colors"
                             title="Edit"
                           >
                             <Pencil className="w-4 h-4" />
@@ -284,12 +284,12 @@ export function Students() {
       {isFormOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
           <div className="relative w-full max-w-2xl my-auto">
-            <GlassCard className="w-full max-h-[90vh] overflow-y-auto custom-scrollbar dark:bg-[#111827] dark:border-gray-800">
-              <div className="flex justify-between items-center mb-6 sticky top-0 bg-white dark:bg-[#111827] backdrop-blur-md py-2 border-b border-slate-100 dark:border-gray-800 z-10 -mx-6 px-6 -mt-6">
-                <h2 className="text-xl font-bold text-indigo-900 dark:text-white">
+            <GlassCard className="w-full max-h-[90vh] overflow-y-auto custom-scrollbar  ">
+              <div className="flex justify-between items-center mb-6 sticky top-0 bg-white  backdrop-blur-md py-2 border-b border-[#E5D9C4]  z-10 -mx-6 px-6 -mt-6">
+                <h2 className="text-xl font-bold text-[#2E1C40] ">
                   {editingId ? 'Edit Student' : 'Add New Student'}
                 </h2>
-                <button onClick={closeForm} className="p-2 text-slate-400 dark:text-slate-400 dark:text-white/50 hover:text-slate-800 dark:text-slate-800 dark:text-white transition-colors rounded-full hover:bg-slate-100 dark:bg-slate-100 dark:bg-white/10">
+                <button onClick={closeForm} className="p-2 text-[#4C677C]/60   hover:text-[#2E1C40]   transition-colors rounded-full hover:bg-[#E5D9C4]  ">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -303,11 +303,11 @@ export function Students() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-600 dark:text-gray-300 font-semibold">Class / Standard</label>
+                    <label className="block text-sm font-medium text-[#4C677C]  font-semibold">Class / Standard</label>
                     <select 
                       value={formData.standard}
                       onChange={(e) => setFormData({...formData, standard: e.target.value})}
-                      className="glass-input w-full dark:!text-white [&>option]:bg-white dark:bg-[#0B0F19]"
+                      className="glass-input w-full dark:!text-white [&>option]:bg-white "
                       disabled={availableStandards.length === 0}
                     >
                       {availableStandards.map(std => (
@@ -317,11 +317,11 @@ export function Students() {
                   </div>
                   
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Section</label>
+                    <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Section</label>
                     <select 
                       value={formData.section}
                       onChange={(e) => setFormData({...formData, section: e.target.value})}
-                      className="glass-input w-full dark:!text-white [&>option]:bg-white dark:bg-[#0B0F19]"
+                      className="glass-input w-full dark:!text-white [&>option]:bg-white "
                       disabled={availableSections.length === 0}
                     >
                       {availableSections.map(sec => (
@@ -331,11 +331,11 @@ export function Students() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Medium</label>
+                    <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Medium</label>
                     <select 
                       value={formData.medium}
                       onChange={(e) => setFormData({...formData, medium: e.target.value})}
-                      className="glass-input w-full dark:!text-white [&>option]:bg-white dark:bg-[#0B0F19]"
+                      className="glass-input w-full dark:!text-white [&>option]:bg-white "
                     >
                       <option value="TAMIL">TAMIL</option>
                       <option value="ENGLISH">ENGLISH</option>
@@ -345,11 +345,11 @@ export function Students() {
 
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Gender</label>
+                    <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Gender</label>
                     <select 
                       value={formData.gender}
                       onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                      className="glass-input w-full dark:!text-white [&>option]:bg-white dark:bg-[#0B0F19]"
+                      className="glass-input w-full dark:!text-white [&>option]:bg-white "
                     >
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
@@ -358,7 +358,7 @@ export function Students() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Roll Number</label>
+                    <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Roll Number</label>
                     <input 
                       type="text" 
                       required
@@ -371,7 +371,7 @@ export function Students() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Full Name</label>
+                  <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Full Name</label>
                   <input 
                     type="text" 
                     required
@@ -384,7 +384,7 @@ export function Students() {
 
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Tamil Name</label>
+                    <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Tamil Name</label>
                     <input 
                       type="text" 
                       value={formData.tamilName}
@@ -395,7 +395,7 @@ export function Students() {
                   </div>
                   
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Father's Name</label>
+                    <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Father's Name</label>
                     <input 
                       type="text" 
                       value={formData.fatherName}
@@ -406,17 +406,17 @@ export function Students() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Date of Birth</label>
+                    <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Date of Birth</label>
                     <input 
                       type="date" 
                       value={formData.dob}
                       onChange={(e) => setFormData({...formData, dob: e.target.value})}
-                      className="glass-input w-full dark:[&::-webkit-calendar-picker-indicator]:filter dark:[&::-webkit-calendar-picker-indicator]:invert"
+                      className="glass-input w-full &::-webkit-calendar-picker-indicator]:filter &::-webkit-calendar-picker-indicator]:invert"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Admission Number</label>
+                    <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Admission Number</label>
                     <input 
                       type="text" 
                       value={formData.admissionNumber}
@@ -427,7 +427,7 @@ export function Students() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Religion</label>
+                    <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Religion</label>
                     <input 
                       type="text" 
                       value={formData.religion}
@@ -438,7 +438,7 @@ export function Students() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Community</label>
+                    <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Community</label>
                     <input 
                       type="text" 
                       value={formData.community}
@@ -450,7 +450,7 @@ export function Students() {
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Address</label>
+                  <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Address</label>
                   <textarea 
                     value={formData.address}
                     onChange={(e) => setFormData({...formData, address: e.target.value})}
@@ -460,20 +460,20 @@ export function Students() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Profile Photo</label>
+                  <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Profile Photo</label>
                   {editingId && formData.photoUrl && (
                     <div className="mb-2">
                       <img src={formData.photoUrl} alt="Current" className="w-16 h-16 rounded-full object-cover border border-white/20" />
-                      <p className="text-xs text-slate-400 dark:text-slate-400 dark:text-white/50 mt-1">Upload new to replace</p>
+                      <p className="text-xs text-[#4C677C]/60   mt-1">Upload new to replace</p>
                     </div>
                   )}
                   {file && (
                     <div className="mb-2">
-                      <p className="text-sm font-medium text-green-600 dark:text-green-400">Photo selected!</p>
+                      <p className="text-sm font-medium text-green-600 ">Photo selected!</p>
                     </div>
                   )}
                   <div className="flex gap-3">
-                    <label className="flex-1 text-center cursor-pointer py-3 px-4 rounded-xl font-bold text-sm bg-indigo-100 text-indigo-700 dark:bg-white/10 dark:text-white hover:bg-indigo-200 dark:hover:bg-white/20 transition-colors">
+                    <label className="flex-1 text-center cursor-pointer py-3 px-4 rounded-xl font-bold text-sm bg-[#62D4CA]/20 text-[#2E1C40]   hover:bg-indigo-200 :bg-white/20 transition-colors">
                       <input 
                         type="file" 
                         accept="image/*"
@@ -483,7 +483,7 @@ export function Students() {
                       />
                       Take Photo
                     </label>
-                    <label className="flex-1 text-center cursor-pointer py-3 px-4 rounded-xl font-bold text-sm bg-purple-100 text-purple-700 dark:bg-white/10 dark:text-white hover:bg-purple-200 dark:hover:bg-white/20 transition-colors">
+                    <label className="flex-1 text-center cursor-pointer py-3 px-4 rounded-xl font-bold text-sm bg-[#2E1C40]/10 text-[#2E1C40]   hover:bg-purple-200 :bg-white/20 transition-colors">
                       <input 
                         type="file" 
                         accept="image/*"
@@ -499,7 +499,7 @@ export function Students() {
                   <button 
                     type="button" 
                     onClick={closeForm}
-                    className="flex-1 py-3 px-4 rounded-lg font-medium text-slate-500 dark:text-slate-500 dark:text-white/70 bg-slate-50 dark:bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:bg-slate-100 dark:bg-white/10 transition-colors"
+                    className="flex-1 py-3 px-4 rounded-lg font-medium text-[#4C677C]   bg-[#F2FCFA]   hover:bg-[#E5D9C4]   transition-colors"
                   >
                     Cancel
                   </button>

@@ -51,10 +51,14 @@ export function Register() {
 
   return (
     <div className="dark min-h-screen flex items-center justify-center p-4">
-      <GlassCard className="w-full max-w-md p-8">
+      {/* Decorative background elements */}
+      <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-secondary/60 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-primary/40 rounded-full blur-[120px] pointer-events-none" />
+
+      <GlassCard className="w-full max-w-md p-8 relative z-10">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2 tracking-tight text-white drop-shadow-md">
-            Join Edu Teacher
+            Join <span className="text-transparent bg-clip-text bg-gradient-to-r from-primaryGlow to-secondaryGlow">EduPulse</span>
           </h1>
           <p className="text-gray-300">Create an account to request access</p>
         </div>
@@ -75,7 +79,7 @@ export function Register() {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-white transition-all placeholder-gray-400"
+              className="glass-input w-full"
               placeholder="John Doe"
             />
           </div>
@@ -89,7 +93,7 @@ export function Register() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-white transition-all placeholder-gray-400"
+              className="glass-input w-full"
               placeholder="you@school.edu"
               autoComplete="off"
             />
@@ -104,7 +108,7 @@ export function Register() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-white transition-all placeholder-gray-400"
+              className="glass-input w-full"
               placeholder="••••••••"
               autoComplete="new-password"
             />
@@ -142,7 +146,7 @@ export function Register() {
 
         <div className="mt-8 text-center text-sm text-gray-400">
           Already have an account?{' '}
-          <Link to="/login" className="text-purple-400 hover:text-purple-300 transition-colors font-medium">
+          <Link to="/login" className="text-primaryGlow hover:text-secondaryGlow transition-colors font-medium">
             Sign In
           </Link>
         </div>

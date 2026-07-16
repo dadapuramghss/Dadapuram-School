@@ -6,15 +6,18 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Outfit', 'sans-serif'],
+      },
       colors: {
         background: "#0a0a0f", // Deep futuristic dark background
         glass: "rgba(255, 255, 255, 0.05)",
         glassBorder: "rgba(255, 255, 255, 0.1)",
-        primary: "#6d28d9", // Deep purple
-        primaryGlow: "#8b5cf6",
-        secondary: "#0284c7",
-        secondaryGlow: "#38bdf8",
-        neonAccent: "#0ea5e9"
+        primary: "#425F76", // Slate Blue
+        primaryGlow: "#54C6BE", // Cyan
+        secondary: "#2A2146", // Deep Dark Purple
+        secondaryGlow: "#D2F6F0", // Very Light Cyan
+        neonAccent: "#54C6BE"
       },
       boxShadow: {
         'glass': '0 4px 30px rgba(0, 0, 0, 0.1)',

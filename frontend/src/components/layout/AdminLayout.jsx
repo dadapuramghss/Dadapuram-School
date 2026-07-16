@@ -25,12 +25,12 @@ export function AdminLayout() {
   ];
 
   return (
-    <div className="dark flex h-screen overflow-hidden bg-[#0B0F19] text-gray-100 font-sans relative z-10">
+    <div className="dark flex h-screen overflow-hidden bg-[#0B1221] text-gray-100 font-sans relative z-10">
       
       {/* Mobile Topbar */}
-      <div className="md:hidden absolute top-0 left-0 w-full h-16 bg-[#111827]/90 backdrop-blur-md border-b border-gray-800 flex items-center justify-between px-4 z-40 shadow-sm">
+      <div className="md:hidden absolute top-0 left-0 w-full h-16 bg-[#131E3A]/90 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 z-40 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 shrink-0 flex items-center justify-center">
+          <div className="w-8 h-8 shrink-0 flex items-center justify-center bg-white rounded-lg p-1">
             <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-white">
@@ -39,7 +39,7 @@ export function AdminLayout() {
         </div>
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-2 bg-gray-800 text-gray-300 rounded-lg"
+          className="p-2 bg-white/5 text-white rounded-lg border border-white/10"
         >
           {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -55,7 +55,7 @@ export function AdminLayout() {
 
       {/* Sidebar */}
       <aside className={cn(
-        "bg-[#111827] m-4 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-gray-800 flex flex-col justify-between transition-all duration-300 z-50 shrink-0",
+        "bg-[#131E3A] m-4 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.3)] border border-white/5 flex flex-col justify-between transition-all duration-300 z-50 shrink-0",
         "fixed md:relative h-[calc(100vh-2rem)]",
         isSidebarOpen ? "translate-x-0 w-64" : "-translate-x-[150%] md:translate-x-0 w-[5.5rem]"
       )}>
@@ -63,7 +63,7 @@ export function AdminLayout() {
           <div className={cn("p-6 flex items-center h-24", isSidebarOpen ? "justify-between" : "justify-center")}>
             {isSidebarOpen && (
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="w-10 h-10 shrink-0 flex items-center justify-center">
+                <div className="w-10 h-10 shrink-0 flex items-center justify-center bg-white rounded-xl p-1 shadow-sm">
                   <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain" />
                 </div>
                 <h1 className="text-2xl font-bold tracking-tight text-white">
@@ -73,7 +73,7 @@ export function AdminLayout() {
             )}
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="hidden md:block p-2 rounded-xl hover:bg-gray-800 text-gray-500 hover:text-gray-300 transition-colors"
+              className="hidden md:block p-2 rounded-xl hover:bg-white/5 text-[#EBD8BE]/60 hover:text-white transition-colors"
             >
               {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
             </button>
@@ -91,8 +91,8 @@ export function AdminLayout() {
                     "flex items-center rounded-2xl transition-all duration-300",
                     isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mb-2 mx-auto w-12",
                     isActive 
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.3)] font-semibold" 
-                      : "text-gray-400 hover:bg-gray-800 hover:text-gray-200 font-medium"
+                      ? "bg-gradient-to-r from-[#F9CB84]/10 to-transparent text-[#F9CB84] border-l-4 border-[#F9CB84] font-bold" 
+                      : "text-[#EBD8BE]/60 hover:bg-white/5 hover:text-white font-medium border-l-4 border-transparent"
                   )
                 }
                 title={!isSidebarOpen ? item.name : undefined}
@@ -108,7 +108,7 @@ export function AdminLayout() {
           </nav>
         </div>
 
-        <div className={cn("p-4 space-y-2 shrink-0 border-t border-gray-800/50", !isSidebarOpen && "flex flex-col items-center")}>
+        <div className={cn("p-4 space-y-2 shrink-0 border-t border-white/5", !isSidebarOpen && "flex flex-col items-center")}>
           <NavLink
             to="/admin/profile"
             onClick={handleNavClick}
@@ -117,8 +117,8 @@ export function AdminLayout() {
                 "flex items-center rounded-2xl transition-all duration-300 w-full",
                 isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12",
                 isActive 
-                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.3)] font-semibold" 
-                  : "text-gray-400 hover:bg-gray-800 hover:text-gray-200 font-medium"
+                  ? "bg-gradient-to-r from-[#F9CB84]/10 to-transparent text-[#F9CB84] border-l-4 border-[#F9CB84] font-bold" 
+                  : "text-[#EBD8BE]/60 hover:bg-white/5 hover:text-white font-medium border-l-4 border-transparent"
               )
             }
             title={!isSidebarOpen ? "My Profile" : undefined}
@@ -133,7 +133,7 @@ export function AdminLayout() {
           <button 
             onClick={logout}
             className={cn(
-              "flex items-center rounded-2xl text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 w-full font-medium",
+              "flex items-center rounded-xl text-[#EBD8BE]/60 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 w-full font-medium border-l-4 border-transparent",
               isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12"
             )}
             title={!isSidebarOpen ? "Logout" : undefined}
@@ -149,7 +149,7 @@ export function AdminLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-4 md:pl-0 pt-20 md:pt-4 w-full bg-[#0B0F19]">
+      <main className="flex-1 overflow-y-auto p-4 md:pl-0 pt-20 md:pt-4 w-full bg-[#0B1221]">
         <div className="h-full rounded-3xl w-full max-w-full overflow-x-hidden">
           <Outlet />
         </div>

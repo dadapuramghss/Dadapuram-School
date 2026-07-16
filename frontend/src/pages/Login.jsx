@@ -120,8 +120,8 @@ export function Login() {
   return (
     <div className="dark min-h-screen flex items-center justify-center p-4">
       {/* Decorative background elements */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/30 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-secondary/60 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/40 rounded-full blur-[120px] pointer-events-none" />
       
       <GlassCard className="w-full max-w-md p-8 relative z-10">
         <div className="text-center mb-8">
@@ -129,7 +129,7 @@ export function Login() {
             <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
           </div>
           <h1 className="text-4xl font-bold mb-2 tracking-tight text-white drop-shadow-md">
-            Edu<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">Pulse</span>
+            Edu<span className="text-transparent bg-clip-text bg-gradient-to-r from-primaryGlow to-secondaryGlow">Pulse</span>
           </h1>
           <p className="text-white/60 text-sm">Academic Analytics & Ranking Dashboard</p>
         </div>
@@ -151,7 +151,7 @@ export function Login() {
             type="button"
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
               selectedRole === 'teacher' 
-                ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/25' 
+                ? 'bg-primaryGlow text-slate-900 shadow-lg shadow-primaryGlow/25' 
                 : 'text-white/60 hover:text-white hover:bg-white/5'
             }`}
             onClick={() => setSelectedRole('teacher')}
@@ -162,7 +162,7 @@ export function Login() {
             type="button"
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
               selectedRole === 'admin' 
-                ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/25' 
+                ? 'bg-primary text-white shadow-lg shadow-primary/40' 
                 : 'text-white/60 hover:text-white hover:bg-white/5'
             }`}
             onClick={() => setSelectedRole('admin')}
@@ -192,7 +192,7 @@ export function Login() {
                 type="button" 
                 onClick={handleResetPassword}
                 disabled={resetting}
-                className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                className="text-xs text-primaryGlow hover:text-secondaryGlow transition-colors"
               >
                 {resetting ? 'Sending...' : 'Forgot Password?'}
               </button>
@@ -235,7 +235,7 @@ export function Login() {
 
         <div className="mt-8 text-center text-sm text-gray-400">
           Don't have an account?{' '}
-          <Link to="/register" className="text-cyan-400 hover:text-cyan-300 transition-colors font-medium">
+          <Link to="/register" className="text-primaryGlow hover:text-secondaryGlow transition-colors font-medium">
             Register for access
           </Link>
         </div>

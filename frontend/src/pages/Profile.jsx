@@ -40,7 +40,7 @@ export function Profile() {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold bg-clip-text text-transparent text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 font-black drop-shadow-sm dark:from-white dark:to-white/70">
+      <h1 className="text-3xl font-bold text-[#2E1C40] font-black drop-shadow-sm  ">
         My Profile
       </h1>
 
@@ -50,59 +50,59 @@ export function Profile() {
         <GlassCard className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-gradient-to-br from-indigo-100 to-indigo-50 shadow-inner rounded-full">
-              <User className="w-6 h-6 text-indigo-600" />
+              <User className="w-6 h-6 text-[#62D4CA]" />
             </div>
-            <h2 className="text-xl font-bold text-indigo-900">Account Details</h2>
+            <h2 className="text-xl font-bold text-[#2E1C40]">Account Details</h2>
           </div>
 
           <form onSubmit={handleSave} className="space-y-4">
             <div>
-              <label className="block text-sm font-bold text-indigo-900/80 dark:text-white/80 mb-1 flex items-center gap-2">
-                <User className="w-4 h-4 text-indigo-500 dark:text-white/50" />
+              <label className="block text-sm font-bold text-[#4C677C]  mb-1 flex items-center gap-2">
+                <User className="w-4 h-4 text-indigo-500 " />
                 Display Name
               </label>
               <input 
                 type="text" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="glass-input w-full font-bold text-indigo-900 bg-white shadow-sm border border-indigo-100 focus:ring-indigo-400"
+                className="glass-input w-full font-bold text-[#2E1C40] bg-white shadow-sm border border-[#E5D9C4] focus:ring-indigo-400"
                 placeholder="Enter your name"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-indigo-900/80 dark:text-white/80 mb-1 flex items-center gap-2">
-                <Mail className="w-4 h-4 text-indigo-500 dark:text-white/50" />
+              <label className="block text-sm font-bold text-[#4C677C]  mb-1 flex items-center gap-2">
+                <Mail className="w-4 h-4 text-indigo-500 " />
                 Email Address
               </label>
               <input 
                 type="email" 
                 value={dbUser.email}
-                className="glass-input w-full opacity-60 font-bold text-indigo-900 bg-slate-50 border border-slate-200 cursor-not-allowed"
+                className="glass-input w-full opacity-60 font-bold text-[#2E1C40] bg-[#F2FCFA] border border-slate-200 cursor-not-allowed"
                 disabled
               />
-              <p className="text-xs text-slate-400 dark:text-white/40 mt-1 font-medium">Email cannot be changed.</p>
+              <p className="text-xs text-[#4C677C]/60  mt-1 font-medium">Email cannot be changed.</p>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-indigo-900/80 dark:text-white/80 mb-1 flex items-center gap-2">
-                <Shield className="w-4 h-4 text-indigo-500 dark:text-white/50" />
+              <label className="block text-sm font-bold text-[#4C677C]  mb-1 flex items-center gap-2">
+                <Shield className="w-4 h-4 text-indigo-500 " />
                 Role
               </label>
               <div className="flex items-center gap-2 mt-2">
                 <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
                   dbUser.role === 'admin' 
-                    ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30' 
-                    : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30'
+                    ? 'bg-purple-50 text-[#2E1C40] border-purple-200   ' 
+                    : 'bg-blue-50 text-blue-700 border-blue-200   '
                 }`}>
                   {dbUser.role.toUpperCase()}
                 </span>
                 
                 <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
                   dbUser.status === 'approved' 
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-green-500/20 dark:text-green-300 dark:border-green-500/30' 
-                    : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-yellow-500/20 dark:text-yellow-300 dark:border-yellow-500/30'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200   ' 
+                    : 'bg-amber-50 text-amber-700 border-amber-200   '
                 }`}>
                   {dbUser.status.toUpperCase()}
                 </span>
@@ -118,7 +118,7 @@ export function Profile() {
               </div>
             )}
 
-            <div className="pt-4 border-t border-slate-100 dark:border-white/10">
+            <div className="pt-4 border-t border-[#E5D9C4] ">
               <NeonButton type="submit" disabled={isSaving || !name.trim()}>
                 {isSaving ? 'Saving...' : 'Update Profile'}
               </NeonButton>
@@ -132,30 +132,30 @@ export function Profile() {
             <div className="p-3 bg-gradient-to-br from-sky-100 to-sky-50 shadow-inner rounded-full">
               <BookOpen className="w-6 h-6 text-sky-600" />
             </div>
-            <h2 className="text-xl font-bold text-indigo-900">Assigned Classes</h2>
+            <h2 className="text-xl font-bold text-[#2E1C40]">Assigned Classes</h2>
           </div>
 
           {dbUser.role === 'admin' ? (
-            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-100 dark:border-white/10 text-center">
-              <p className="text-slate-500 dark:text-white/70">As an Admin, you have full access to all classes and sections.</p>
+            <div className="bg-[#F2FCFA]  p-4 rounded-xl border border-[#E5D9C4]  text-center">
+              <p className="text-[#4C677C] ">As an Admin, you have full access to all classes and sections.</p>
             </div>
           ) : (
             <div className="space-y-3">
               {dbUser.assignedClasses && dbUser.assignedClasses.length > 0 ? (
                 dbUser.assignedClasses.map((ac, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 bg-indigo-50/50 dark:bg-white/5 rounded-xl border border-indigo-100 dark:border-white/5 hover:bg-indigo-50 hover:shadow-sm transition-all">
+                  <div key={idx} className="flex items-center justify-between p-3 bg-[#D8FDF6]/40/50  rounded-xl border border-[#E5D9C4]  hover:bg-[#D8FDF6]/40 hover:shadow-sm transition-all">
                     <div>
-                      <span className="font-bold text-indigo-950 dark:text-white">Standard {ac.standard}</span>
-                      <span className="mx-2 text-indigo-200 dark:text-white/30">|</span>
-                      <span className="text-indigo-800 font-bold dark:text-white/80">Section {ac.section}</span>
+                      <span className="font-bold text-indigo-950 ">Standard {ac.standard}</span>
+                      <span className="mx-2 text-indigo-200 ">|</span>
+                      <span className="text-indigo-800 font-bold ">Section {ac.section}</span>
                     </div>
                     <div>
                       {ac.accessLevel === 'view' ? (
-                        <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/20 dark:text-blue-300">
+                        <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-50 text-blue-700 border border-blue-200  ">
                           View Only
                         </span>
                       ) : (
-                        <span className="px-2 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-green-500/20 dark:text-green-300">
+                        <span className="px-2 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200  ">
                           Full Access
                         </span>
                       )}
@@ -163,9 +163,9 @@ export function Profile() {
                   </div>
                 ))
               ) : (
-                <div className="text-center p-6 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10">
-                  <p className="text-slate-400 dark:text-white/50 font-medium italic">No classes assigned yet.</p>
-                  <p className="text-xs text-slate-400/80 dark:text-white/40 mt-1 font-medium">Please contact an administrator.</p>
+                <div className="text-center p-6 bg-[#F2FCFA]  rounded-2xl border border-[#E5D9C4] ">
+                  <p className="text-[#4C677C]/60  font-medium italic">No classes assigned yet.</p>
+                  <p className="text-xs text-[#4C677C]/60/80  mt-1 font-medium">Please contact an administrator.</p>
                 </div>
               )}
             </div>

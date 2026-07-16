@@ -141,21 +141,21 @@ export function Gradebook() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 drop-shadow-sm dark:from-white dark:to-white/70">
+      <h1 className="text-3xl font-black text-[#2E1C40] drop-shadow-sm">
         Term Gradebook
       </h1>
 
       <GlassCard className="mb-6">
         <div className="flex flex-col md:flex-row gap-4 md:items-end">
           <div className="flex-1 space-y-2 w-full md:w-auto">
-            <label className="block text-sm font-bold text-indigo-900/80 dark:text-white/80">Class</label>
+            <label className="block text-sm font-bold text-[#4C677C]">Class</label>
             <select 
               value={selectedClass} 
               onChange={e => {
                 setSelectedClass(e.target.value);
                 if (e.target.value === 'All') setSelectedSection('All');
               }}
-              className="glass-input w-full font-bold text-indigo-900 bg-white shadow-sm border border-indigo-100 focus:ring-indigo-400 disabled:opacity-50 dark:bg-[#0B0F19] dark:text-white dark:[&>option]:bg-[#0B0F19]"
+              className="glass-input w-full font-bold text-[#2E1C40] bg-white shadow-sm border border-[#E5D9C4] focus:ring-[#62D4CA] disabled:opacity-50"
             >
               <option value="All">All Standards</option>
               {availableStandards.map(std => (
@@ -164,11 +164,11 @@ export function Gradebook() {
             </select>
           </div>
           <div className="flex-1 space-y-2 w-full md:w-auto">
-            <label className="block text-sm font-bold text-indigo-900/80 dark:text-white/80">Section</label>
+            <label className="block text-sm font-bold text-[#4C677C]">Section</label>
             <select 
               value={selectedSection} 
               onChange={e => setSelectedSection(e.target.value)}
-              className="glass-input w-full font-bold text-indigo-900 bg-white shadow-sm border border-indigo-100 focus:ring-indigo-400 disabled:opacity-50 dark:bg-[#0B0F19] dark:text-white dark:[&>option]:bg-[#0B0F19]"
+              className="glass-input w-full font-bold text-[#2E1C40] bg-white shadow-sm border border-[#E5D9C4] focus:ring-[#62D4CA] disabled:opacity-50"
               disabled={selectedClass === 'All'}
             >
               <option value="All">All Sections</option>
@@ -178,11 +178,11 @@ export function Gradebook() {
             </select>
           </div>
           <div className="flex-1 space-y-2 w-full md:w-auto">
-            <label className="block text-sm font-bold text-indigo-900/80 dark:text-white/80">Term</label>
+            <label className="block text-sm font-bold text-[#4C677C]">Term</label>
             <select 
               value={selectedTerm} 
               onChange={e => setSelectedTerm(e.target.value)}
-              className="glass-input w-full font-bold text-indigo-900 bg-white shadow-sm border border-indigo-100 focus:ring-indigo-400 disabled:opacity-50 dark:bg-[#0B0F19] dark:text-white dark:[&>option]:bg-[#0B0F19]"
+              className="glass-input w-full font-bold text-[#2E1C40] bg-white shadow-sm border border-[#E5D9C4] focus:ring-[#62D4CA] disabled:opacity-50"
             >
               <option value="All Terms">All Terms (Total Sum)</option>
               <option value="Quarterly">Quarterly</option>
@@ -202,24 +202,24 @@ export function Gradebook() {
         <form onSubmit={handleSave}>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <thead className="bg-indigo-50 text-indigo-900 dark:bg-white/5 dark:text-white">
-                <tr className="border-b border-indigo-100 dark:border-white/10">
+              <thead className="bg-[#D8FDF6]/40 text-[#4C677C]">
+                <tr className="border-b border-[#E5D9C4]">
                   <th className="p-4 font-bold rounded-tl-lg whitespace-nowrap">Roll No</th>
                   <th className="p-4 font-bold whitespace-nowrap">Name</th>
                   {subjects.map(sub => (
                     <th key={sub} className="p-4 font-bold">{sub}</th>
                   ))}
-                  <th className="p-4 font-black text-amber-500 rounded-tr-lg">Total</th>
+                  <th className="p-4 font-black text-[#732A26] rounded-tr-lg">Total</th>
                 </tr>
               </thead>
               <tbody>
                 {students.map(student => (
-                  <tr key={student._id} className="border-b border-indigo-50 dark:border-white/5 hover:bg-indigo-50/30 dark:hover:bg-white/5 transition-colors">
-                    <td className="p-4 text-indigo-900/70 dark:text-white/70 font-medium whitespace-nowrap">
+                  <tr key={student._id} className="border-b border-[#E5D9C4]/40 hover:bg-[#D8FDF6]/20 transition-colors">
+                    <td className="p-4 text-[#4C677C] font-medium whitespace-nowrap">
                       {student.rollNumber}
-                      {isReportView && <span className="ml-2 bg-indigo-100 text-indigo-700 dark:bg-white/10 dark:text-white/80 px-2 py-0.5 rounded-full text-xs font-bold inline-block whitespace-nowrap">Std {student.standard}-{student.section}</span>}
+                      {isReportView && <span className="ml-2 bg-[#62D4CA]/20 text-[#2E1C40] px-2 py-0.5 rounded-full text-xs font-bold inline-block whitespace-nowrap">Std {student.standard}-{student.section}</span>}
                     </td>
-                    <td className="p-4 font-bold text-indigo-950 dark:text-white whitespace-nowrap">{student.name}</td>
+                    <td className="p-4 font-bold text-[#2E1C40] whitespace-nowrap">{student.name}</td>
                     {subjects.map(sub => (
                       <td key={sub} className="p-4">
                         <input 
@@ -229,12 +229,12 @@ export function Gradebook() {
                           required
                           value={marks[`${student._id}-${sub}`] || (selectedTerm === 'All Terms' ? 0 : '')}
                           onChange={(e) => handleMarkChange(student._id, sub, e.target.value)}
-                          className={`glass-input w-20 text-center font-bold text-indigo-900 bg-white shadow-sm ${!hasFullAccess ? 'opacity-50 cursor-not-allowed bg-slate-50 dark:bg-white/5 border-none shadow-none' : ''}`}
+                          className={`glass-input w-20 text-center font-bold text-[#2E1C40] bg-white shadow-sm border border-[#E5D9C4] ${!hasFullAccess ? 'opacity-50 cursor-not-allowed bg-slate-50 border-none shadow-none' : ''}`}
                           disabled={!hasFullAccess}
                         />
                       </td>
                     ))}
-                    <td className="p-4 font-black text-amber-500 text-lg">
+                    <td className="p-4 font-black text-[#732A26] text-lg">
                       {subjects.reduce((sum, sub) => sum + (Number(marks[`${student._id}-${sub}`]) || 0), 0)}
                     </td>
                   </tr>
@@ -245,9 +245,9 @@ export function Gradebook() {
           
           <div className="mt-6 flex justify-end">
             {hasFullAccess ? (
-              <NeonButton type="submit">Save {selectedTerm} Marks</NeonButton>
+              <NeonButton type="submit" className="bg-[#62D4CA] text-[#2E1C40]">Save {selectedTerm} Marks</NeonButton>
             ) : (
-              <p className="text-slate-400 dark:text-slate-400 dark:text-white/50 text-sm italic">
+              <p className="text-[#4C677C]/60 text-sm italic">
                 {isReportView ? 'Report views are read-only.' : 'You have view-only access to this class.'}
               </p>
             )}

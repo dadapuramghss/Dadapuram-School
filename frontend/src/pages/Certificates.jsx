@@ -97,25 +97,25 @@ export function Certificates() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 drop-shadow-sm dark:from-white dark:to-white/70">
+          <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 drop-shadow-sm  ">
             Study Certificate App
           </h1>
-          <p className="text-slate-500 dark:text-slate-500 dark:text-white/60 mt-1">Select details to generate certificate</p>
+          <p className="text-[#4C677C]   mt-1">Select details to generate certificate</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6">
         <GlassCard className="p-6">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-slate-800 dark:text-slate-800 dark:text-white">
+            <table className="w-full text-left text-[#2E1C40]  ">
               <tbody>
-                <tr className="border-b border-indigo-50 dark:border-white/10">
-                  <th className="py-3 font-bold text-indigo-900/80 dark:text-white/80 w-1/3">Certificate Type</th>
+                <tr className="border-b border-indigo-50 ">
+                  <th className="py-3 font-bold text-[#4C677C]  w-1/3">Certificate Type</th>
                   <td className="py-3">
                     <select
                       value={certificateType}
                       onChange={(e) => setCertificateType(e.target.value)}
-                      className="glass-input w-full font-bold text-indigo-900 bg-white shadow-sm border border-indigo-100 focus:ring-indigo-400 disabled:opacity-50 dark:bg-[#0B0F19]"
+                      className="glass-input w-full font-bold text-[#2E1C40] bg-white shadow-sm border border-[#E5D9C4] focus:ring-indigo-400 disabled:opacity-50 "
                     >
                       <option value="">Select Certificate Type</option>
                       <option value="STUDY">Study Certificate</option>
@@ -123,14 +123,14 @@ export function Certificates() {
                     </select>
                   </td>
                 </tr>
-                <tr className="border-b border-indigo-50 dark:border-white/10">
-                  <th className="py-3 font-bold text-indigo-900/80 dark:text-white/80 w-1/3">Language</th>
+                <tr className="border-b border-indigo-50 ">
+                  <th className="py-3 font-bold text-[#4C677C]  w-1/3">Language</th>
                   <td className="py-3">
                     <select
                       name="language"
                       value={filters.language}
                       onChange={handleFilterChange}
-                      className="glass-input w-full font-bold text-indigo-900 bg-white shadow-sm border border-indigo-100 focus:ring-indigo-400 disabled:opacity-50 dark:bg-[#0B0F19]"
+                      className="glass-input w-full font-bold text-[#2E1C40] bg-white shadow-sm border border-[#E5D9C4] focus:ring-indigo-400 disabled:opacity-50 "
                     >
                       <option value="">Select Language</option>
                       <option value="TAMIL">tamil</option>
@@ -138,14 +138,14 @@ export function Certificates() {
                     </select>
                   </td>
                 </tr>
-                <tr className="border-b border-indigo-50 dark:border-white/10">
-                  <th className="py-3 font-bold text-indigo-900/80 dark:text-white/80">Class</th>
+                <tr className="border-b border-indigo-50 ">
+                  <th className="py-3 font-bold text-[#4C677C] ">Class</th>
                   <td className="py-3">
                     <select
                       name="standard"
                       value={filters.standard}
                       onChange={handleFilterChange}
-                      className="glass-input w-full font-bold text-indigo-900 bg-white shadow-sm border border-indigo-100 focus:ring-indigo-400 disabled:opacity-50 dark:bg-[#0B0F19]"
+                      className="glass-input w-full font-bold text-[#2E1C40] bg-white shadow-sm border border-[#E5D9C4] focus:ring-indigo-400 disabled:opacity-50 "
                     >
                       <option value="">Select Class</option>
                       {availableStandards.map(c => (
@@ -154,15 +154,15 @@ export function Certificates() {
                     </select>
                   </td>
                 </tr>
-                <tr className="border-b border-indigo-50 dark:border-white/10">
-                  <th className="py-3 font-bold text-indigo-900/80 dark:text-white/80">Section</th>
+                <tr className="border-b border-indigo-50 ">
+                  <th className="py-3 font-bold text-[#4C677C] ">Section</th>
                   <td className="py-3">
                     <select
                       name="section"
                       value={filters.section}
                       onChange={handleFilterChange}
                       disabled={!filters.standard}
-                      className="glass-input w-full font-bold text-indigo-900 bg-white shadow-sm border border-indigo-100 focus:ring-indigo-400 disabled:opacity-50 dark:bg-[#0B0F19]"
+                      className="glass-input w-full font-bold text-[#2E1C40] bg-white shadow-sm border border-[#E5D9C4] focus:ring-indigo-400 disabled:opacity-50 "
                     >
                       <option value="">Select Section</option>
                       {availableSections.map(s => (
@@ -171,15 +171,15 @@ export function Certificates() {
                     </select>
                   </td>
                 </tr>
-                <tr className="border-b border-indigo-50 dark:border-white/10">
-                  <th className="py-3 font-bold text-indigo-900/80 dark:text-white/80">Student Name</th>
+                <tr className="border-b border-indigo-50 ">
+                  <th className="py-3 font-bold text-[#4C677C] ">Student Name</th>
                   <td className="py-3">
                     <select
                       name="studentId"
                       value={filters.studentId}
                       onChange={handleFilterChange}
                       disabled={!filters.section}
-                      className="glass-input w-full font-bold text-indigo-900 bg-white shadow-sm border border-indigo-100 focus:ring-indigo-400 disabled:opacity-50 dark:bg-[#0B0F19]"
+                      className="glass-input w-full font-bold text-[#2E1C40] bg-white shadow-sm border border-[#E5D9C4] focus:ring-indigo-400 disabled:opacity-50 "
                     >
                       <option value="">Select Student</option>
                       {students.map(s => (
@@ -189,9 +189,9 @@ export function Certificates() {
                   </td>
                 </tr>
                 <tr>
-                  <th className="py-3 font-bold text-indigo-900/80 dark:text-white/80">EMIS Number</th>
+                  <th className="py-3 font-bold text-[#4C677C] ">EMIS Number</th>
                   <td className="py-3">
-                    <div className="w-full bg-indigo-50/50 border border-indigo-100 rounded-xl px-4 py-3 text-indigo-900 font-bold dark:bg-white/5 dark:border-white/10 dark:text-white/70">
+                    <div className="w-full bg-[#D8FDF6]/40/50 border border-[#E5D9C4] rounded-xl px-4 py-3 text-[#2E1C40] font-bold   ">
                       {selectedStudent ? selectedStudent.rollNumber : '-'}
                     </div>
                   </td>
@@ -214,21 +214,21 @@ export function Certificates() {
       </div>
 
       <GlassCard className="p-6">
-        <h2 className="text-xl font-bold mb-4 bg-indigo-50 text-indigo-900 p-3 rounded-xl dark:bg-white/5 dark:text-white">Student Summary</h2>
+        <h2 className="text-xl font-bold mb-4 bg-[#D8FDF6]/40 text-[#2E1C40] p-3 rounded-xl  ">Student Summary</h2>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-slate-800 dark:text-slate-800 dark:text-white">
+          <table className="w-full text-left text-[#2E1C40]  ">
             <tbody>
-              <tr className="border-b border-indigo-50 dark:border-white/10">
-                <th className="py-3 font-bold text-indigo-900/80 dark:text-white/80 w-1/4">DOB:</th>
-                <td className="py-3 font-bold text-indigo-950 dark:text-white">{selectedStudent?.dob || '-'}</td>
+              <tr className="border-b border-indigo-50 ">
+                <th className="py-3 font-bold text-[#4C677C]  w-1/4">DOB:</th>
+                <td className="py-3 font-bold text-indigo-950 ">{selectedStudent?.dob || '-'}</td>
               </tr>
-              <tr className="border-b border-indigo-50 dark:border-white/10">
-                <th className="py-3 font-bold text-indigo-900/80 dark:text-white/80">Father's Name:</th>
-                <td className="py-3 font-bold text-indigo-950 dark:text-white">{selectedStudent?.fatherName || '-'}</td>
+              <tr className="border-b border-indigo-50 ">
+                <th className="py-3 font-bold text-[#4C677C] ">Father's Name:</th>
+                <td className="py-3 font-bold text-indigo-950 ">{selectedStudent?.fatherName || '-'}</td>
               </tr>
               <tr>
-                <th className="py-3 font-bold text-indigo-900/80 dark:text-white/80">Address:</th>
-                <td className="py-3 font-bold text-indigo-950 dark:text-white">{selectedStudent?.address || '-'}</td>
+                <th className="py-3 font-bold text-[#4C677C] ">Address:</th>
+                <td className="py-3 font-bold text-indigo-950 ">{selectedStudent?.address || '-'}</td>
               </tr>
             </tbody>
           </table>
