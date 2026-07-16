@@ -9,9 +9,8 @@
   "icons": [
     {
       "src": "/dpm_logo.png",
-      "sizes": "192x192 512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "sizes": "2162x1984 any",
+      "type": "image/png"
     }
   ]
 }
