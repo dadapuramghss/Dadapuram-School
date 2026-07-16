@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, Loader2, Sparkles, Mic, MicOff } from 'lucide-react';
+import { Bot, Send, Loader2, Sparkles, Mic, MicOff, Volume2 } from 'lucide-react';
 import { api } from '../lib/api';
 
 export function AiDashboard() {
@@ -61,7 +61,6 @@ export function AiDashboard() {
     try {
       const response = await api.askAI(userQuery);
       setMessages(prev => [...prev, { role: 'assistant', content: response.answer }]);
-      speakText(response.answer);
     } catch (error) {
       console.error("AI Error:", error);
       const errorMessage = error.response?.data?.error || error.message || 'Unknown error occurred.';
@@ -100,6 +99,18 @@ export function AiDashboard() {
                   : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-sm'
               }`}>
                 <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                {msg.role === 'assistant' && (
+                  <div className="mt-3 flex justify-end">
+                    <button 
+                      onClick={() => speakText(msg.content)}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium text-slate-500 hover:text-indigo-600 bg-slate-100 dark:bg-slate-700/50 rounded-lg transition-colors"
+                      title="Read aloud"
+                    >
+                      <Volume2 className="w-3.5 h-3.5" />
+                      Read Aloud
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
