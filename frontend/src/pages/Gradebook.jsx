@@ -155,7 +155,7 @@ export function Gradebook() {
                 setSelectedClass(e.target.value);
                 if (e.target.value === 'All') setSelectedSection('All');
               }}
-              className="glass-input w-full [&>option]:bg-white dark:bg-[#0B0F19]"
+              className="glass-input w-full font-bold text-indigo-900 bg-white shadow-sm border border-indigo-100 focus:ring-indigo-400 disabled:opacity-50 dark:bg-[#0B0F19] dark:text-white dark:[&>option]:bg-[#0B0F19]"
             >
               <option value="All">All Standards</option>
               {availableStandards.map(std => (
@@ -168,7 +168,7 @@ export function Gradebook() {
             <select 
               value={selectedSection} 
               onChange={e => setSelectedSection(e.target.value)}
-              className="glass-input w-full [&>option]:bg-white dark:bg-[#0B0F19]"
+              className="glass-input w-full font-bold text-indigo-900 bg-white shadow-sm border border-indigo-100 focus:ring-indigo-400 disabled:opacity-50 dark:bg-[#0B0F19] dark:text-white dark:[&>option]:bg-[#0B0F19]"
               disabled={selectedClass === 'All'}
             >
               <option value="All">All Sections</option>
@@ -182,7 +182,7 @@ export function Gradebook() {
             <select 
               value={selectedTerm} 
               onChange={e => setSelectedTerm(e.target.value)}
-              className="glass-input w-full [&>option]:bg-white dark:bg-[#0B0F19]"
+              className="glass-input w-full font-bold text-indigo-900 bg-white shadow-sm border border-indigo-100 focus:ring-indigo-400 disabled:opacity-50 dark:bg-[#0B0F19] dark:text-white dark:[&>option]:bg-[#0B0F19]"
             >
               <option value="All Terms">All Terms (Total Sum)</option>
               <option value="Quarterly">Quarterly</option>

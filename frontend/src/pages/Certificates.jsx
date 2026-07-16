@@ -5,16 +5,18 @@ import { Printer, FileOutput } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
 import { StudyCertificatePrint } from '../components/certificates/StudyCertificatePrint';
+import { RankCardPrint } from '../components/certificates/RankCardPrint';
 
 export function Certificates() {
   const [students, setStudents] = useState([]);
+  const [certificateType, setCertificateType] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
 
   // Filters
   const [filters, setFilters] = useState({
-    language: 'TAMIL',
+    language: '',
     standard: '',
     section: '',
     studentId: ''
@@ -76,6 +78,14 @@ export function Certificates() {
   };
 
   const handlePrint = () => {
+    if (!certificateType) {
+      alert("Please select a certificate type.");
+      return;
+    }
+    if (!filters.language) {
+      alert("Please select a language.");
+      return;
+    }
     if (!selectedStudent) {
       alert("Please select a student first.");
       return;
@@ -100,6 +110,20 @@ export function Certificates() {
             <table className="w-full text-left text-slate-800 dark:text-slate-800 dark:text-white">
               <tbody>
                 <tr className="border-b border-indigo-50 dark:border-white/10">
+                  <th className="py-3 font-bold text-indigo-900/80 dark:text-white/80 w-1/3">Certificate Type</th>
+                  <td className="py-3">
+                    <select
+                      value={certificateType}
+                      onChange={(e) => setCertificateType(e.target.value)}
+                      className="glass-input w-full font-bold text-indigo-900 bg-white shadow-sm border border-indigo-100 focus:ring-indigo-400 disabled:opacity-50 dark:bg-[#0B0F19]"
+                    >
+                      <option value="">Select Certificate Type</option>
+                      <option value="STUDY">Study Certificate</option>
+                      <option value="RANK">Rank Card</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr className="border-b border-indigo-50 dark:border-white/10">
                   <th className="py-3 font-bold text-indigo-900/80 dark:text-white/80 w-1/3">Language</th>
                   <td className="py-3">
                     <select
@@ -108,6 +132,7 @@ export function Certificates() {
                       onChange={handleFilterChange}
                       className="glass-input w-full font-bold text-indigo-900 bg-white shadow-sm border border-indigo-100 focus:ring-indigo-400 disabled:opacity-50 dark:bg-[#0B0F19]"
                     >
+                      <option value="">Select Language</option>
                       <option value="TAMIL">tamil</option>
                       <option value="ENGLISH">english</option>
                     </select>
@@ -211,7 +236,11 @@ export function Certificates() {
       </GlassCard>
 
       {/* Hidden Print Component */}
-      <StudyCertificatePrint ref={printRef} student={selectedStudent} />
+      {certificateType === 'STUDY' ? (
+        <StudyCertificatePrint ref={printRef} student={selectedStudent} language={filters.language} />
+      ) : (
+        <RankCardPrint ref={printRef} student={selectedStudent} language={filters.language} />
+      )}
 
     </div>
   );
