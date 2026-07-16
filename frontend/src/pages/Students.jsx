@@ -3,6 +3,7 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { useAuth } from '../context/AuthContext';
 import { NeonButton } from '../components/ui/NeonButton';
 import { api } from '../lib/api';
+import { compressImage } from '../lib/utils';
 import { Pencil, Trash2, Plus, X } from 'lucide-react';
 
 export function Students() {
@@ -133,12 +134,17 @@ export function Students() {
       let photoUrl = formData.photoUrl || null; 
       
       if (file) {
-        photoUrl = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
+        try {
+          photoUrl = await compressImage(file, 1);
+        } catch (err) {
+          console.error("Compression failed, using original file", err);
+          photoUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+        }
       }
 
       const payload = {
@@ -456,7 +462,7 @@ export function Students() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Profile Photo</label>
+                  <label className="block text-sm font-medium text-slate-600 dark:text-indigo-900/80 font-semibold dark:text-white/80">Profile Photo (Camera or Upload)</label>
                   {editingId && formData.photoUrl && (
                     <div className="mb-2">
                       <img src={formData.photoUrl} alt="Current" className="w-16 h-16 rounded-full object-cover border border-white/20" />
