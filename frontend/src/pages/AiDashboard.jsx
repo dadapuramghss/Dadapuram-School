@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, Loader2, Sparkles, Mic, MicOff, Volume2 } from 'lucide-react';
+import { Bot, Send, Loader2, Sparkles, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { api } from '../lib/api';
 
 export function AiDashboard() {
@@ -38,7 +38,15 @@ export function AiDashboard() {
     const utterance = new SpeechSynthesisUtterance(text.replace(/\*/g, '').replace(/#/g, ''));
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
     window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
   };
 
   const scrollToBottom = () => {
@@ -102,12 +110,25 @@ export function AiDashboard() {
                 {msg.role === 'assistant' && (
                   <div className="mt-3 flex justify-end">
                     <button 
-                      onClick={() => speakText(msg.content)}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium text-slate-500 hover:text-indigo-600 bg-slate-100 dark:bg-slate-700/50 rounded-lg transition-colors"
-                      title="Read aloud"
+                      onClick={() => isSpeaking ? stopSpeaking() : speakText(msg.content)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium rounded-lg transition-colors ${
+                        isSpeaking 
+                          ? 'text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20' 
+                          : 'text-slate-500 hover:text-indigo-600 bg-slate-100 dark:bg-slate-700/50 hover:bg-slate-200'
+                      }`}
+                      title={isSpeaking ? "Stop reading" : "Read aloud"}
                     >
-                      <Volume2 className="w-3.5 h-3.5" />
-                      Read Aloud
+                      {isSpeaking ? (
+                        <>
+                          <VolumeX className="w-3.5 h-3.5" />
+                          Stop Reading
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 className="w-3.5 h-3.5" />
+                          Read Aloud
+                        </>
+                      )}
                     </button>
                   </div>
                 )}
