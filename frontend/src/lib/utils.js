@@ -14,8 +14,8 @@ export const compressImage = (file, maxSizeMB = 1) => {
       img.src = event.target.result;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
+        const MAX_WIDTH = 400;
+        const MAX_HEIGHT = 400;
         let width = img.width;
         let height = img.height;
 
@@ -36,7 +36,7 @@ export const compressImage = (file, maxSizeMB = 1) => {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        let quality = 0.8;
+        let quality = 0.7;
         let dataUrl = canvas.toDataURL('image/jpeg', quality);
         let sizeMB = (dataUrl.length * (3/4)) / (1024 * 1024);
 

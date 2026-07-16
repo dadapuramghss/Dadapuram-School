@@ -136,7 +136,7 @@ export function Students() {
       if (file) {
         try {
           // Compress the image and use the resulting Base64 string directly
-          photoUrl = await compressImage(file, 1);
+          photoUrl = await compressImage(file, 0.1);
         } catch (err) {
           console.error("Compression failed", err);
           setMessage("Failed to process image. Please try again.");
