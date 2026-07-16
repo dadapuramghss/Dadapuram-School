@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { NeonButton } from '../components/ui/NeonButton';
 import { api } from '../lib/api';
 import { compressImage } from '../lib/utils';
+import { storage } from '../lib/firebase';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { Pencil, Trash2, Plus, X } from 'lucide-react';
 
 export function Students() {
@@ -135,15 +137,17 @@ export function Students() {
       
       if (file) {
         try {
-          photoUrl = await compressImage(file, 1);
+          const base64DataUrl = await compressImage(file, 1);
+          const fileName = `profile_photos/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+          const storageRef = ref(storage, fileName);
+          
+          await uploadString(storageRef, base64DataUrl, 'data_url');
+          photoUrl = await getDownloadURL(storageRef);
         } catch (err) {
-          console.error("Compression failed, using original file", err);
-          photoUrl = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
+          console.error("Firebase upload failed", err);
+          setMessage("Failed to upload image. Please check your connection and try again.");
+          setLoading(false);
+          return;
         }
       }
 
