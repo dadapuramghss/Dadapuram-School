@@ -54,7 +54,7 @@ export function Register() {
       <GlassCard className="w-full max-w-md p-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2 tracking-tight text-white drop-shadow-md">
-            Join EduPulse
+            Join Edu Teacher
           </h1>
           <p className="text-gray-300">Create an account to request access</p>
         </div>

@@ -33,7 +33,7 @@ export function TeacherLayout() {
             <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 tracking-tight">
-            EduPulse
+            Edu Teacher
           </h1>
         </div>
         <button 
@@ -66,7 +66,7 @@ export function TeacherLayout() {
                   <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain" />
                 </div>
                 <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 tracking-tight">
-                  EduPulse
+                  Edu Teacher
                 </h1>
               </div>
             )}

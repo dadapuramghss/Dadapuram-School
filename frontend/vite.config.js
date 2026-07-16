@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'EduPulse / EduAdmin',
-        short_name: 'EduPulse',
+        name: 'Edu Teacher / EduAdmin',
+        short_name: 'Edu Teacher',
         description: 'Academic Analytics & Ranking Dashboard',
         theme_color: '#111827',
         background_color: '#0a0a0f',
