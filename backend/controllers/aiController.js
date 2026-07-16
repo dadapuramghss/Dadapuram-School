@@ -44,7 +44,7 @@ Instructions:
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-3-8b-instruct:free',
+        model: 'google/gemini-2.5-flash:free',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: question }
