@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, GraduationCap, LogOut, BarChart3, ShieldAlert, FileText, User, ChevronLeft, ChevronRight, Menu, X, Bot } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, LogOut, BarChart3, ShieldAlert, FileText, User, ChevronLeft, ChevronRight, Menu, X, Bot, BookOpen } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export function TeacherLayout() {
@@ -18,6 +18,7 @@ export function TeacherLayout() {
     { name: 'Dashboard', path: '/teacher', exact: true, icon: LayoutDashboard },
     { name: 'Students', path: '/teacher/students', exact: false, icon: Users },
     { name: 'Gradebook', path: '/teacher/gradebook', exact: false, icon: GraduationCap },
+    { name: 'Homework', path: '/teacher/homework', exact: false, icon: BookOpen },
     { name: 'Leaderboard', path: '/teacher/leaderboard', exact: false, icon: BarChart3 },
     { name: 'Certificates', path: '/teacher/certificates', exact: false, icon: FileText },
     { name: 'AI Analyst', path: '/teacher/ai', exact: false, icon: Bot },

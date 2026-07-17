@@ -45,8 +45,38 @@ router.get('/me', verifyStudentToken, async (req, res) => {
     // req.student is populated by verifyStudentToken middleware
     res.json(req.student);
   } catch (error) {
-    console.error('Fetch student profile error:', error);
-    res.status(500).json({ message: 'Server error fetching profile' });
+    console.error('Error fetching student profile:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/student-portal/homework
+router.get('/homework', verifyStudentToken, async (req, res) => {
+  try {
+    const student = req.student;
+
+    const Homework = require('../models/Homework');
+    const homeworkList = await Homework.find({
+      standard: student.standard,
+      section: student.section
+    }).sort({ dueDate: 1 });
+
+    res.json({ success: true, data: homeworkList });
+  } catch (error) {
+    console.error('Error fetching homework:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/student-portal/circulars
+router.get('/circulars', verifyStudentToken, async (req, res) => {
+  try {
+    const Circular = require('../models/Circular');
+    const circulars = await Circular.find().sort({ createdAt: -1 });
+    res.json({ success: true, data: circulars });
+  } catch (error) {
+    console.error('Error fetching circulars:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

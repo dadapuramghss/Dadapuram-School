@@ -10,6 +10,18 @@
       radial-gradient(at 100% 100%, rgba(2, 132, 199, 0.15) 0px, transparent 50%);
     background-attachment: fixed;
   }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-[#4C677C]/30 dark:bg-white/20 rounded-full hover:bg-[#62D4CA] dark:hover:bg-[#62D4CA]/80 transition-colors;
+  }
 }
 
 @media print {

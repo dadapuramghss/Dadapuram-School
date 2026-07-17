@@ -56,6 +56,26 @@ export const api = {
     method: 'DELETE'
   }),
 
+  // Homework
+  getHomeworkByClass: (standard, section) => fetchWithAuth(`/homework?standard=${standard}&section=${section}`),
+  addHomework: (data) => fetchWithAuth('/homework', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+  deleteHomework: (id) => fetchWithAuth(`/homework/${id}`, {
+    method: 'DELETE'
+  }),
+
+  // Circulars
+  getCirculars: () => fetchWithAuth('/circulars'),
+  addCircular: (data) => fetchWithAuth('/circulars', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+  deleteCircular: (id) => fetchWithAuth(`/circulars/${id}`, {
+    method: 'DELETE'
+  }),
+
   // Analytics Leaderboard
   getLeaderboard: (standard, section) => fetchWithAuth(`/analytics/leaderboard?standard=${standard}&section=${section}`),
   getDashboardStats: () => fetchWithAuth('/analytics/dashboard'),

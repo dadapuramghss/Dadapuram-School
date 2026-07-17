@@ -1,216 +1,161 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, User, BookOpen, Award, MapPin } from 'lucide-react';
+import { User, Award, BookOpen, Megaphone } from 'lucide-react';
+import { FilePreviewModal } from '../components/ui/FilePreviewModal';
 
 export default function Dashboard() {
-  const [student, setStudent] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const { student } = useOutletContext();
+  const [circulars, setCirculars] = useState([]);
+  const [loadingCirculars, setLoadingCirculars] = useState(true);
+  const [previewFile, setPreviewFile] = useState(null);
 
   useEffect(() => {
-    const fetchStudentData = async () => {
-      const token = localStorage.getItem('studentToken');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
+    const fetchCirculars = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/student-portal/me', {
+        const token = localStorage.getItem('studentToken');
+        const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const response = await axios.get(`${baseURL}/student-portal/circulars`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setStudent(response.data);
+        setCirculars(response.data.data || []);
       } catch (error) {
-        console.error('Error fetching student data:', error);
-        localStorage.removeItem('studentToken');
-        navigate('/login');
+        console.error('Error fetching circulars:', error);
       } finally {
-        setLoading(false);
+        setLoadingCirculars(false);
       }
     };
-
-    fetchStudentData();
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('studentToken');
-    navigate('/login');
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
-
-  if (!student) return null;
+    fetchCirculars();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-12">
-      {/* Navbar */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-6 h-6 text-indigo-600" />
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
-                EduPulse Student
+    <div className="space-y-6 max-w-5xl mx-auto">
+      {/* Welcome Banner */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+        <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
+          <div className="w-24 h-24 rounded-full border-4 border-white/30 overflow-hidden bg-white/10 flex items-center justify-center flex-shrink-0 shadow-xl">
+            {student.photoUrl ? (
+              <img src={student.photoUrl} alt={student.name} className="w-full h-full object-cover" />
+            ) : (
+              <User className="w-12 h-12 text-white/70" />
+            )}
+          </div>
+          <div className="text-center md:text-left">
+            <h1 className="text-3xl font-bold mb-2">Welcome back, {student.name}!</h1>
+            {student.tamilName && <p className="text-indigo-100 mb-4">{student.tamilName}</p>}
+            <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+              <span className="bg-white/20 px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm border border-white/10">
+                Std {student.standard} - {student.section}
+              </span>
+              <span className="bg-white/20 px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm border border-white/10">
+                Roll No: {student.rollNumber}
               </span>
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center text-gray-500 hover:text-red-600 transition-colors"
-            >
-              <LogOut className="w-5 h-5 mr-1" />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
           </div>
         </div>
-      </nav>
+      </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
+            <BookOpen className="w-6 h-6 text-indigo-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Medium</p>
+            <p className="text-lg font-bold text-gray-900">{student.medium}</p>
+          </div>
+        </div>
         
-        {/* Profile Card */}
-        <div className="glass-card p-6 md:p-8 mb-8">
-          <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
-            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-indigo-50 flex-shrink-0 flex items-center justify-center">
-              {student.photoUrl ? (
-                <img src={student.photoUrl} alt={student.name} className="w-full h-full object-cover" />
-              ) : (
-                <User className="w-16 h-16 text-indigo-300" />
-              )}
-            </div>
-            <div className="flex-1 text-center md:text-left space-y-2">
-              <h1 className="text-3xl font-bold text-gray-900">{student.name}</h1>
-              {student.tamilName && <p className="text-lg text-gray-600 font-medium">{student.tamilName}</p>}
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
-                <div className="bg-white/50 rounded-xl p-3 shadow-sm border border-gray-100">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Standard</p>
-                  <p className="text-lg font-bold text-indigo-600">{student.standard} - {student.section}</p>
-                </div>
-                <div className="bg-white/50 rounded-xl p-3 shadow-sm border border-gray-100">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Roll No</p>
-                  <p className="text-lg font-bold text-gray-800">{student.rollNumber}</p>
-                </div>
-                <div className="bg-white/50 rounded-xl p-3 shadow-sm border border-gray-100">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Medium</p>
-                  <p className="text-lg font-bold text-gray-800">{student.medium}</p>
-                </div>
-                <div className="bg-white/50 rounded-xl p-3 shadow-sm border border-gray-100">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Gender</p>
-                  <p className="text-lg font-bold text-gray-800">{student.gender}</p>
-                </div>
-              </div>
-            </div>
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center flex-shrink-0">
+            <User className="w-6 h-6 text-purple-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Gender</p>
+            <p className="text-lg font-bold text-gray-900">{student.gender}</p>
           </div>
         </div>
-
-        {/* Details and Marks Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0">
+            <Award className="w-6 h-6 text-amber-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Total Exams</p>
+            <p className="text-lg font-bold text-gray-900">{student.terms ? student.terms.length : 0}</p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Circulars Section */}
+      {!loadingCirculars && circulars.length > 0 && (
+        <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-6 rounded-2xl shadow-sm border border-orange-200 mt-6">
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="p-2 bg-orange-500/10 text-orange-600 rounded-lg">
+              <Megaphone className="w-5 h-5" />
+            </div>
+            <h2 className="text-xl font-extrabold text-gray-900 tracking-tight">Recent Announcements</h2>
+          </div>
           
-          {/* Left Column - Details */}
-          <div className="space-y-8">
-            <div className="glass-card p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <User className="w-5 h-5 mr-2 text-indigo-500" />
-                Personal Details
-              </h2>
-              <div className="space-y-4">
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-gray-500 text-sm">Father's Name</span>
-                  <span className="font-medium text-gray-900 text-sm">{student.fatherName || '-'}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-gray-500 text-sm">Date of Birth</span>
-                  <span className="font-medium text-gray-900 text-sm">{student.dob || '-'}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-gray-500 text-sm">Admission No</span>
-                  <span className="font-medium text-gray-900 text-sm">{student.admissionNumber || '-'}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-gray-500 text-sm">Community</span>
-                  <span className="font-medium text-gray-900 text-sm">{student.community || '-'}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-gray-500 text-sm">Religion</span>
-                  <span className="font-medium text-gray-900 text-sm">{student.religion || '-'}</span>
-                </div>
-                {student.address && (
-                  <div className="pt-2">
-                    <span className="text-gray-500 text-sm flex items-center mb-1">
-                      <MapPin className="w-4 h-4 mr-1" /> Address
-                    </span>
-                    <p className="font-medium text-gray-900 text-sm bg-gray-50 p-3 rounded-lg border border-gray-100">
-                      {student.address}
-                    </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {circulars.map(circular => (
+              <div key={circular._id} className="bg-white p-4 rounded-xl border border-orange-100 shadow-sm flex flex-col">
+                <h3 className="font-bold text-gray-900 mb-1 line-clamp-1">{circular.title}</h3>
+                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{circular.description}</p>
+                
+                {circular.fileUrl && circular.fileType === 'image' && (
+                  <div 
+                    className="mb-3 h-32 rounded-lg overflow-hidden border border-gray-100 cursor-pointer"
+                    onClick={() => setPreviewFile(circular)}
+                  >
+                    <img src={circular.fileUrl} alt="Attachment" className="w-full h-full object-cover hover:scale-105 transition-transform" />
                   </div>
                 )}
-              </div>
-            </div>
-          </div>
 
-          {/* Right Column - Academic Performance */}
-          <div className="lg:col-span-2 space-y-8">
-            <div className="glass-card p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
-                <Award className="w-5 h-5 mr-2 text-amber-500" />
-                Academic Performance
-              </h2>
-              
-              {student.terms && student.terms.length > 0 ? (
-                <div className="space-y-8">
-                  {student.terms.map((term, index) => {
-                    const totalScore = term.marks.reduce((acc, curr) => acc + curr.score, 0);
-                    const maxScore = term.marks.length * 100;
-                    const percentage = maxScore > 0 ? ((totalScore / maxScore) * 100).toFixed(1) : 0;
-                    
-                    return (
-                      <div key={index} className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
-                        <div className="bg-indigo-50/50 px-6 py-4 border-b border-indigo-100 flex justify-between items-center">
-                          <h3 className="font-bold text-indigo-900 text-lg">{term.termName} Exam</h3>
-                          <div className="text-right">
-                            <span className="text-sm text-indigo-600 font-semibold mr-3">
-                              Total: {totalScore} / {maxScore}
-                            </span>
-                            <span className="inline-block bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-full">
-                              {percentage}%
-                            </span>
-                          </div>
-                        </div>
-                        <div className="p-6">
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {term.marks.map((mark, i) => (
-                              <div key={i} className="bg-gray-50 p-3 rounded-xl border border-gray-100 flex flex-col items-center justify-center">
-                                <span className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1 truncate w-full text-center" title={mark.subject}>
-                                  {mark.subject}
-                                </span>
-                                <span className={`text-2xl font-bold ${mark.score >= 35 ? 'text-gray-900' : 'text-red-500'}`}>
-                                  {mark.score}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                {circular.fileUrl && circular.fileType !== 'image' && (
+                  <button 
+                    onClick={() => setPreviewFile(circular)}
+                    className="mb-3 p-2 rounded-lg border border-orange-200 bg-orange-50 flex items-center gap-2 hover:bg-orange-100 transition-colors text-left w-full"
+                  >
+                    <div className="p-1.5 bg-orange-500/10 rounded-md shrink-0">
+                      <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-gray-900 truncate">
+                        {circular.fileName || "View Document"}
+                      </p>
+                    </div>
+                  </button>
+                )}
+                
+                <div className="mt-auto text-[10px] font-bold text-orange-600/70 uppercase tracking-wider">
+                  Posted by {circular.postedBy}
                 </div>
-              ) : (
-                <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                  <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500 font-medium">No academic records found yet.</p>
-                </div>
-              )}
-            </div>
+              </div>
+            ))}
           </div>
-          
         </div>
-      </main>
+      )}
+      
+      {/* Info Card */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center mt-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Navigate using the sidebar</h2>
+        <p className="text-gray-500">
+          Check out your <strong>Profile</strong> for full personal details, or visit <strong>Marks</strong> to see your academic performance in all exams.
+        </p>
+      </div>
+
+      {previewFile && (
+        <FilePreviewModal
+          isOpen={!!previewFile}
+          onClose={() => setPreviewFile(null)}
+          fileUrl={previewFile.fileUrl}
+          fileType={previewFile.fileType}
+          fileName={previewFile.fileName}
+        />
+      )}
     </div>
   );
 }

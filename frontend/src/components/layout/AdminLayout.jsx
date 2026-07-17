@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, Bot } from 'lucide-react';
+import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, Bot, BookOpen, Database } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export function AdminLayout() {
@@ -19,8 +19,11 @@ export function AdminLayout() {
     { name: 'User Management', path: '/admin/users', exact: false, icon: Users },
     { name: 'Students', path: '/admin/students', exact: false, icon: Backpack },
     { name: 'Gradebook', path: '/admin/gradebook', exact: false, icon: GraduationCap },
+    { name: 'Homework', path: '/admin/homework', exact: false, icon: BookOpen },
+    { name: 'Circulars', path: '/admin/circulars', exact: false, icon: FileText },
     { name: 'Leaderboard', path: '/admin/leaderboard', exact: false, icon: BarChart3 },
     { name: 'Certificates', path: '/admin/certificates', exact: false, icon: FileText },
+    { name: 'Data Sync', path: '/admin/data-sync', exact: false, icon: Database },
     { name: 'AI Analyst', path: '/admin/ai', exact: false, icon: Bot },
   ];
 

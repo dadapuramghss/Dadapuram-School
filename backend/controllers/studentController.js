@@ -56,6 +56,58 @@ const addStudent = async (req, res) => {
   }
 };
 
+// Bulk Add/Update Students (Admin Only)
+const bulkAddStudents = async (req, res) => {
+  try {
+    const students = req.body;
+    if (!Array.isArray(students)) {
+      return res.status(400).json({ error: 'Expected an array of students' });
+    }
+
+    if (req.dbUser?.role !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can perform bulk operations' });
+    }
+
+    const results = {
+      added: 0,
+      updated: 0,
+      errors: []
+    };
+
+    for (const studentData of students) {
+      const { rollNumber, name, standard, section, gender, medium } = studentData;
+      
+      if (!rollNumber || !name || !standard || !section || !medium) {
+        results.errors.push(`Row missing required fields (Roll: ${rollNumber || 'N/A'})`);
+        continue;
+      }
+
+      try {
+        const existingStudent = await Student.findOne({ rollNumber, standard, section });
+        
+        if (existingStudent) {
+          await Student.findByIdAndUpdate(existingStudent._id, studentData);
+          results.updated++;
+        } else {
+          const newStudent = new Student({
+            ...studentData,
+            terms: []
+          });
+          await newStudent.save();
+          results.added++;
+        }
+      } catch (err) {
+        results.errors.push(`Error processing ${rollNumber}: ${err.message}`);
+      }
+    }
+
+    res.status(200).json({ success: true, data: results });
+  } catch (error) {
+    console.error('Error in bulk add students:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // Get students for a specific class and section
 const getStudentsByClass = async (req, res) => {
   try {
@@ -185,5 +237,6 @@ module.exports = {
   getStudentById,
   updateStudentMarks,
   updateStudent,
-  deleteStudent
+  deleteStudent,
+  bulkAddStudents
 };

@@ -8,6 +8,8 @@ import { Dashboard } from './pages/Dashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { Students } from './pages/Students';
 import { Gradebook } from './pages/Gradebook';
+import { Homework } from './pages/Homework';
+import { Circulars } from './pages/Circulars';
 import { Leaderboard } from './pages/Leaderboard';
 import { Certificates } from './pages/Certificates';
 import { Profile } from './pages/Profile';
@@ -16,6 +18,8 @@ import { AiDashboard } from './pages/AiDashboard';
 import { Register } from './pages/Register';
 import { PendingApproval } from './pages/PendingApproval';
 import { AdminUsers } from './pages/AdminUsers';
+
+import { DataSync } from './pages/DataSync';
 
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const { currentUser, dbUser } = useAuth();
@@ -64,6 +68,7 @@ function AppRoutes() {
         <Route index element={<Dashboard />} />
         <Route path="students" element={<Students />} />
         <Route path="gradebook" element={<Gradebook />} />
+        <Route path="homework" element={<Homework />} />
         <Route path="leaderboard" element={<Leaderboard />} />
         <Route path="certificates" element={<Certificates />} />
         <Route path="profile" element={<Profile />} />
@@ -81,8 +86,11 @@ function AppRoutes() {
         <Route path="profile" element={<Profile />} />
         <Route path="students" element={<Students />} />
         <Route path="gradebook" element={<Gradebook />} />
+        <Route path="homework" element={<Homework />} />
+        <Route path="circulars" element={<Circulars />} />
         <Route path="leaderboard" element={<Leaderboard />} />
         <Route path="certificates" element={<Certificates />} />
+        <Route path="data-sync" element={<DataSync />} />
         <Route path="ai" element={<AiDashboard />} />
       </Route>
     </Routes>
