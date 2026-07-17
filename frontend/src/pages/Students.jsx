@@ -20,7 +20,8 @@ export function Students() {
     admissionNumber: '',
     religion: '',
     community: '',
-    address: ''
+    address: '',
+    mobileNumber: ''
   });
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -90,7 +91,7 @@ export function Students() {
     setFormData(prev => ({
       ...prev,
       name: '', rollNumber: '', medium: 'TAMIL', gender: 'Other',
-      tamilName: '', fatherName: '', dob: '', admissionNumber: '', religion: '', community: '', address: '', photoUrl: ''
+      tamilName: '', fatherName: '', dob: '', admissionNumber: '', religion: '', community: '', address: '', photoUrl: '', mobileNumber: ''
     }));
     setFile(null);
     setMessage('');
@@ -113,7 +114,8 @@ export function Students() {
       religion: student.religion || '',
       community: student.community || '',
       address: student.address || '',
-      photoUrl: student.photoUrl || '' 
+      photoUrl: student.photoUrl || '',
+      mobileNumber: student.mobileNumber || ''
     });
     setFile(null);
     setMessage('');
@@ -123,6 +125,7 @@ export function Students() {
   const closeForm = () => {
     setIsFormOpen(false);
     setEditingId(null);
+    setLoading(false);
   };
 
   const handleSubmit = async (e) => {
@@ -449,6 +452,17 @@ export function Students() {
                   </div>
                 </div>
                 
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Mobile Number (For Student Login)</label>
+                  <input 
+                    type="tel" 
+                    value={formData.mobileNumber}
+                    onChange={(e) => setFormData({...formData, mobileNumber: e.target.value})}
+                    className="glass-input w-full"
+                    placeholder="Enter 10-digit mobile number"
+                  />
+                </div>
+
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Address</label>
                   <textarea 

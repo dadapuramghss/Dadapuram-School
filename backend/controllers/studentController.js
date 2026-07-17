@@ -17,7 +17,7 @@ const addStudent = async (req, res) => {
   try {
     const { 
       rollNumber, name, standard, section, gender, medium, photoUrl,
-      tamilName, fatherName, dob, admissionNumber, religion, community, address
+      tamilName, fatherName, dob, admissionNumber, religion, community, address, mobileNumber
     } = req.body;
 
     if (!isAuthorizedForClass(req.dbUser, standard, section, true)) {
@@ -44,6 +44,7 @@ const addStudent = async (req, res) => {
       religion, 
       community, 
       address,
+      mobileNumber,
       terms: [] // initialized empty
     });
 
@@ -118,6 +119,7 @@ const updateStudent = async (req, res) => {
   try {
     const { studentId } = req.params;
     const updateData = req.body;
+    console.log("Updating student:", studentId, "Mobile Number:", updateData.mobileNumber);
 
     const student = await Student.findById(studentId);
     if (!student) {

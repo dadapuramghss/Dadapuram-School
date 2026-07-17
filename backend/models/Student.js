@@ -1,47 +1,47 @@
 const mongoose = require('mongoose');
 
 const markSchema = new mongoose.Schema({
-  subject: { 
-    type: String, 
+  subject: {
+    type: String,
     required: true,
     trim: true
   },
-  score: { 
-    type: Number, 
-    required: true, 
-    min: 0, 
-    max: 100 
+  score: {
+    type: Number,
+    required: true,
+    min: 0,
+    max: 100
   }
 }, { _id: false });
 
 const termSchema = new mongoose.Schema({
-  termName: { 
-    type: String, 
-    enum: ['Quarterly', 'Half-Yearly', 'Annual'], 
-    required: true 
+  termName: {
+    type: String,
+    enum: ['Quarterly', 'Half-Yearly', 'Annual'],
+    required: true
   },
   marks: [markSchema]
 }, { _id: false });
 
 const studentSchema = new mongoose.Schema({
-  rollNumber: { 
-    type: String, 
+  rollNumber: {
+    type: String,
     required: true,
     trim: true
   },
-  name: { 
-    type: String, 
+  name: {
+    type: String,
     required: true,
     trim: true
   },
-  standard: { 
-    type: String, 
+  standard: {
+    type: String,
     required: true,
     enum: ['6', '7', '8', '9', '10', '11', '12'],
     trim: true
   },
-  section: { 
-    type: String, 
+  section: {
+    type: String,
     required: true,
     enum: ['A', 'B', 'C', 'D'],
     trim: true
@@ -57,7 +57,7 @@ const studentSchema = new mongoose.Schema({
     enum: ['TAMIL', 'ENGLISH'],
     trim: true
   },
-  photoUrl: { 
+  photoUrl: {
     type: String,
     trim: true,
     default: null
@@ -90,9 +90,14 @@ const studentSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  mobileNumber: {
+    type: String,
+    trim: true,
+    sparse: true
+  },
   terms: [termSchema]
-}, { 
-  timestamps: true 
+}, {
+  timestamps: true
 });
 
 // Ensure unique roll number per standard and section

@@ -11,6 +11,7 @@ const studentRoutes = require('./routes/studentRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const authRoutes = require('./routes/authRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+const studentPortalRoutes = require('./routes/studentPortalRoutes');
 
 const app = express();
 
@@ -18,11 +19,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Request Logger Middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 // Routes
 app.use('/api/students', studentRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/student-portal', studentPortalRoutes);
 
 // Base route
 app.get('/', (req, res) => {
