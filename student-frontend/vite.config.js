@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['student rise.png'],
       manifest: {
         name: 'Student Rise',
         short_name: 'Student Rise',
@@ -18,9 +18,9 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'favicon.svg',
+            src: 'student rise.png',
             sizes: '192x192 512x512',
-            type: 'image/svg+xml',
+            type: 'image/png',
             purpose: 'any maskable'
           }
         ]
