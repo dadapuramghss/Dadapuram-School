@@ -1,5 +1,85 @@
-import React, { useState, useEffect } from 'react';
-import { X, Download, FileText, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Download, FileText, AlertCircle, Loader2 } from 'lucide-react';
+
+const MobilePDFViewer = ({ url }) => {
+  const containerRef = useRef(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadPdf = async () => {
+      try {
+        if (!window.pdfjsLib) {
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+          await new Promise((resolve, reject) => {
+            script.onload = resolve;
+            script.onerror = reject;
+            document.body.appendChild(script);
+          });
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
+        const loadingTask = window.pdfjsLib.getDocument(url);
+        const pdf = await loadingTask.promise;
+        
+        if (!isMounted) return;
+
+        const container = containerRef.current;
+        if (!container) return;
+        
+        container.innerHTML = ''; // Clear previous
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const viewport = page.getViewport({ scale: 1.5 });
+          
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+          canvas.className = 'max-w-full h-auto mb-4 rounded shadow bg-white mx-auto';
+          
+          container.appendChild(canvas);
+          
+          await page.render({
+            canvasContext: context,
+            viewport: viewport
+          }).promise;
+        }
+        
+        if (isMounted) setLoading(false);
+      } catch (err) {
+        console.error('Error rendering PDF:', err);
+        if (isMounted) {
+          setError(true);
+          setLoading(false);
+        }
+      }
+    };
+
+    loadPdf();
+
+    return () => { isMounted = false; };
+  }, [url]);
+
+  if (error) {
+    return <div className="text-gray-400 p-4">Error loading PDF preview. Please download the file instead.</div>;
+  }
+
+  return (
+    <div className="w-full h-full overflow-y-auto custom-scrollbar p-2 relative text-center">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-[#0B0B11]/80 z-10">
+          <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+        </div>
+      )}
+      <div ref={containerRef} className="w-full flex flex-col items-center"></div>
+    </div>
+  );
+};
 
 export function FilePreviewModal({ isOpen, onClose, fileUrl, fileType, fileName }) {
   const [blobUrl, setBlobUrl] = useState(null);
@@ -86,15 +166,9 @@ export function FilePreviewModal({ isOpen, onClose, fileUrl, fileType, fileName 
               className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
             />
           ) : isPdf ? (
-            <iframe 
-              src={
-                blobUrl?.startsWith('http') 
-                  ? `https://docs.google.com/gview?url=${encodeURIComponent(blobUrl)}&embedded=true`
-                  : blobUrl
-              }
-              className="w-full h-full rounded-lg border-0 bg-white"
-              title="PDF Preview"
-            />
+            <div className="w-full h-full bg-[#0B0B11] rounded-lg shadow-inner overflow-hidden relative">
+              <MobilePDFViewer url={blobUrl || fileUrl} />
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center text-center max-w-md mx-auto p-8 bg-white/5 rounded-2xl border border-white/10">
               <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center mb-6">
