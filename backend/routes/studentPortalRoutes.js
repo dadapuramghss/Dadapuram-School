@@ -9,16 +9,22 @@ const JWT_SECRET = process.env.JWT_SECRET || 'edupulse_student_secret_key_2026';
 // POST /api/student-portal/login
 router.post('/login', async (req, res) => {
   try {
-    const { mobileNumber } = req.body;
+    const { identifier, mobileNumber } = req.body;
+    const loginId = identifier || mobileNumber;
 
-    if (!mobileNumber) {
-      return res.status(400).json({ message: 'Mobile number is required' });
+    if (!loginId) {
+      return res.status(400).json({ message: 'Mobile number or Roll number is required' });
     }
 
-    const students = await Student.find({ mobileNumber });
+    const students = await Student.find({
+      $or: [
+        { mobileNumber: loginId },
+        { rollNumber: loginId }
+      ]
+    });
 
     if (!students || students.length === 0) {
-      return res.status(404).json({ message: 'Student not found with this mobile number' });
+      return res.status(404).json({ message: 'Student not found with this Mobile or Roll number' });
     }
 
     if (students.length > 1) {
@@ -57,13 +63,20 @@ router.post('/login', async (req, res) => {
 // POST /api/student-portal/login-select
 router.post('/login-select', async (req, res) => {
   try {
-    const { mobileNumber, studentId } = req.body;
+    const { identifier, mobileNumber, studentId } = req.body;
+    const loginId = identifier || mobileNumber;
     
-    if (!mobileNumber || !studentId) {
-      return res.status(400).json({ message: 'Mobile number and student ID are required' });
+    if (!loginId || !studentId) {
+      return res.status(400).json({ message: 'Login ID and student ID are required' });
     }
 
-    const student = await Student.findOne({ _id: studentId, mobileNumber });
+    const student = await Student.findOne({ 
+      _id: studentId,
+      $or: [
+        { mobileNumber: loginId },
+        { rollNumber: loginId }
+      ]
+    });
     
     if (!student) {
       return res.status(404).json({ message: 'Invalid selection or student not found' });

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { GraduationCap, ArrowRight, Loader2, User, Users } from 'lucide-react';
 
 export default function Login() {
-  const [mobileNumber, setMobileNumber] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [requiresSelection, setRequiresSelection] = useState(false);
@@ -15,8 +15,8 @@ export default function Login() {
     e.preventDefault();
     setError('');
     
-    if (!mobileNumber) {
-      setError('Please enter your mobile number');
+    if (!identifier) {
+      setError('Please enter your mobile number or roll number');
       return;
     }
 
@@ -24,7 +24,7 @@ export default function Login() {
     try {
       const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const response = await axios.post(`${baseURL}/student-portal/login`, {
-        mobileNumber
+        identifier
       });
       
       if (response.data.requiresSelection) {
@@ -47,7 +47,7 @@ export default function Login() {
     try {
       const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const response = await axios.post(`${baseURL}/student-portal/login-select`, {
-        mobileNumber,
+        identifier,
         studentId
       });
       if (response.data.token) {
@@ -74,7 +74,7 @@ export default function Login() {
                   <Users className="w-8 h-8" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Select Student</h2>
-                <p className="text-gray-500 text-sm">Multiple students found for {mobileNumber}</p>
+                <p className="text-gray-500 text-sm">Multiple students found for {identifier}</p>
               </div>
               
               <div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
@@ -125,16 +125,16 @@ export default function Login() {
 
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-2">
-                  <label htmlFor="mobileNumber" className="text-sm font-medium text-gray-700 block">
-                    Mobile Number
+                  <label htmlFor="identifier" className="text-sm font-medium text-gray-700 block">
+                    Mobile Number or Roll Number
                   </label>
                   <div className="relative">
                     <input
-                      id="mobileNumber"
-                      type="tel"
-                      value={mobileNumber}
-                      onChange={(e) => setMobileNumber(e.target.value)}
-                      placeholder="Enter your registered mobile number"
+                      id="identifier"
+                      type="text"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                      placeholder="Enter your registered mobile number or roll number"
                       className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none placeholder:text-gray-400"
                       disabled={loading}
                     />
