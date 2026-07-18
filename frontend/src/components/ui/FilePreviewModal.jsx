@@ -87,7 +87,11 @@ export function FilePreviewModal({ isOpen, onClose, fileUrl, fileType, fileName 
             />
           ) : isPdf ? (
             <iframe 
-              src={blobUrl} 
+              src={
+                blobUrl?.startsWith('http') 
+                  ? `https://docs.google.com/gview?url=${encodeURIComponent(blobUrl)}&embedded=true`
+                  : blobUrl
+              }
               className="w-full h-full rounded-lg border-0 bg-white"
               title="PDF Preview"
             />
