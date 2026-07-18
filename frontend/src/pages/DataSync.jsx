@@ -112,7 +112,8 @@ export function DataSync() {
           }).filter(student => student.rollNumber && student.name);
 
           if (studentsToImport.length === 0) {
-            setError('No valid student data found in the CSV. Please check the format.');
+            const sampleRow = rows.length > 0 ? JSON.stringify(rows[0]).substring(0, 200) : 'empty';
+            setError(`No valid student data found in the CSV. Parsed first row: ${sampleRow}`);
             setImporting(false);
             return;
           }
