@@ -1,12 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, GraduationCap, LogOut, BarChart3, ShieldAlert, FileText, User, ChevronLeft, ChevronRight, Menu, X, Bot, BookOpen } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, LogOut, BarChart3, ShieldAlert, FileText, User, ChevronLeft, ChevronRight, Menu, X, Bot, BookOpen, Bell, Megaphone } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { api } from '../../lib/api';
 
 export function TeacherLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [circularIds, setCircularIds] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
   const { logout, dbUser } = useAuth();
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await api.getCirculars();
+        const data = res.data || [];
+        
+        const sortedCirculars = [...data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setNotifications(sortedCirculars);
+        
+        const ids = data.map(c => c._id);
+        setCircularIds(ids);
+        
+        const readIds = JSON.parse(localStorage.getItem('teacherReadCirculars') || '[]');
+        const unread = data.filter(c => !readIds.includes(c._id));
+        setUnreadCount(unread.length);
+      } catch (err) {
+        console.error('Failed to fetch notifications', err);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
+  const handleNotificationClick = () => {
+    localStorage.setItem('teacherReadCirculars', JSON.stringify(circularIds));
+    setUnreadCount(0);
+    setIsNotificationPanelOpen(true);
+  };
 
   const handleNavClick = () => {
     if (window.innerWidth < 768) {
@@ -37,12 +70,23 @@ export function TeacherLayout() {
             Edu Teacher
           </h1>
         </div>
-        <button 
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-2 bg-[#62D4CA] text-[#2E1C40] rounded-lg"
-        >
-          {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={handleNotificationClick}
+            className="relative p-2 text-[#E5D9C4] hover:text-[#62D4CA] transition-colors rounded-full"
+          >
+            <Bell className="w-5 h-5" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-transparent"></span>
+            )}
+          </button>
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-2 bg-[#62D4CA] text-[#2E1C40] rounded-lg"
+          >
+            {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Sidebar Overlay Backdrop */}
@@ -71,12 +115,24 @@ export function TeacherLayout() {
                 </h1>
               </div>
             )}
-            <button 
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="hidden md:block p-2 rounded-xl hover:bg-[#4C677C]/40 text-[#D8FDF6]/70 hover:text-[#D8FDF6] transition-colors"
-            >
-              {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
-            </button>
+            <div className={cn("hidden md:flex items-center gap-1", !isSidebarOpen && "flex-col mt-4")}>
+              <button 
+                onClick={handleNotificationClick}
+                className="relative p-2 rounded-xl hover:bg-[#4C677C]/40 text-[#D8FDF6]/70 hover:text-[#D8FDF6] transition-colors"
+                title="Notifications"
+              >
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                )}
+              </button>
+              <button 
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="p-2 rounded-xl hover:bg-[#4C677C]/40 text-[#D8FDF6]/70 hover:text-[#D8FDF6] transition-colors"
+              >
+                {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
           
           <nav className="mt-2 px-4 space-y-2">
@@ -154,6 +210,57 @@ export function TeacherLayout() {
           <Outlet />
         </div>
       </main>
+
+      {/* Notification Panel Overlay */}
+      {isNotificationPanelOpen && (
+        <div 
+          className="fixed inset-0 bg-[#2E1C40]/20 backdrop-blur-sm z-[60]"
+          onClick={() => setIsNotificationPanelOpen(false)}
+        />
+      )}
+
+      {/* Notification Panel */}
+      <div className={`fixed top-0 right-0 h-full w-80 sm:w-96 bg-white shadow-2xl z-[70] transform transition-transform duration-300 flex flex-col ${
+        isNotificationPanelOpen ? "translate-x-0" : "translate-x-full"
+      }`}>
+        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-[#F4F8F7]">
+          <h2 className="text-lg font-bold text-[#2E1C40] flex items-center gap-2">
+            <Bell className="w-5 h-5 text-[#62D4CA]" />
+            Notifications
+          </h2>
+          <button 
+            onClick={() => setIsNotificationPanelOpen(false)}
+            className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500"
+          >
+            <X className="w-5 h-5"/>
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+          {notifications.length === 0 ? (
+            <div className="text-center text-gray-500 mt-10">
+              <Bell className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+              <p>No new notifications</p>
+            </div>
+          ) : (
+            notifications.map(n => (
+              <div key={n._id} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex gap-3">
+                  <div className="p-2 bg-[#D8FDF6] text-[#62D4CA] rounded-lg shrink-0 h-fit">
+                    <Megaphone className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-[#2E1C40] text-sm mb-1">{n.title}</h4>
+                    <p className="text-xs text-gray-500 mb-2 line-clamp-2">{n.description}</p>
+                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                      {n.postedBy || 'Admin'} • {new Date(n.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   );
 }

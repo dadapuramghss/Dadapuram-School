@@ -15,13 +15,20 @@ export function DataSync() {
       setError(null);
       // Fetch all students.
       // Assuming getStudentsByClass returns all if standard='All' and section='All'
-      const response = await api.get('/students?standard=All&section=All');
+      const response = await api.getStudents('All', 'All');
       const students = response.data;
 
-      if (!students || students.length === 0) {
+      if (!students || !Array.isArray(students) || students.length === 0) {
         setError('No students found to export.');
         return;
       }
+
+      const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d)) return dateStr;
+        return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+      };
 
       // Map to flat structure for CSV
       const csvData = students.map(student => ({
@@ -33,7 +40,7 @@ export function DataSync() {
         'Medium': student.medium,
         'Tamil Name': student.tamilName || '',
         'Father Name': student.fatherName || '',
-        'DOB': student.dob || '',
+        'DOB': formatDate(student.dob),
         'Admission Number': student.admissionNumber || '',
         'Religion': student.religion || '',
         'Community': student.community || '',
@@ -42,7 +49,7 @@ export function DataSync() {
       }));
 
       const csv = Papa.unparse(csvData);
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -133,7 +140,7 @@ export function DataSync() {
     }];
     
     const csv = Papa.unparse(templateData);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -218,7 +225,7 @@ export function DataSync() {
           <button 
             onClick={handleExport}
             disabled={exporting}
-            className="glass-button-primary bg-blue-600 hover:bg-blue-700 text-white w-full max-w-xs flex items-center justify-center gap-2 py-3"
+            className="glass-button-primary bg-blue-600 hover:bg-blue-700 text-white w-full max-w-xs flex items-center justify-center gap-2 py-3 relative z-10"
           >
             {exporting ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

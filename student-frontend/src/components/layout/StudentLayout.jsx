@@ -8,13 +8,20 @@ import {
   LogOut, 
   Menu, 
   X, 
-  BookOpen
+  BookOpen,
+  Bell,
+  Megaphone,
+  Calendar
 } from 'lucide-react';
 
 export default function StudentLayout() {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [circularIds, setCircularIds] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,6 +49,51 @@ export default function StudentLayout() {
 
     fetchStudentData();
   }, [navigate]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const token = localStorage.getItem('studentToken');
+      if (!token) return;
+      try {
+        const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const [circRes, hwRes] = await Promise.all([
+          axios.get(`${baseURL}/student-portal/circulars`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${baseURL}/student-portal/homework`, { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+
+        const circulars = (circRes.data.data || []).map(c => ({
+          ...c,
+          notificationType: 'circular',
+          dateField: new Date(c.createdAt || Date.now())
+        }));
+
+        const homework = (hwRes.data.data || []).map(h => ({
+          ...h,
+          notificationType: 'homework',
+          dateField: new Date(h.createdAt || Date.now())
+        }));
+
+        const combined = [...circulars, ...homework].sort((a, b) => b.dateField - a.dateField);
+        setNotifications(combined);
+        
+        const ids = combined.map(c => c._id);
+        setCircularIds(ids);
+        
+        const readIds = JSON.parse(localStorage.getItem('studentReadCirculars') || '[]');
+        const unread = combined.filter(c => !readIds.includes(c._id));
+        setUnreadCount(unread.length);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
+  const handleNotificationClick = () => {
+    localStorage.setItem('studentReadCirculars', JSON.stringify(circularIds));
+    setUnreadCount(0);
+    setIsNotificationPanelOpen(true);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('studentToken');
@@ -84,9 +136,9 @@ export default function StudentLayout() {
         <div className="h-full flex flex-col">
           {/* Sidebar Header */}
           <div className="h-16 flex items-center px-6 border-b border-gray-100 bg-white">
-            <BookOpen className="w-6 h-6 text-indigo-600 mr-2" />
+            <img src="/student rise.png" alt="Student Rise Logo" className="w-8 h-8 mr-2 object-contain" />
             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
-              EduPulse
+              Student Rise
             </span>
             <button 
               onClick={() => setIsSidebarOpen(false)}
@@ -144,10 +196,19 @@ export default function StudentLayout() {
             >
               <Menu className="w-6 h-6" />
             </button>
-            <h1 className="text-xl font-bold text-gray-900 lg:hidden">Student Portal</h1>
+            <h1 className="text-xl font-bold text-gray-900 lg:hidden">Student Rise</h1>
           </div>
 
           <div className="flex items-center gap-4 ml-auto">
+            <button 
+              onClick={handleNotificationClick}
+              className="relative p-2 text-gray-500 hover:text-indigo-600 transition-colors rounded-full hover:bg-indigo-50"
+            >
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+              )}
+            </button>
             <div className="hidden sm:flex flex-col items-end mr-2">
               <span className="text-sm font-bold text-gray-900">{student.name}</span>
               <span className="text-xs font-medium text-gray-500">Std {student.standard} - {student.section}</span>
@@ -166,6 +227,78 @@ export default function StudentLayout() {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar">
           <Outlet context={{ student }} />
         </main>
+      </div>
+
+      {/* Notification Panel Overlay */}
+      {isNotificationPanelOpen && (
+        <div 
+          className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-[60]"
+          onClick={() => setIsNotificationPanelOpen(false)}
+        />
+      )}
+
+      {/* Notification Panel */}
+      <div className={`fixed top-0 right-0 h-full w-80 sm:w-96 bg-white shadow-2xl z-[70] transform transition-transform duration-300 flex flex-col ${
+        isNotificationPanelOpen ? "translate-x-0" : "translate-x-full"
+      }`}>
+        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/80 backdrop-blur-sm">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <Bell className="w-5 h-5 text-indigo-600" />
+            Notifications
+          </h2>
+          <button 
+            onClick={() => setIsNotificationPanelOpen(false)}
+            className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500"
+          >
+            <X className="w-5 h-5"/>
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+          {notifications.length === 0 ? (
+            <div className="text-center text-gray-500 mt-10">
+              <Bell className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+              <p>No new notifications</p>
+            </div>
+          ) : (
+            notifications.map(n => (
+              <div key={n._id} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+                {n.notificationType === 'circular' ? (
+                  <div className="flex gap-3">
+                    <div className="p-2 bg-orange-50 text-orange-600 rounded-lg shrink-0 h-fit">
+                      <Megaphone className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 text-sm mb-1">{n.title}</h4>
+                      <p className="text-xs text-gray-500 mb-2 line-clamp-2">{n.description}</p>
+                      <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                        {n.postedBy || 'Admin'} • {new Date(n.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-3">
+                    <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg shrink-0 h-fit">
+                      <BookOpen className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded-full">
+                          {n.subject}
+                        </span>
+                        <h4 className="font-bold text-gray-900 text-sm">{n.title}</h4>
+                      </div>
+                      <p className="text-xs text-gray-500 mb-2 line-clamp-2">{n.description}</p>
+                      <div className="flex items-center gap-1 text-[10px] font-semibold text-red-500 uppercase tracking-wider">
+                        <Calendar className="w-3 h-3" />
+                        Due: {new Date(n.dueDate).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

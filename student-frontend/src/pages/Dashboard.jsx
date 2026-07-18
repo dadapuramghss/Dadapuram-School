@@ -57,27 +57,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
-            <BookOpen className="w-6 h-6 text-indigo-600" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 font-medium">Medium</p>
-            <p className="text-lg font-bold text-gray-900">{student.medium}</p>
-          </div>
-        </div>
-        
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center flex-shrink-0">
-            <User className="w-6 h-6 text-purple-600" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 font-medium">Gender</p>
-            <p className="text-lg font-bold text-gray-900">{student.gender}</p>
-          </div>
-        </div>
-        
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0">
             <Award className="w-6 h-6 text-amber-600" />

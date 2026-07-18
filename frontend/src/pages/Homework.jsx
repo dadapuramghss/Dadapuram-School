@@ -212,13 +212,13 @@ export function Homework() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-black text-[#2E1C40] dark:text-white drop-shadow-sm flex items-center">
-          <BookOpen className="w-8 h-8 mr-3 text-[#62D4CA]" />
-          Homework Management
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <h1 className="text-2xl md:text-3xl font-black text-[#2E1C40] dark:text-white drop-shadow-sm flex items-start md:items-center">
+          <BookOpen className="w-8 h-8 mr-3 text-[#62D4CA] shrink-0 mt-1 md:mt-0" />
+          <span>Homework Management</span>
         </h1>
         {hasFullAccess && !isAdding && (
-          <NeonButton onClick={() => setIsAdding(true)} className="bg-[#62D4CA] text-[#2E1C40] flex items-center">
+          <NeonButton onClick={() => setIsAdding(true)} className="bg-[#62D4CA] text-[#2E1C40] flex items-center self-start md:self-auto shrink-0">
             <Plus className="w-5 h-5 mr-2" />
             Add Homework
           </NeonButton>

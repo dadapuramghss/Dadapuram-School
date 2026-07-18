@@ -16,9 +16,13 @@ export default function Profile() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center">
-          <User className="w-6 h-6" />
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
+          {student.photoUrl ? (
+            <img src={student.photoUrl} alt={student.name} className="w-full h-full object-cover" />
+          ) : (
+            <User className="w-8 h-8" />
+          )}
         </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Personal Profile</h1>

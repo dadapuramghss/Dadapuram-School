@@ -116,13 +116,13 @@ export function Circulars() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-black text-[#2E1C40] dark:text-white drop-shadow-sm flex items-center">
-          <Megaphone className="w-8 h-8 mr-3 text-orange-500" />
-          Circulars & Announcements
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <h1 className="text-2xl md:text-3xl font-black text-[#2E1C40] dark:text-white drop-shadow-sm flex items-start md:items-center">
+          <Megaphone className="w-8 h-8 mr-3 text-orange-500 shrink-0 mt-1 md:mt-0" />
+          <span>Circulars & Announcements</span>
         </h1>
         {isAdmin && !isAdding && (
-          <NeonButton onClick={() => setIsAdding(true)} className="bg-orange-500 text-white flex items-center border-orange-400">
+          <NeonButton onClick={() => setIsAdding(true)} className="bg-orange-500 text-white flex items-center border-orange-400 self-start md:self-auto shrink-0">
             <Plus className="w-5 h-5 mr-2" />
             Add Circular
           </NeonButton>
