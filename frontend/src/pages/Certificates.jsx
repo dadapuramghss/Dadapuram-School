@@ -26,7 +26,7 @@ export function Certificates() {
   const printRef = useRef();
 
   let availableStandards = ['6', '7', '8', '9', '10', '11', '12'];
-  let availableSections = ['A', 'B', 'C', 'D'];
+  let availableSections = ['A', 'B', 'C', 'D', 'A1', 'A2', 'B1'];
 
   if (dbUser?.role !== 'admin' && dbUser?.assignedClasses?.length > 0) {
     availableStandards = [...new Set(dbUser.assignedClasses.map(c => c.standard))].sort((a,b) => Number(a) - Number(b));

@@ -43,7 +43,7 @@ const studentSchema = new mongoose.Schema({
   section: {
     type: String,
     required: true,
-    enum: ['A', 'B', 'C', 'D'],
+    enum: ['A', 'B', 'C', 'D', 'A1', 'A2', 'B1'],
     trim: true
   },
   gender: {

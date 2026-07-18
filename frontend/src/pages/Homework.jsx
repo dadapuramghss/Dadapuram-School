@@ -40,7 +40,7 @@ export function Homework() {
 
   if (dbUser?.role === 'admin') {
     availableStandards = ['6', '7', '8', '9', '10', '11', '12'];
-    availableSections = ['A', 'B', 'C', 'D'];
+    availableSections = ['A', 'B', 'C', 'D', 'A1', 'A2', 'B1'];
   } else if (dbUser?.assignedClasses) {
     availableStandards = [...new Set(dbUser.assignedClasses.map(c => c.standard))].sort((a,b) => Number(a) - Number(b));
     availableSections = dbUser.assignedClasses

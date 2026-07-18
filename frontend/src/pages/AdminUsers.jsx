@@ -254,7 +254,7 @@ export function AdminUsers() {
                     onChange={(e) => setNewClass({...newClass, section: e.target.value})}
                     className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white [&>option]:bg-gray-800"
                   >
-                    {['A','B','C','D'].map(s => <option key={s} value={s}>{s}</option>)}
+                    {['A','B','C','D','A1','A2','B1'].map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div className="flex-1 space-y-1">

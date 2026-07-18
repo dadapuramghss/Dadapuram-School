@@ -100,6 +100,9 @@ export function Leaderboard() {
             <option value="B">Section B</option>
             <option value="C">Section C</option>
             <option value="D">Section D</option>
+            <option value="A1">Section A1</option>
+            <option value="A2">Section A2</option>
+            <option value="B1">Section B1</option>
           </select>
           <NeonButton onClick={fetchLeaderboard} className="w-full sm:w-auto mt-2 sm:mt-0">Refresh</NeonButton>
         </div>
