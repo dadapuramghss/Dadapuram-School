@@ -82,13 +82,31 @@ const getClassLeaderboard = async (req, res) => {
 
 const getDashboardStats = async (req, res) => {
   try {
-    const totalStudents = await Student.countDocuments();
-    const maleStudents = await Student.countDocuments({ gender: 'Male' });
-    const femaleStudents = await Student.countDocuments({ gender: 'Female' });
+    let query = {};
+    if (req.dbUser && req.dbUser.role === 'teacher') {
+      if (req.dbUser.assignedClasses && req.dbUser.assignedClasses.length > 0) {
+        query = {
+          $or: req.dbUser.assignedClasses.map(c => ({
+            standard: c.standard,
+            section: c.section
+          }))
+        };
+      } else {
+        // If teacher has no classes assigned, they have 0 students
+        query = { _id: null };
+      }
+    }
+
+    const totalStudents = await Student.countDocuments(query);
+    const maleStudents = await Student.countDocuments({ ...query, gender: 'Male' });
+    const femaleStudents = await Student.countDocuments({ ...query, gender: 'Female' });
     const totalTeachers = await User.countDocuments({ role: 'teacher' });
 
-    // Get Top 3 students across the school
+    // Get Top 3 students across the school (or teacher's classes)
     const topStudents = await Student.aggregate([
+      {
+        $match: query
+      },
       {
         $unwind: {
           path: "$terms",
