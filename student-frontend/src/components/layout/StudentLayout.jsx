@@ -261,7 +261,14 @@ export default function StudentLayout() {
             </div>
           ) : (
             notifications.map(n => (
-              <div key={n._id} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+              <div 
+                key={n._id} 
+                className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer hover:border-indigo-200"
+                onClick={() => {
+                  setIsNotificationPanelOpen(false);
+                  navigate(n.notificationType === 'circular' ? '/dashboard' : '/homework');
+                }}
+              >
                 {n.notificationType === 'circular' ? (
                   <div className="flex gap-3">
                     <div className="p-2 bg-orange-50 text-orange-600 rounded-lg shrink-0 h-fit">
