@@ -88,7 +88,8 @@ export function DataSync() {
               if (row.hasOwnProperty(key)) {
                 // Normalize key: lowercase, remove all non-alphanumeric chars
                 const normKey = key.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-                normRow[normKey] = row[key]?.trim() || '';
+                // Safely convert value to string before trimming
+                normRow[normKey] = row[key] != null ? String(row[key]).trim() : '';
               }
             }
 
