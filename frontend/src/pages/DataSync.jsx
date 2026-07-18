@@ -76,6 +76,7 @@ export function DataSync() {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
+      transformHeader: (header) => header.trim().replace(/^\uFEFF/, ''),
       complete: async (results) => {
         try {
           const rows = results.data;
