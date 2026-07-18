@@ -112,8 +112,12 @@ export function DataSync() {
           }).filter(student => student.rollNumber && student.name);
 
           if (studentsToImport.length === 0) {
-            const sampleRow = rows.length > 0 ? JSON.stringify(rows[0]).substring(0, 200) : 'empty';
-            setError(`No valid student data found in the CSV. Parsed first row: ${sampleRow}`);
+            const firstRowStr = rows.length > 0 ? JSON.stringify(rows[0]) : '';
+            if (firstRowStr.includes('PK\\u0003\\u0004') || file.name.endsWith('.xlsx')) {
+              setError('You uploaded an Excel file (.xlsx) but the system expects a CSV file. Please open your file in Excel, click "File > Save As", choose "CSV (Comma delimited)", and upload that new CSV file.');
+            } else {
+              setError('No valid student data found in the CSV. Please check the format.');
+            }
             setImporting(false);
             return;
           }
