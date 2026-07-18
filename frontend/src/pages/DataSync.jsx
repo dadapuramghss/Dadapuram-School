@@ -81,23 +81,34 @@ export function DataSync() {
         try {
           const rows = results.data;
           
-          // Map CSV headers to API fields
-          const studentsToImport = rows.map(row => ({
-            rollNumber: row['Roll Number'],
-            name: row['Name'],
-            standard: row['Standard'] ? String(row['Standard']) : '',
-            section: row['Section'] ? String(row['Section']).toUpperCase() : '',
-            gender: row['Gender'] || 'Other',
-            medium: row['Medium'] ? String(row['Medium']).toUpperCase() : 'ENGLISH',
-            tamilName: row['Tamil Name'] || '',
-            fatherName: row['Father Name'] || '',
-            dob: row['DOB'] || '',
-            admissionNumber: row['Admission Number'] || '',
-            religion: row['Religion'] || '',
-            community: row['Community'] || '',
-            address: row['Address'] || '',
-            mobileNumber: row['Mobile Number'] || ''
-          }));
+          // Map CSV headers to API fields using normalized keys for robustness
+          const studentsToImport = rows.map(row => {
+            const normRow = {};
+            for (const key in row) {
+              if (row.hasOwnProperty(key)) {
+                // Normalize key: lowercase, remove all non-alphanumeric chars
+                const normKey = key.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+                normRow[normKey] = row[key]?.trim() || '';
+              }
+            }
+
+            return {
+              rollNumber: normRow['rollnumber'] || normRow['rollno'] || '',
+              name: normRow['name'] || normRow['studentname'] || '',
+              standard: normRow['standard'] || normRow['class'] || '',
+              section: normRow['section'] ? String(normRow['section']).toUpperCase() : '',
+              gender: normRow['gender'] || 'Other',
+              medium: normRow['medium'] ? String(normRow['medium']).toUpperCase() : 'ENGLISH',
+              tamilName: normRow['tamilname'] || '',
+              fatherName: normRow['fathername'] || '',
+              dob: normRow['dob'] || normRow['dateofbirth'] || '',
+              admissionNumber: normRow['admissionnumber'] || normRow['admissionnumb'] || normRow['admissionno'] || '',
+              religion: normRow['religion'] || '',
+              community: normRow['community'] || '',
+              address: normRow['address'] || '',
+              mobileNumber: normRow['mobilenumber'] || normRow['mobile'] || ''
+            };
+          });
 
           const response = await api.post('/students/bulk', studentsToImport);
           
