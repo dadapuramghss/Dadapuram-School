@@ -109,7 +109,13 @@ export function DataSync() {
               address: normRow['address'] || '',
               mobileNumber: normRow['mobilenumber'] || normRow['mobile'] || ''
             };
-          });
+          }).filter(student => student.rollNumber && student.name);
+
+          if (studentsToImport.length === 0) {
+            setError('No valid student data found in the CSV. Please check the format.');
+            setImporting(false);
+            return;
+          }
 
           const response = await api.post('/students/bulk', studentsToImport);
           
