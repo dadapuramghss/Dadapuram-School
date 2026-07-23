@@ -5,7 +5,7 @@ import * as XLSX from 'xlsx';
 
 export function AdminReports() {
   const [allStudents, setAllStudents] = useState([]);
-  const [demographicFilter, setDemographicFilter] = useState('community');
+  const [demographicFilter, setDemographicFilter] = useState('all');
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedStudentDetails, setSelectedStudentDetails] = useState(null);
@@ -38,24 +38,44 @@ export function AdminReports() {
     return 'UNKNOWN';
   };
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d)) return dateStr;
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+  };
+
+  const mapStudentToExcelRow = (student) => ({
+    'EMIS Num': student.emisNumber || student.rollNumber || '',
+    'Name': student.name || '',
+    'Standard': student.standard || '',
+    'Section': student.section || '',
+    'Gender': student.gender || '',
+    'Medium': student.medium || '',
+    'Tamil Nam': student.tamilName || '',
+    'Father Nam': student.fatherName || '',
+    'DOB': formatDate(student.dob),
+    'Admission': student.admissionNumber || '',
+    'Religion': student.religion || '',
+    'Communit': student.community || '',
+    'Address': student.address || '',
+    'Mobile Number': student.mobileNumber || ''
+  });
+
   const handleDownloadExcel = (groupKey, studentsToDownload) => {
     if (!studentsToDownload || studentsToDownload.length === 0) return;
     
-    const excelData = studentsToDownload.map(student => ({
-      'EMIS Number': student.emisNumber || student.rollNumber || '',
-      'Name': student.name || '',
-      'Gender': student.gender || '',
-      'Community': student.community || '',
-      'Standard': student.standard || '',
-      'Section': student.section || '',
-      'Phone': student.phone || '',
-    }));
+    const excelData = studentsToDownload.map(mapStudentToExcelRow);
 
     const worksheet = XLSX.utils.json_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
     
     XLSX.writeFile(workbook, `${groupKey.replace(/[^a-zA-Z0-9]/g, '_')}_students_report.xlsx`);
+  };
+
+  const handleDownloadSingleStudent = (student) => {
+    handleDownloadExcel(student.name, [student]);
   };
 
   const renderDemographics = () => {
@@ -156,13 +176,20 @@ export function AdminReports() {
                         </td>
                         <td className="p-4 text-sm text-white/70">{student.gender || 'N/A'}</td>
                         <td className="p-4 text-sm text-white/70">{student.community || 'N/A'}</td>
-                        <td className="p-4 text-right">
+                        <td className="p-4 text-right flex items-center justify-end gap-2">
                           <button 
                             onClick={() => setSelectedStudentDetails(student)}
                             className="p-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] rounded-xl transition-colors"
                             title="View Student Details"
                           >
                             <Eye className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDownloadSingleStudent(student)}
+                            className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl transition-colors"
+                            title="Download Student Record"
+                          >
+                            <Download className="w-4 h-4" />
                           </button>
                         </td>
                       </tr>
