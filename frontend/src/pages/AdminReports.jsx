@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { PieChart, FileText, Download, X } from 'lucide-react';
+import { PieChart, FileText, Download, X, Eye } from 'lucide-react';
 import Papa from 'papaparse';
 
 export function AdminReports() {
@@ -8,6 +8,7 @@ export function AdminReports() {
   const [demographicFilter, setDemographicFilter] = useState('community');
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedStudentDetails, setSelectedStudentDetails] = useState(null);
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -40,7 +41,7 @@ export function AdminReports() {
     if (!studentsToDownload || studentsToDownload.length === 0) return;
     
     const csvData = studentsToDownload.map(student => ({
-      'EMIS Number': student.emisNumber || '',
+      'EMIS Number': student.emisNumber || student.rollNumber || '',
       'Name': student.name || '',
       'Gender': student.gender || '',
       'Community': student.community || '',
@@ -144,12 +145,13 @@ export function AdminReports() {
                       <th className="p-4 font-semibold">Class & Section</th>
                       <th className="p-4 font-semibold">Gender</th>
                       <th className="p-4 font-semibold">Community</th>
+                      <th className="p-4 font-semibold text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {selectedStudents.map((student) => (
                       <tr key={student._id} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="p-4 text-sm text-white/70 font-medium">{student.emisNumber || 'N/A'}</td>
+                        <td className="p-4 text-sm text-white/70 font-medium">{student.emisNumber || student.rollNumber || 'N/A'}</td>
                         <td className="p-4 text-sm font-bold text-[#EBD8BE]">{student.name}</td>
                         <td className="p-4">
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#5D7D9A]/10 text-[#5D7D9A] border border-[#5D7D9A]/20">
@@ -158,6 +160,15 @@ export function AdminReports() {
                         </td>
                         <td className="p-4 text-sm text-white/70">{student.gender || 'N/A'}</td>
                         <td className="p-4 text-sm text-white/70">{student.community || 'N/A'}</td>
+                        <td className="p-4 text-right">
+                          <button 
+                            onClick={() => setSelectedStudentDetails(student)}
+                            className="p-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] rounded-xl transition-colors"
+                            title="View Student Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -215,6 +226,110 @@ export function AdminReports() {
         
         {renderDemographics()}
       </div>
+
+      {/* Student Details Modal */}
+      {selectedStudentDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#0B132B] border border-white/10 shadow-2xl rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/[0.02]">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
+                Student Details
+              </h3>
+              <button 
+                onClick={() => setSelectedStudentDetails(null)}
+                className="p-2 hover:bg-white/10 rounded-xl text-white/50 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* Personal Info */}
+                <div className="space-y-4">
+                  <h4 className="text-[#62D4CA] text-xs font-bold uppercase tracking-widest border-b border-white/5 pb-2">Personal Information</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Full Name</p>
+                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.name || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Tamil Name</p>
+                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.tamilName || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Gender</p>
+                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.gender || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Date of Birth</p>
+                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.dob || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Father's Name</p>
+                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.fatherName || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Academic Info */}
+                <div className="space-y-4">
+                  <h4 className="text-[#F9CB84] text-xs font-bold uppercase tracking-widest border-b border-white/5 pb-2">Academic Information</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">EMIS Number</p>
+                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.emisNumber || selectedStudentDetails.rollNumber || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Admission Number</p>
+                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.admissionNumber || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Class & Section</p>
+                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.standard} - {selectedStudentDetails.section}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Medium</p>
+                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.medium || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Info */}
+                <div className="space-y-4 md:col-span-2">
+                  <h4 className="text-[#EBD8BE] text-xs font-bold uppercase tracking-widest border-b border-white/5 pb-2">Contact & Background</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Mobile Number</p>
+                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.mobileNumber || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Religion / Community</p>
+                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.religion || 'N/A'} / {selectedStudentDetails.community || 'N/A'}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Address</p>
+                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.address || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            
+            <div className="p-4 border-t border-white/10 bg-white/[0.02] flex justify-end">
+              <button 
+                onClick={() => setSelectedStudentDetails(null)}
+                className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-bold transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
