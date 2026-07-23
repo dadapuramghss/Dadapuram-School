@@ -17,7 +17,9 @@ export function ClassConfigProvider({ children }) {
     try {
       setLoadingConfigs(true);
       const res = await api.getClassConfigs();
-      setClassConfigs(res.data || []);
+      // Handle both cases: direct array or nested under data property
+      const configArray = Array.isArray(res) ? res : (res.data || []);
+      setClassConfigs(configArray);
     } catch (err) {
       console.error('Failed to fetch class configurations:', err);
     } finally {

@@ -42,12 +42,15 @@ export function AdminClasses() {
         .map(s => s.trim())
         .filter(s => s.length > 0);
 
+      const cleanStandard = formData.standard.trim();
+      const cleanSection = formData.section.trim().toUpperCase();
+
       if (editingConfig) {
         await api.updateClassConfig(editingConfig._id, { subjects: parsedSubjects });
       } else {
         await api.addClassConfig({
-          standard: formData.standard,
-          section: formData.section,
+          standard: cleanStandard,
+          section: cleanSection,
           subjects: parsedSubjects
         });
       }
@@ -56,7 +59,11 @@ export function AdminClasses() {
       handleCloseModal();
     } catch (err) {
       console.error('Failed to save configuration:', err);
-      alert(err.message || 'Error saving configuration');
+      if (err.message && err.message.includes("already exists")) {
+        alert("This class and section combination already exists in your configuration.");
+      } else {
+        alert(err.message || 'Error saving configuration');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -102,7 +109,7 @@ export function AdminClasses() {
           <tbody>
             {classConfigs.map((config) => (
               <tr key={config._id} className="border-b border-[#E5D9C4]/40 dark:border-[#4C677C]/30 hover:bg-[#D8FDF6]/20 dark:hover:bg-[#2E1C40]/20 transition-colors">
-                <td className="p-4 font-medium text-[#2E1C40] dark:text-white">Standard {config.standard}</td>
+                <td className="p-4 font-medium text-[#2E1C40] dark:text-white">{config.standard}</td>
                 <td className="p-4 font-medium text-[#2E1C40] dark:text-white">{config.section}</td>
                 <td className="p-4 text-[#4C677C] dark:text-gray-300">
                   <div className="flex flex-wrap gap-2">
