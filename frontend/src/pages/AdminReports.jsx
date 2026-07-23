@@ -62,7 +62,7 @@ export function AdminReports() {
         ]);
         setAllStudents(studentsRes.data || []);
         setHomeworkData(homeworkRes.data || []);
-        setClassConfigsData(classConfigsRes.data || []);
+        setClassConfigsData(Array.isArray(classConfigsRes) ? classConfigsRes : (classConfigsRes.data || []));
       } catch (err) {
         console.error('Error fetching reports data:', err);
       } finally {
@@ -414,13 +414,13 @@ export function AdminReports() {
     );
   };
   const handleDownloadHomeworkExcel = (matrix, classes, subjects) => {
-    const excelData = classes.map(c => {
-      const row = { 'Class & Section': `${c.standard} - ${c.section}` };
-      subjects.forEach(sub => {
+    const excelData = subjects.map(sub => {
+      const row = { 'Subject': sub };
+      classes.forEach(c => {
         if (!c.subjects?.includes(sub)) {
-          row[sub] = 'N/A';
+          row[`${c.standard} - ${c.section}`] = 'N/A';
         } else {
-          row[sub] = matrix[`${c.standard}-${c.section}`]?.[sub] ? 'Added' : 'Not Added';
+          row[`${c.standard} - ${c.section}`] = matrix[`${c.standard}-${c.section}`]?.[sub] ? 'Added' : 'Not Added';
         }
       });
       return row;
@@ -442,9 +442,6 @@ export function AdminReports() {
       return a.standard.localeCompare(b.standard) || a.section.localeCompare(b.section);
     });
 
-    // Unique subjects
-    const allSubjects = Array.from(new Set(classConfigsData.flatMap(c => c.subjects || []))).sort();
-
     // Map homework
     const hwMap = {};
     homeworkData.forEach(hw => {
@@ -453,47 +450,42 @@ export function AdminReports() {
       hwMap[key][hw.subject] = true;
     });
 
-    return (
-      <div className="mt-6 animate-in slide-in-from-top-4 duration-300">
-        <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-xl">
-          <div className="p-4 md:p-5 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.02]">
-            <div className="flex items-center gap-3">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
-                Active Homework Status
-              </h3>
-            </div>
-            <button 
-              onClick={() => handleDownloadHomeworkExcel(hwMap, sortedClasses, allSubjects)}
-              className="flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
-            >
-              <Download className="w-4 h-4" />
-              Download Excel
-            </button>
+    const renderHomeworkMatrix = (title, classesGroup) => {
+      if (classesGroup.length === 0) return null;
+      const subjects = Array.from(new Set(classesGroup.flatMap(c => c.subjects || []))).sort();
+      
+      return (
+        <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-xl mb-6 last:mb-0">
+          <div className="p-4 md:p-5 border-b border-white/10 bg-white/[0.02]">
+             <h3 className="text-lg font-bold text-white flex items-center gap-2">
+               <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
+               {title}
+             </h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-center border-collapse">
               <thead>
                 <tr className="bg-white/[0.02] border-b border-white/5 text-[11px] uppercase tracking-wider text-white/50 font-bold">
-                  <th className="p-4 text-left border-r border-white/5 bg-white/5 whitespace-nowrap sticky left-0 z-10">Class & Section</th>
-                  {allSubjects.map(sub => (
-                    <th key={sub} className="p-4 bg-white/[0.01]">{sub}</th>
+                  <th className="p-4 text-left border-r border-white/5 bg-white/5 whitespace-nowrap sticky left-0 z-10">Subject</th>
+                  {classesGroup.map(c => (
+                    <th key={`${c.standard}-${c.section}`} className="p-4 bg-white/[0.01]">
+                      {c.standard} - {c.section}
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-sm">
-                {sortedClasses.map(c => {
-                  const key = `${c.standard}-${c.section}`;
-                  return (
-                    <tr key={key} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="p-4 text-left font-bold text-[#EBD8BE] border-r border-white/5 bg-[#0B132B] whitespace-nowrap sticky left-0 z-10">{c.standard} - {c.section}</td>
-                      {allSubjects.map(sub => {
-                        if (!c.subjects?.includes(sub)) {
-                          return <td key={sub} className="p-4 bg-white/[0.02]"></td>;
-                        }
-                        const hasHw = hwMap[key]?.[sub];
-                        return (
-                          <td key={sub} className="p-4">
+                {subjects.map(sub => (
+                  <tr key={sub} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="p-4 text-left font-bold text-[#EBD8BE] border-r border-white/5 bg-[#0B132B] whitespace-nowrap sticky left-0 z-10">{sub}</td>
+                    {classesGroup.map(c => {
+                       const key = `${c.standard}-${c.section}`;
+                       if (!c.subjects?.includes(sub)) {
+                          return <td key={key} className="p-4 bg-white/[0.02]"></td>;
+                       }
+                       const hasHw = hwMap[key]?.[sub];
+                       return (
+                          <td key={key} className="p-4">
                             <div className="flex justify-center">
                               {hasHw ? (
                                 <CheckCircle className="w-5 h-5 text-green-500" />
@@ -502,20 +494,45 @@ export function AdminReports() {
                               )}
                             </div>
                           </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
-                {sortedClasses.length === 0 && (
-                  <tr>
-                    <td colSpan={1 + allSubjects.length} className="p-8 text-white/40 font-medium">No class configurations found</td>
+                       );
+                    })}
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>
         </div>
+      );
+    };
+
+    const group1 = sortedClasses.filter(c => ['6','7','8','9','10'].includes(String(c.standard)));
+    const group2 = sortedClasses.filter(c => ['11','12'].includes(String(c.standard)));
+    const groupOther = sortedClasses.filter(c => !['6','7','8','9','10','11','12'].includes(String(c.standard)));
+    const allSubjects = Array.from(new Set(sortedClasses.flatMap(c => c.subjects || []))).sort();
+
+    return (
+      <div className="mt-6 animate-in slide-in-from-top-4 duration-300">
+        <div className="flex justify-end mb-4">
+          <button 
+            onClick={() => handleDownloadHomeworkExcel(hwMap, sortedClasses, allSubjects)}
+            className="flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Download Excel
+          </button>
+        </div>
+        
+        {sortedClasses.length === 0 ? (
+          <div className="bg-[#0B132B] rounded-2xl border border-white/10 p-8 text-center text-white/40 font-medium shadow-xl">
+            No class configurations found
+          </div>
+        ) : (
+          <>
+            {renderHomeworkMatrix("Standards 6 to 10", group1)}
+            {renderHomeworkMatrix("Standards 11 & 12", group2)}
+            {renderHomeworkMatrix("Other Standards", groupOther)}
+          </>
+        )}
       </div>
     );
   };
