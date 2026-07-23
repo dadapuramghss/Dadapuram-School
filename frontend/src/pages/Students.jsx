@@ -339,7 +339,7 @@ export function Students() {
                         />
                       </td>
                     )}
-                    <td className="p-3 text-[#4C677C] dark:text-gray-300">{s.emisNumber}</td>
+                    <td className="p-3 text-[#4C677C] dark:text-gray-300">{s.emisNumber || s.rollNumber || 'N/A'}</td>
                     <td className="p-3 font-medium text-[#2E1C40] dark:text-white">{s.name}</td>
                     <td className="p-3 text-[#4C677C] dark:text-gray-300">{s.medium}</td>
                     {hasFullAccess && (
