@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { PieChart, FileText, Download, X, Eye } from 'lucide-react';
-import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 
 export function AdminReports() {
   const [allStudents, setAllStudents] = useState([]);
@@ -34,13 +34,14 @@ export function AdminReports() {
     if (filter === 'class') return `Standard ${student.standard || 'Unknown'}`;
     if (filter === 'section') return `Section ${student.section || 'Unknown'}`;
     if (filter === 'gender') return student.gender || 'Unknown';
+    if (filter === 'all') return 'ALL STUDENTS';
     return 'UNKNOWN';
   };
 
-  const handleDownloadCSV = (groupKey, studentsToDownload) => {
+  const handleDownloadExcel = (groupKey, studentsToDownload) => {
     if (!studentsToDownload || studentsToDownload.length === 0) return;
     
-    const csvData = studentsToDownload.map(student => ({
+    const excelData = studentsToDownload.map(student => ({
       'EMIS Number': student.emisNumber || student.rollNumber || '',
       'Name': student.name || '',
       'Gender': student.gender || '',
@@ -50,16 +51,11 @@ export function AdminReports() {
       'Phone': student.phone || '',
     }));
 
-    const csv = Papa.unparse(csvData);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
     
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `${groupKey}_students_report.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    XLSX.writeFile(workbook, `${groupKey.replace(/[^a-zA-Z0-9]/g, '_')}_students_report.xlsx`);
   };
 
   const renderDemographics = () => {
@@ -121,11 +117,11 @@ export function AdminReports() {
                 
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button 
-                    onClick={() => handleDownloadCSV(selectedGroup, selectedStudents)}
+                    onClick={() => handleDownloadExcel(selectedGroup, selectedStudents)}
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
                   >
                     <Download className="w-4 h-4" />
-                    Download CSV
+                    Download Excel
                   </button>
                   <button 
                     onClick={() => setSelectedGroup(null)}
@@ -220,6 +216,7 @@ export function AdminReports() {
               <option value="class">Class</option>
               <option value="section">Section</option>
               <option value="gender">Gender</option>
+              <option value="all">All</option>
             </select>
           </div>
         </div>

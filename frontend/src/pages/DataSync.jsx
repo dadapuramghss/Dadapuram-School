@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Papa from 'papaparse';
 import { Database, Upload, Download, FileSpreadsheet, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { api } from '../lib/api';
+import * as XLSX from 'xlsx';
 
 export function DataSync() {
   const [importing, setImporting] = useState(false);
@@ -31,7 +32,7 @@ export function DataSync() {
       };
 
       // Map to flat structure for CSV
-      const csvData = students.map(student => ({
+      const excelData = students.map(student => ({
         'EMIS Number': student.emisNumber,
         'Name': student.name,
         'Standard': student.standard,
@@ -48,15 +49,11 @@ export function DataSync() {
         'Mobile Number': student.mobileNumber || ''
       }));
 
-      const csv = Papa.unparse(csvData);
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `students_export_${new Date().toISOString().split('T')[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
+      
+      XLSX.writeFile(workbook, `students_export_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (err) {
       console.error('Export error:', err);
       setError('Failed to export students. Please try again.');
@@ -243,7 +240,7 @@ export function DataSync() {
           
           <h2 className="text-2xl font-bold text-white mb-3">Export Students</h2>
           <p className="text-gray-400 mb-8 max-w-sm">
-            Download a complete backup of all student records in CSV format. This file can be edited and re-imported later.
+            Download a complete backup of all student records in Excel format.
           </p>
           
           <button 
@@ -256,7 +253,7 @@ export function DataSync() {
             ) : (
               <Download className="w-5 h-5" />
             )}
-            {exporting ? 'Generating CSV...' : 'Download CSV Export'}
+            {exporting ? 'Generating Excel...' : 'Download Excel Export'}
           </button>
         </div>
 
