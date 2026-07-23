@@ -413,6 +413,31 @@ export function AdminReports() {
       </div>
     );
   };
+  const subjectOrder = [
+    "Tamil",
+    "English",
+    "Maths",
+    "Science",
+    "Social Science",
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Computer Science",
+    "Botany",
+    "Zoology"
+  ];
+
+  const sortSubjects = (subjectsArray) => {
+    return [...subjectsArray].sort((a, b) => {
+      let indexA = subjectOrder.indexOf(a);
+      let indexB = subjectOrder.indexOf(b);
+      if (indexA === -1) indexA = 999;
+      if (indexB === -1) indexB = 999;
+      if (indexA !== indexB) return indexA - indexB;
+      return a.localeCompare(b);
+    });
+  };
+
   const handleDownloadHomeworkExcel = (matrix, classes) => {
     const group1 = classes.filter(c => ['6','7','8','9','10'].includes(String(c.standard)));
     const group2 = classes.filter(c => ['11','12'].includes(String(c.standard)));
@@ -422,7 +447,9 @@ export function AdminReports() {
     
     const addGroupToAoA = (groupClasses) => {
       if (groupClasses.length === 0) return;
-      const groupSubjects = Array.from(new Set(groupClasses.flatMap(c => c.subjects || []))).sort();
+      
+      const uniqueSubjects = Array.from(new Set(groupClasses.flatMap(c => c.subjects || [])));
+      const groupSubjects = sortSubjects(uniqueSubjects);
       
       const headerRow = ['Class & Section', ...groupSubjects];
       aoa.push(headerRow);
@@ -472,7 +499,9 @@ export function AdminReports() {
 
     const renderHomeworkMatrix = (title, classesGroup) => {
       if (classesGroup.length === 0) return null;
-      const subjects = Array.from(new Set(classesGroup.flatMap(c => c.subjects || []))).sort();
+      
+      const uniqueSubjects = Array.from(new Set(classesGroup.flatMap(c => c.subjects || [])));
+      const subjects = sortSubjects(uniqueSubjects);
       
       return (
         <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-xl mb-6 last:mb-0">
