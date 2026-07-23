@@ -414,13 +414,13 @@ export function AdminReports() {
     );
   };
   const handleDownloadHomeworkExcel = (matrix, classes, subjects) => {
-    const excelData = subjects.map(sub => {
-      const row = { 'Subject': sub };
-      classes.forEach(c => {
+    const excelData = classes.map(c => {
+      const row = { 'Class & Section': `${c.standard} - ${c.section}` };
+      subjects.forEach(sub => {
         if (!c.subjects?.includes(sub)) {
-          row[`${c.standard} - ${c.section}`] = 'N/A';
+          row[sub] = 'N/A';
         } else {
-          row[`${c.standard} - ${c.section}`] = matrix[`${c.standard}-${c.section}`]?.[sub] ? 'Added' : 'Not Added';
+          row[sub] = matrix[`${c.standard}-${c.section}`]?.[sub] ? 'Added' : 'Not Added';
         }
       });
       return row;
@@ -466,38 +466,40 @@ export function AdminReports() {
             <table className="w-full text-center border-collapse">
               <thead>
                 <tr className="bg-white/[0.02] border-b border-white/5 text-[11px] uppercase tracking-wider text-white/50 font-bold">
-                  <th className="p-4 text-left border-r border-white/5 bg-white/5 whitespace-nowrap sticky left-0 z-10">Subject</th>
-                  {classesGroup.map(c => (
-                    <th key={`${c.standard}-${c.section}`} className="p-4 bg-white/[0.01]">
-                      {c.standard} - {c.section}
+                  <th className="p-4 text-left border-r border-white/5 bg-white/5 whitespace-nowrap sticky left-0 z-10">Class & Section</th>
+                  {subjects.map(sub => (
+                    <th key={sub} className="p-4 bg-white/[0.01]">
+                      {sub}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-sm">
-                {subjects.map(sub => (
-                  <tr key={sub} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="p-4 text-left font-bold text-[#EBD8BE] border-r border-white/5 bg-[#0B132B] whitespace-nowrap sticky left-0 z-10">{sub}</td>
-                    {classesGroup.map(c => {
-                       const key = `${c.standard}-${c.section}`;
-                       if (!c.subjects?.includes(sub)) {
-                          return <td key={key} className="p-4 bg-white/[0.02]"></td>;
-                       }
-                       const hasHw = hwMap[key]?.[sub];
-                       return (
-                          <td key={key} className="p-4">
-                            <div className="flex justify-center">
-                              {hasHw ? (
-                                <CheckCircle className="w-5 h-5 text-green-500" />
-                              ) : (
-                                <XCircle className="w-5 h-5 text-red-500/80" />
-                              )}
-                            </div>
-                          </td>
-                       );
-                    })}
-                  </tr>
-                ))}
+                {classesGroup.map(c => {
+                  const key = `${c.standard}-${c.section}`;
+                  return (
+                    <tr key={key} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="p-4 text-left font-bold text-[#EBD8BE] border-r border-white/5 bg-[#0B132B] whitespace-nowrap sticky left-0 z-10">{c.standard} - {c.section}</td>
+                      {subjects.map(sub => {
+                         if (!c.subjects?.includes(sub)) {
+                            return <td key={sub} className="p-4 bg-white/[0.02]"></td>;
+                         }
+                         const hasHw = hwMap[key]?.[sub];
+                         return (
+                            <td key={sub} className="p-4">
+                              <div className="flex justify-center">
+                                {hasHw ? (
+                                  <CheckCircle className="w-5 h-5 text-green-500" />
+                                ) : (
+                                  <XCircle className="w-5 h-5 text-red-500/80" />
+                                )}
+                              </div>
+                            </td>
+                         );
+                      })}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
