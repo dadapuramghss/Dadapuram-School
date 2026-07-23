@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { FileText, Download, X, Eye, Grid } from 'lucide-react';
+import { FileText, Download, X, Eye, Grid, BookOpen, CheckCircle, XCircle, GraduationCap } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export function AdminReports() {
   const [allStudents, setAllStudents] = useState([]);
+  const [homeworkData, setHomeworkData] = useState([]);
+  const [classConfigsData, setClassConfigsData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('student');
   const [selectedStudentDetails, setSelectedStudentDetails] = useState(null);
   
   // Matrix specific state
@@ -50,17 +53,23 @@ export function AdminReports() {
   };
 
   useEffect(() => {
-    const fetchStudents = async () => {
+    const fetchData = async () => {
       try {
-        const response = await api.getStudents('All', 'All');
-        setAllStudents(response.data || []);
+        const [studentsRes, homeworkRes, classConfigsRes] = await Promise.all([
+          api.getStudents('All', 'All'),
+          api.getHomeworkByClass('All', 'All'),
+          api.getClassConfigs()
+        ]);
+        setAllStudents(studentsRes.data || []);
+        setHomeworkData(homeworkRes.data || []);
+        setClassConfigsData(classConfigsRes.data || []);
       } catch (err) {
-        console.error('Error fetching students:', err);
+        console.error('Error fetching reports data:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchStudents();
+    fetchData();
   }, []);
 
   const formatDate = (dateStr) => {
@@ -404,6 +413,266 @@ export function AdminReports() {
       </div>
     );
   };
+  const handleDownloadHomeworkExcel = (matrix, classes, subjects) => {
+    const excelData = classes.map(c => {
+      const row = { 'Class & Section': `${c.standard} - ${c.section}` };
+      subjects.forEach(sub => {
+        if (!c.subjects?.includes(sub)) {
+          row[sub] = 'N/A';
+        } else {
+          row[sub] = matrix[`${c.standard}-${c.section}`]?.[sub] ? 'Added' : 'Not Added';
+        }
+      });
+      return row;
+    });
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Homework Report");
+    XLSX.writeFile(workbook, `Homework_Report.xlsx`);
+  };
+
+  const renderHomeworkReport = () => {
+    if (loading) return <div className="text-white/40 text-center py-10 font-medium">Loading report data...</div>;
+    
+    // Sort classes
+    const sortedClasses = [...classConfigsData].sort((a, b) => {
+      const numA = parseInt(a.standard);
+      const numB = parseInt(b.standard);
+      if (!isNaN(numA) && !isNaN(numB) && numA !== numB) return numA - numB;
+      return a.standard.localeCompare(b.standard) || a.section.localeCompare(b.section);
+    });
+
+    // Unique subjects
+    const allSubjects = Array.from(new Set(classConfigsData.flatMap(c => c.subjects || []))).sort();
+
+    // Map homework
+    const hwMap = {};
+    homeworkData.forEach(hw => {
+      const key = `${hw.standard}-${hw.section}`;
+      if (!hwMap[key]) hwMap[key] = {};
+      hwMap[key][hw.subject] = true;
+    });
+
+    return (
+      <div className="mt-6 animate-in slide-in-from-top-4 duration-300">
+        <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-xl">
+          <div className="p-4 md:p-5 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.02]">
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
+                Active Homework Status
+              </h3>
+            </div>
+            <button 
+              onClick={() => handleDownloadHomeworkExcel(hwMap, sortedClasses, allSubjects)}
+              className="flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Download Excel
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-center border-collapse">
+              <thead>
+                <tr className="bg-white/[0.02] border-b border-white/5 text-[11px] uppercase tracking-wider text-white/50 font-bold">
+                  <th className="p-4 text-left border-r border-white/5 bg-white/5 whitespace-nowrap sticky left-0 z-10">Class & Section</th>
+                  {allSubjects.map(sub => (
+                    <th key={sub} className="p-4 bg-white/[0.01]">{sub}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5 text-sm">
+                {sortedClasses.map(c => {
+                  const key = `${c.standard}-${c.section}`;
+                  return (
+                    <tr key={key} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="p-4 text-left font-bold text-[#EBD8BE] border-r border-white/5 bg-[#0B132B] whitespace-nowrap sticky left-0 z-10">{c.standard} - {c.section}</td>
+                      {allSubjects.map(sub => {
+                        if (!c.subjects?.includes(sub)) {
+                          return <td key={sub} className="p-4 bg-white/[0.02]"></td>;
+                        }
+                        const hasHw = hwMap[key]?.[sub];
+                        return (
+                          <td key={sub} className="p-4">
+                            <div className="flex justify-center">
+                              {hasHw ? (
+                                <CheckCircle className="w-5 h-5 text-green-500" />
+                              ) : (
+                                <XCircle className="w-5 h-5 text-red-500/80" />
+                              )}
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+                {sortedClasses.length === 0 && (
+                  <tr>
+                    <td colSpan={1 + allSubjects.length} className="p-8 text-white/40 font-medium">No class configurations found</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const EXAMS = ['Quarterly', 'Half-Yearly', 'Annual'];
+  
+  const handleDownloadGradeBookExcel = (abstractData, standards) => {
+    const excelData = [];
+    standards.forEach(std => {
+      const row = { 'Class': std };
+      EXAMS.forEach(exam => {
+        const stats = abstractData[std]?.[exam];
+        if (stats) {
+          row[`${exam} - Total`] = stats.total;
+          row[`${exam} - Pass`] = stats.pass;
+          row[`${exam} - Fail`] = stats.fail;
+          row[`${exam} - Pass %`] = `${stats.passPercent}%`;
+        } else {
+          row[`${exam} - Total`] = '-';
+        }
+      });
+      excelData.push(row);
+    });
+    
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Grade Book Report");
+    XLSX.writeFile(workbook, `Grade_Book_Report.xlsx`);
+  };
+
+  const renderGradeBookReport = () => {
+    if (loading) return <div className="text-white/40 text-center py-10 font-medium">Loading report data...</div>;
+
+    const abstractData = {};
+    const stdSet = new Set();
+    
+    allStudents.forEach(student => {
+      const std = student.standard;
+      if (!std) return;
+      stdSet.add(std);
+      
+      if (!abstractData[std]) abstractData[std] = {};
+      
+      if (student.terms && Array.isArray(student.terms)) {
+        student.terms.forEach(term => {
+          if (!term.termName || !term.marks || term.marks.length === 0) return;
+          
+          if (!abstractData[std][term.termName]) {
+            abstractData[std][term.termName] = { total: 0, pass: 0, fail: 0 };
+          }
+          
+          abstractData[std][term.termName].total += 1;
+          
+          const passedAll = term.marks.every(m => m.score >= 35);
+          if (passedAll) {
+            abstractData[std][term.termName].pass += 1;
+          } else {
+            abstractData[std][term.termName].fail += 1;
+          }
+        });
+      }
+    });
+
+    const standards = Array.from(stdSet).sort((a, b) => {
+      const numA = parseInt(a);
+      const numB = parseInt(b);
+      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      return a.localeCompare(b);
+    });
+    
+    // Calculate percentages
+    standards.forEach(std => {
+      EXAMS.forEach(exam => {
+        if (abstractData[std]?.[exam]) {
+          const stats = abstractData[std][exam];
+          stats.passPercent = stats.total > 0 ? Math.round((stats.pass / stats.total) * 100) : 0;
+        }
+      });
+    });
+
+    return (
+      <div className="mt-6 animate-in slide-in-from-top-4 duration-300">
+        <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-xl">
+          <div className="p-4 md:p-5 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.02]">
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#EBD8BE]"></span>
+                Class-wise Pass/Fail Abstract
+              </h3>
+            </div>
+            <button 
+              onClick={() => handleDownloadGradeBookExcel(abstractData, standards)}
+              className="flex items-center justify-center gap-2 bg-[#EBD8BE]/10 hover:bg-[#EBD8BE]/20 text-[#EBD8BE] border border-[#EBD8BE]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Download Excel
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-center border-collapse">
+              <thead>
+                <tr className="bg-white/[0.02] border-b border-white/5 text-[11px] uppercase tracking-wider text-white/50 font-bold">
+                  <th className="p-4 text-left border-r border-white/5 bg-white/5 whitespace-nowrap sticky left-0 z-10" rowSpan="2">Class</th>
+                  {EXAMS.map(exam => (
+                    <th key={exam} className="p-3 border-b border-r border-white/5 bg-white/[0.01]" colSpan="4">{exam}</th>
+                  ))}
+                </tr>
+                <tr className="bg-white/[0.01] border-b border-white/5 text-[10px] uppercase tracking-wider text-white/40 font-bold">
+                  {EXAMS.map(exam => (
+                    <React.Fragment key={`${exam}-headers`}>
+                      <th className="p-3 border-r border-white/5">Total</th>
+                      <th className="p-3 border-r border-white/5 text-green-400">Pass</th>
+                      <th className="p-3 border-r border-white/5 text-red-400">Fail</th>
+                      <th className="p-3 border-r border-white/5 text-[#EBD8BE]">Pass %</th>
+                    </React.Fragment>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5 text-sm">
+                {standards.map(std => (
+                  <tr key={std} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="p-4 text-left font-bold text-[#EBD8BE] border-r border-white/5 bg-[#0B132B] whitespace-nowrap sticky left-0 z-10">{std}</td>
+                    {EXAMS.map(exam => {
+                      const stats = abstractData[std]?.[exam];
+                      if (!stats) {
+                        return (
+                          <React.Fragment key={`${std}-${exam}`}>
+                            <td className="p-3 border-r border-white/5 text-white/20">-</td>
+                            <td className="p-3 border-r border-white/5 text-white/20">-</td>
+                            <td className="p-3 border-r border-white/5 text-white/20">-</td>
+                            <td className="p-3 border-r border-white/5 text-white/20">-</td>
+                          </React.Fragment>
+                        );
+                      }
+                      return (
+                        <React.Fragment key={`${std}-${exam}`}>
+                          <td className="p-3 border-r border-white/5 font-semibold text-white/80">{stats.total}</td>
+                          <td className="p-3 border-r border-white/5 font-bold text-green-400">{stats.pass}</td>
+                          <td className="p-3 border-r border-white/5 font-bold text-red-400">{stats.fail}</td>
+                          <td className="p-3 border-r border-white/5 font-bold text-[#EBD8BE]">{stats.passPercent}%</td>
+                        </React.Fragment>
+                      );
+                    })}
+                  </tr>
+                ))}
+                {standards.length === 0 && (
+                  <tr>
+                    <td colSpan={1 + EXAMS.length * 4} className="p-8 text-white/40 font-medium">No grade book data available</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6 pb-10">
@@ -419,9 +688,41 @@ export function AdminReports() {
           <p className="text-white/60 mt-2 font-medium">View and analyze school-wide student data demographics.</p>
         </div>
       </div>
+      {/* Tabs */}
+      <div className="flex overflow-x-auto bg-[#131E3A]/50 border border-white/5 rounded-2xl p-2 gap-2 hide-scrollbar">
+        <button
+          onClick={() => setActiveTab('student')}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${
+            activeTab === 'student' ? 'bg-[#F9CB84] text-[#0B132B] shadow-md' : 'text-white/60 hover:bg-white/5 hover:text-white'
+          }`}
+        >
+          <Grid className="w-5 h-5" />
+          Student Report
+        </button>
+        <button
+          onClick={() => setActiveTab('homework')}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${
+            activeTab === 'homework' ? 'bg-[#62D4CA] text-[#0B132B] shadow-md' : 'text-white/60 hover:bg-white/5 hover:text-white'
+          }`}
+        >
+          <BookOpen className="w-5 h-5" />
+          Student Homework Report
+        </button>
+        <button
+          onClick={() => setActiveTab('gradebook')}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${
+            activeTab === 'gradebook' ? 'bg-[#EBD8BE] text-[#0B132B] shadow-md' : 'text-white/60 hover:bg-white/5 hover:text-white'
+          }`}
+        >
+          <GraduationCap className="w-5 h-5" />
+          Student Grade Book Report
+        </button>
+      </div>
 
-      {/* Custom Matrix Report Builder */}
-      <div className="bg-[#131E3A]/50 border border-white/5 shadow-xl rounded-3xl p-6 md:p-8 backdrop-blur-sm">
+      {activeTab === 'student' && (
+        <>
+          {/* Custom Matrix Report Builder */}
+          <div className="bg-[#131E3A]/50 border border-white/5 shadow-xl rounded-3xl p-6 md:p-8 backdrop-blur-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-[#F9CB84]/15 rounded-xl border border-[#F9CB84]/20">
@@ -612,6 +913,9 @@ export function AdminReports() {
           </div>
         </div>
       )}
+
+      {activeTab === 'homework' && renderHomeworkReport()}
+      {activeTab === 'gradebook' && renderGradeBookReport()}
     </div>
   );
 }
