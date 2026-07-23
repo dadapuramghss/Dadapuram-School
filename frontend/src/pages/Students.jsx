@@ -33,6 +33,7 @@ export function Students() {
   
   const [studentsList, setStudentsList] = useState([]);
   const [listLoading, setListLoading] = useState(false);
+  const [selectedStudents, setSelectedStudents] = useState([]);
   
   // UI State
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -77,6 +78,7 @@ export function Students() {
     try {
       const response = await api.getStudents(listStandard, listSection);
       setStudentsList(response.data || []);
+      setSelectedStudents([]);
     } catch (err) {
       console.error('Error fetching student list:', err);
     } finally {
@@ -183,9 +185,40 @@ export function Students() {
     try {
       await api.deleteStudent(id);
       fetchStudents();
+      setSelectedStudents(prev => prev.filter(sId => sId !== id));
     } catch (err) {
       console.error("Error deleting student:", err);
       alert("Failed to delete student.");
+    }
+  };
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedStudents(studentsList.map(s => s._id));
+    } else {
+      setSelectedStudents([]);
+    }
+  };
+
+  const handleSelectStudent = (id) => {
+    setSelectedStudents(prev => 
+      prev.includes(id) ? prev.filter(sId => sId !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete ${selectedStudents.length} students?`)) return;
+    setListLoading(true);
+    try {
+      for (const id of selectedStudents) {
+        await api.deleteStudent(id);
+      }
+      setSelectedStudents([]);
+      fetchStudents();
+    } catch (err) {
+      console.error("Error bulk deleting students:", err);
+      alert("Failed to delete some students.");
+      setListLoading(false);
     }
   };
 
@@ -234,12 +267,23 @@ export function Students() {
           <h2 className="text-xl font-bold text-[#2E1C40] dark:text-white">
             {listStandard === 'All' ? 'All Students' : `Students in ${listStandard}${listSection !== 'All' ? '-' + listSection : ''}`}
           </h2>
-          {hasFullAccess && (
-            <NeonButton onClick={openAddForm} className="py-2 px-4 flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Add Student
-            </NeonButton>
-          )}
+          <div className="flex items-center gap-3">
+            {hasFullAccess && selectedStudents.length > 0 && (
+              <button 
+                onClick={handleBulkDelete}
+                className="py-2 px-4 flex items-center gap-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/30 transition-colors text-sm font-medium"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete ({selectedStudents.length})
+              </button>
+            )}
+            {hasFullAccess && (
+              <NeonButton onClick={openAddForm} className="py-2 px-4 flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Add Student
+              </NeonButton>
+            )}
+          </div>
         </div>
 
         {listLoading ? (
@@ -251,7 +295,17 @@ export function Students() {
             <table className="w-full text-left text-sm whitespace-nowrap">
               <thead className="bg-[#F2FCFA] dark:bg-[#0B132B] sticky top-0 backdrop-blur-md">
                 <tr className="border-b border-[#E5D9C4] dark:border-[#4C677C]/30 text-[#2E1C40] dark:text-[#E5D9C4] uppercase text-xs tracking-wider">
-                  <th className="p-3 rounded-tl-lg font-medium">Roll No</th>
+                  {hasFullAccess && (
+                    <th className="p-3 rounded-tl-lg w-12 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedStudents.length === studentsList.length && studentsList.length > 0}
+                        onChange={handleSelectAll}
+                        className="rounded border-[#E5D9C4] text-[#62D4CA] focus:ring-[#62D4CA] cursor-pointer"
+                      />
+                    </th>
+                  )}
+                  <th className={`p-3 font-medium ${!hasFullAccess ? 'rounded-tl-lg' : ''}`}>EMIS No</th>
                   <th className="p-3 font-medium">Name</th>
                   <th className="p-3 font-medium">Medium</th>
                   {hasFullAccess && <th className="p-3 rounded-tr-lg font-medium text-right">Actions</th>}
@@ -259,7 +313,17 @@ export function Students() {
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                 {studentsList.map((s) => (
-                  <tr key={s._id} className="hover:bg-[#F2FCFA] dark:hover:bg-[#2E1C40]/20 transition-colors">
+                  <tr key={s._id} className={`hover:bg-[#F2FCFA] dark:hover:bg-[#2E1C40]/20 transition-colors ${selectedStudents.includes(s._id) ? 'bg-[#F2FCFA] dark:bg-[#2E1C40]/30' : ''}`}>
+                    {hasFullAccess && (
+                      <td className="p-3 text-center">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedStudents.includes(s._id)}
+                          onChange={() => handleSelectStudent(s._id)}
+                          className="rounded border-[#E5D9C4] text-[#62D4CA] focus:ring-[#62D4CA] cursor-pointer"
+                        />
+                      </td>
+                    )}
                     <td className="p-3 text-[#4C677C] dark:text-gray-300">{s.emisNumber}</td>
                     <td className="p-3 font-medium text-[#2E1C40] dark:text-white">{s.name}</td>
                     <td className="p-3 text-[#4C677C] dark:text-gray-300">{s.medium}</td>
