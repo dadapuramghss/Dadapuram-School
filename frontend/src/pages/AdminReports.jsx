@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { PieChart, FileText, Download, X, Eye } from 'lucide-react';
+import { PieChart, FileText, Download, X, Eye, Grid } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export function AdminReports() {
@@ -9,6 +9,23 @@ export function AdminReports() {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedStudentDetails, setSelectedStudentDetails] = useState(null);
+
+  const [matrixRow, setMatrixRow] = useState('standard');
+  const [matrixCol, setMatrixCol] = useState('gender');
+  
+  const matrixDimensions = [
+    { id: 'standard', label: 'Class' },
+    { id: 'section', label: 'Section' },
+    { id: 'gender', label: 'Gender' },
+    { id: 'community', label: 'Community' },
+    { id: 'religion', label: 'Religion' },
+    { id: 'medium', label: 'Medium' }
+  ];
+
+  const getDimensionValue = (student, dimId) => {
+    const val = student[dimId];
+    return val ? String(val).toUpperCase() : 'UNKNOWN';
+  };
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -24,9 +41,13 @@ export function AdminReports() {
     fetchStudents();
   }, []);
 
-  // Reset selected group when filter changes
+  // Reset or auto-select group when filter changes
   useEffect(() => {
-    setSelectedGroup(null);
+    if (demographicFilter === 'all') {
+      setSelectedGroup('ALL STUDENTS');
+    } else {
+      setSelectedGroup(null);
+    }
   }, [demographicFilter]);
 
   const getGroupKey = (student, filter) => {
@@ -76,6 +97,120 @@ export function AdminReports() {
 
   const handleDownloadSingleStudent = (student) => {
     handleDownloadExcel(student.name, [student]);
+  };
+
+  const handleDownloadMatrixExcel = (matrixData, rowValues, colValues, rowLabel, colLabel) => {
+    const excelData = [];
+    rowValues.forEach(rowVal => {
+      const rowData = { [rowLabel]: rowVal };
+      colValues.forEach(colVal => {
+        rowData[colVal] = matrixData[rowVal]?.[colVal] || 0;
+      });
+      rowData['Total'] = matrixData[rowVal]?.total || 0;
+      excelData.push(rowData);
+    });
+    const totalRow = { [rowLabel]: 'GRAND TOTAL' };
+    colValues.forEach(colVal => {
+      totalRow[colVal] = matrixData.colTotals?.[colVal] || 0;
+    });
+    totalRow['Total'] = matrixData.grandTotal || 0;
+    excelData.push(totalRow);
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Matrix Report");
+    XLSX.writeFile(workbook, `Matrix_Report_${rowLabel}_vs_${colLabel}.xlsx`);
+  };
+
+  const renderMatrixReport = () => {
+    if (loading) return <div className="text-white/40 text-center py-10 font-medium">Loading report data...</div>;
+    if (!allStudents.length) return <div className="text-white/40 text-center py-10 font-medium">No student data available for reports.</div>;
+
+    const matrixData = { colTotals: {}, grandTotal: 0 };
+    const rowSet = new Set();
+    const colSet = new Set();
+
+    allStudents.forEach(student => {
+      const rVal = getDimensionValue(student, matrixRow);
+      const cVal = getDimensionValue(student, matrixCol);
+      rowSet.add(rVal);
+      colSet.add(cVal);
+
+      if (!matrixData[rVal]) matrixData[rVal] = { total: 0 };
+      matrixData[rVal][cVal] = (matrixData[rVal][cVal] || 0) + 1;
+      matrixData[rVal].total += 1;
+      
+      matrixData.colTotals[cVal] = (matrixData.colTotals[cVal] || 0) + 1;
+      matrixData.grandTotal += 1;
+    });
+
+    const customSort = (a, b) => {
+      if (a === 'UNKNOWN') return 1;
+      if (b === 'UNKNOWN') return -1;
+      const numA = parseInt(a);
+      const numB = parseInt(b);
+      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      return a.localeCompare(b);
+    };
+
+    const rowValues = Array.from(rowSet).sort(customSort);
+    const colValues = Array.from(colSet).sort(customSort);
+
+    const rowLabel = matrixDimensions.find(d => d.id === matrixRow)?.label || 'Row';
+    const colLabel = matrixDimensions.find(d => d.id === matrixCol)?.label || 'Column';
+
+    return (
+      <div className="mt-6 animate-in slide-in-from-top-4 duration-300">
+        <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-xl">
+          <div className="p-4 md:p-5 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.02]">
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#F9CB84]"></span>
+                {rowLabel} vs {colLabel} Breakdown
+              </h3>
+            </div>
+            <button 
+              onClick={() => handleDownloadMatrixExcel(matrixData, rowValues, colValues, rowLabel, colLabel)}
+              className="flex items-center justify-center gap-2 bg-[#F9CB84]/10 hover:bg-[#F9CB84]/20 text-[#F9CB84] border border-[#F9CB84]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Download Excel
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-center border-collapse">
+              <thead>
+                <tr className="bg-white/[0.02] border-b border-white/5 text-[11px] uppercase tracking-wider text-white/50 font-bold">
+                  <th className="p-4 text-left border-r border-white/5 bg-white/5">{rowLabel} \ {colLabel}</th>
+                  {colValues.map(c => (
+                    <th key={c} className="p-4 bg-white/[0.01]">{c}</th>
+                  ))}
+                  <th className="p-4 text-white/80 bg-white/5 border-l border-white/5">TOTAL</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5 text-sm">
+                {rowValues.map(r => (
+                  <tr key={r} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="p-4 text-left font-bold text-[#EBD8BE] border-r border-white/5 bg-white/[0.01]">{r}</td>
+                    {colValues.map(c => (
+                      <td key={c} className="p-4 text-white/70">{matrixData[r]?.[c] || 0}</td>
+                    ))}
+                    <td className="p-4 font-bold text-[#F9CB84] bg-white/[0.03] border-l border-white/5">{matrixData[r]?.total || 0}</td>
+                  </tr>
+                ))}
+                <tr className="bg-white/[0.03] font-bold text-white border-t-2 border-white/10">
+                  <td className="p-4 text-left border-r border-white/5 text-[#EBD8BE]">GRAND TOTAL</td>
+                  {colValues.map(c => (
+                    <td key={c} className="p-4 text-[#62D4CA]">{matrixData.colTotals[c] || 0}</td>
+                  ))}
+                  <td className="p-4 text-white bg-[#F9CB84]/15 border-l border-white/5">{matrixData.grandTotal}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const renderDemographics = () => {
@@ -249,6 +384,95 @@ export function AdminReports() {
         </div>
         
         {renderDemographics()}
+      </div>
+
+      {/* Custom Matrix Report Builder */}
+      <div className="bg-[#131E3A]/50 border border-white/5 shadow-xl rounded-3xl p-6 md:p-8 backdrop-blur-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-[#F9CB84]/15 rounded-xl border border-[#F9CB84]/20">
+              <Grid className="w-5 h-5 text-[#F9CB84]" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white tracking-tight">Custom Matrix Report</h2>
+              <p className="text-sm text-white/50 mt-1">Cross-tabulate student data by selecting dimensions.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+          {/* Row Selection */}
+          <div className="bg-[#0B132B] p-5 rounded-2xl border border-white/5 shadow-inner">
+            <h3 className="text-xs text-[#EBD8BE] uppercase font-bold tracking-widest mb-4 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#EBD8BE]"></span>
+              Select Row Dimension
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {matrixDimensions.map(dim => {
+                const isSelected = matrixRow === dim.id;
+                const isDisabled = matrixCol === dim.id;
+                return (
+                  <label key={`row-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                    isSelected ? 'bg-[#F9CB84]/20 border-[#F9CB84] text-[#F9CB84] shadow-[0_0_10px_rgba(249,203,132,0.2)]' : 
+                    isDisabled ? 'bg-white/5 border-white/5 text-white/20 cursor-not-allowed' : 
+                    'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                  }`}>
+                    <input 
+                      type="radio" 
+                      name="matrixRow" 
+                      value={dim.id} 
+                      checked={isSelected} 
+                      disabled={isDisabled}
+                      onChange={(e) => setMatrixRow(e.target.value)}
+                      className="hidden" 
+                    />
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-[#F9CB84] bg-[#F9CB84]/20' : 'border-white/30'}`}>
+                      {isSelected && <div className="w-2 h-2 rounded-sm bg-[#F9CB84]" />}
+                    </div>
+                    <span className="text-sm font-medium">{dim.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+          
+          {/* Column Selection */}
+          <div className="bg-[#0B132B] p-5 rounded-2xl border border-white/5 shadow-inner">
+            <h3 className="text-xs text-[#62D4CA] uppercase font-bold tracking-widest mb-4 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#62D4CA]"></span>
+              Select Column Dimension
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {matrixDimensions.map(dim => {
+                const isSelected = matrixCol === dim.id;
+                const isDisabled = matrixRow === dim.id;
+                return (
+                  <label key={`col-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                    isSelected ? 'bg-[#62D4CA]/20 border-[#62D4CA] text-[#62D4CA] shadow-[0_0_10px_rgba(98,212,202,0.2)]' : 
+                    isDisabled ? 'bg-white/5 border-white/5 text-white/20 cursor-not-allowed' : 
+                    'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                  }`}>
+                    <input 
+                      type="radio" 
+                      name="matrixCol" 
+                      value={dim.id} 
+                      checked={isSelected} 
+                      disabled={isDisabled}
+                      onChange={(e) => setMatrixCol(e.target.value)}
+                      className="hidden" 
+                    />
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-[#62D4CA] bg-[#62D4CA]/20' : 'border-white/30'}`}>
+                      {isSelected && <div className="w-2 h-2 rounded-sm bg-[#62D4CA]" />}
+                    </div>
+                    <span className="text-sm font-medium">{dim.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {renderMatrixReport()}
       </div>
 
       {/* Student Details Modal */}
