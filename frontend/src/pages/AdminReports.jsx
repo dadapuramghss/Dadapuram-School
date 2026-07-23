@@ -913,6 +913,8 @@ export function AdminReports() {
           </div>
         </div>
       )}
+      </>
+      )}
 
       {activeTab === 'homework' && renderHomeworkReport()}
       {activeTab === 'gradebook' && renderGradeBookReport()}
