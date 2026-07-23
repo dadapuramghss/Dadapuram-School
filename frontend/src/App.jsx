@@ -20,6 +20,7 @@ import { Register } from './pages/Register';
 import { PendingApproval } from './pages/PendingApproval';
 import { AdminUsers } from './pages/AdminUsers';
 import { AdminClasses } from './pages/AdminClasses';
+import { AdminReports } from './pages/AdminReports';
 
 import { DataSync } from './pages/DataSync';
 
@@ -86,6 +87,7 @@ function AppRoutes() {
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="classes" element={<AdminClasses />} />
+        <Route path="reports" element={<AdminReports />} />
         <Route path="profile" element={<Profile />} />
         <Route path="students" element={<Students />} />
         <Route path="gradebook" element={<Gradebook />} />

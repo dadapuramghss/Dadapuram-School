@@ -144,7 +144,7 @@ const getStudentsByClass = async (req, res) => {
       }
     }
 
-    const students = await Student.find(query).sort({ emisNumber: 1 });
+    const students = await Student.find(query).collation({ locale: 'en', strength: 2 }).sort({ name: 1 });
     res.status(200).json({ success: true, data: students });
   } catch (err) {
     console.error('Error fetching students:', err);
