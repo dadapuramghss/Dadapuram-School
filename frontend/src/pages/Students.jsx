@@ -43,21 +43,30 @@ export function Students() {
   const { classConfigs } = useClassConfig();
 
   let availableStandards = [];
-  let availableSections = [];
+  let availableListSections = [];
+  let availableFormSections = [];
 
   if (dbUser?.role === 'admin') {
     availableStandards = [...new Set(classConfigs.map(c => c.standard))].sort((a,b) => Number(a) - Number(b));
-    availableSections = classConfigs.filter(c => c.standard === formData.standard).map(c => c.section).sort();
+    
+    let listSecs = classConfigs.filter(c => listStandard === 'All' ? true : c.standard === listStandard).map(c => c.section);
+    availableListSections = [...new Set(listSecs)].sort();
+    
+    availableFormSections = classConfigs.filter(c => c.standard === formData.standard).map(c => c.section).sort();
   } else if (dbUser?.assignedClasses) {
     availableStandards = [...new Set(dbUser.assignedClasses.map(c => c.standard))].sort((a,b) => Number(a) - Number(b));
-    availableSections = dbUser.assignedClasses
+    
+    let listSecs = dbUser.assignedClasses.filter(c => listStandard === 'All' ? true : c.standard === listStandard).map(c => c.section);
+    availableListSections = [...new Set(listSecs)].sort();
+
+    availableFormSections = dbUser.assignedClasses
       .filter(c => c.standard === formData.standard)
       .map(c => c.section)
       .sort();
   }
 
   const hasFullAccess = dbUser?.role === 'admin' || (
-    dbUser?.assignedClasses?.find(c => c.standard === formData.standard && c.section === formData.section)?.accessLevel !== 'view'
+    dbUser?.assignedClasses?.some(c => c.accessLevel !== 'view')
   );
 
   useEffect(() => {
@@ -67,10 +76,16 @@ export function Students() {
   }, [availableStandards, formData.standard]);
 
   useEffect(() => {
-    if (availableSections.length > 0 && !availableSections.includes(formData.section)) {
-      setFormData(prev => ({ ...prev, section: availableSections[0] }));
+    if (availableFormSections.length > 0 && !availableFormSections.includes(formData.section)) {
+      setFormData(prev => ({ ...prev, section: availableFormSections[0] }));
     }
-  }, [availableSections, formData.section, formData.standard]);
+  }, [availableFormSections, formData.section, formData.standard]);
+
+  useEffect(() => {
+    if (listSection !== 'All' && availableListSections.length > 0 && !availableListSections.includes(listSection)) {
+      setListSection('All');
+    }
+  }, [listStandard, availableListSections, listSection]);
 
   const fetchStudents = async () => {
     if (!listStandard || !listSection) return;
@@ -254,7 +269,7 @@ export function Students() {
             className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
           >
             <option value="All">All Sections</option>
-            {availableSections.map(sec => (
+            {availableListSections.map(sec => (
               <option key={sec} value={sec}>{sec}</option>
             ))}
           </select>
@@ -397,9 +412,9 @@ export function Students() {
                       value={formData.section}
                       onChange={(e) => setFormData({...formData, section: e.target.value})}
                       className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
-                      disabled={availableSections.length === 0}
+                      disabled={availableFormSections.length === 0}
                     >
-                      {availableSections.map(sec => (
+                      {availableFormSections.map(sec => (
                         <option key={sec} value={sec}>{sec}</option>
                       ))}
                     </select>
