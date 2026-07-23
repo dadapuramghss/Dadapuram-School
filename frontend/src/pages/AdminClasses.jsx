@@ -107,7 +107,14 @@ export function AdminClasses() {
             </tr>
           </thead>
           <tbody>
-            {classConfigs.map((config) => (
+            {[...classConfigs]
+              .sort((a, b) => {
+                const stdA = parseInt(a.standard, 10);
+                const stdB = parseInt(b.standard, 10);
+                if (stdA !== stdB) return stdA - stdB;
+                return a.section.localeCompare(b.section);
+              })
+              .map((config) => (
               <tr key={config._id} className="border-b border-[#E5D9C4]/40 dark:border-[#4C677C]/30 hover:bg-[#D8FDF6]/20 dark:hover:bg-[#2E1C40]/20 transition-colors">
                 <td className="p-4 font-medium text-center text-[#2E1C40] dark:text-white">{config.standard}</td>
                 <td className="p-4 font-medium text-center text-[#2E1C40] dark:text-white">{config.section}</td>
