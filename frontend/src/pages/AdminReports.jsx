@@ -10,6 +10,14 @@ export function AdminReports() {
   const [loading, setLoading] = useState(true);
   const [selectedStudentDetails, setSelectedStudentDetails] = useState(null);
 
+  const demographicOptions = [
+    { id: 'all', label: 'All' },
+    { id: 'class', label: 'Class' },
+    { id: 'section', label: 'Section' },
+    { id: 'gender', label: 'Gender' },
+    { id: 'community', label: 'Community' }
+  ];
+
   const [matrixRow, setMatrixRow] = useState('standard');
   const [matrixCol, setMatrixCol] = useState('gender');
   
@@ -367,19 +375,32 @@ export function AdminReports() {
             </div>
           </div>
           
-          <div className="flex items-center gap-3 w-full sm:w-auto bg-[#0B132B] p-2 rounded-2xl border border-white/5">
-            <span className="text-[11px] text-white/50 uppercase font-bold tracking-widest pl-2 whitespace-nowrap">Group By:</span>
-            <select 
-              value={demographicFilter}
-              onChange={(e) => setDemographicFilter(e.target.value)}
-              className="flex-1 sm:w-48 bg-[#131E3A] border-none text-white text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-[#62D4CA]/50 font-medium transition-shadow cursor-pointer"
-            >
-              <option value="community">Community</option>
-              <option value="class">Class</option>
-              <option value="section">Section</option>
-              <option value="gender">Gender</option>
-              <option value="all">All</option>
-            </select>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto bg-[#0B132B] p-4 sm:p-3 rounded-2xl border border-white/5 shadow-inner">
+            <span className="text-xs text-[#62D4CA] uppercase font-bold tracking-widest px-1 whitespace-nowrap">Group By</span>
+            <div className="flex flex-wrap gap-2">
+              {demographicOptions.map(opt => {
+                const isSelected = demographicFilter === opt.id;
+                return (
+                  <label key={`filter-${opt.id}`} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer transition-all ${
+                    isSelected ? 'bg-[#62D4CA]/20 border-[#62D4CA] text-[#62D4CA] shadow-[0_0_10px_rgba(98,212,202,0.2)]' : 
+                    'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                  }`}>
+                    <input 
+                      type="radio" 
+                      name="demographicFilter" 
+                      value={opt.id} 
+                      checked={isSelected} 
+                      onChange={(e) => setDemographicFilter(e.target.value)}
+                      className="hidden" 
+                    />
+                    <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-[#62D4CA] bg-[#62D4CA]/20' : 'border-white/30'}`}>
+                      {isSelected && <div className="w-1.5 h-1.5 rounded-sm bg-[#62D4CA]" />}
+                    </div>
+                    <span className="text-sm font-medium">{opt.label}</span>
+                  </label>
+                );
+              })}
+            </div>
           </div>
         </div>
         
