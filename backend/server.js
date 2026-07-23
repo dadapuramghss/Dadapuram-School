@@ -14,6 +14,7 @@ const aiRoutes = require('./routes/aiRoutes');
 const studentPortalRoutes = require('./routes/studentPortalRoutes');
 const homeworkRoutes = require('./routes/homeworkRoutes');
 const circularRoutes = require('./routes/circularRoutes');
+const classConfigRoutes = require('./routes/classConfigRoutes');
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/student-portal', studentPortalRoutes);
 app.use('/api/homework', homeworkRoutes);
 app.use('/api/circulars', circularRoutes);
+app.use('/api/classes', classConfigRoutes);
 
 // Base route
 app.get('/', (req, res) => {

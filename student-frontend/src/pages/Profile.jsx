@@ -55,9 +55,9 @@ export default function Profile() {
                 <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0 text-indigo-500">
                   <MapPin className="w-5 h-5" />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-500 mb-2">Full Address</p>
-                  <p className="text-gray-900 leading-relaxed bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                  <p className="text-gray-900 leading-relaxed bg-gray-50/50 p-4 rounded-xl border border-gray-100 break-words">
                     {student.address}
                   </p>
                 </div>

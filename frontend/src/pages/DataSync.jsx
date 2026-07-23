@@ -32,7 +32,7 @@ export function DataSync() {
 
       // Map to flat structure for CSV
       const csvData = students.map(student => ({
-        'Roll Number': student.rollNumber,
+        'EMIS Number': student.emisNumber,
         'Name': student.name,
         'Standard': student.standard,
         'Section': student.section,
@@ -94,7 +94,7 @@ export function DataSync() {
             }
 
             return {
-              rollNumber: normRow['rollnumber'] || normRow['rollno'] || '',
+              emisNumber: normRow['emisnumber'] || normRow['emisno'] || '',
               name: normRow['name'] || normRow['studentname'] || '',
               standard: normRow['standard'] || normRow['class'] || '',
               section: normRow['section'] ? String(normRow['section']).toUpperCase() : '',
@@ -109,7 +109,7 @@ export function DataSync() {
               address: normRow['address'] || '',
               mobileNumber: normRow['mobilenumber'] || normRow['mobile'] || ''
             };
-          }).filter(student => student.rollNumber && student.name);
+          }).filter(student => student.emisNumber && student.name);
 
           if (studentsToImport.length === 0) {
             const firstRowStr = rows.length > 0 ? JSON.stringify(rows[0]) : '';
@@ -147,7 +147,7 @@ export function DataSync() {
 
   const downloadTemplate = () => {
     const templateData = [{
-      'Roll Number': '101',
+      'EMIS Number': '101',
       'Name': 'John Doe',
       'Standard': '10',
       'Section': 'A',
@@ -306,11 +306,11 @@ export function DataSync() {
         <ul className="space-y-3 text-gray-400">
           <li className="flex items-start gap-3">
             <div className="w-6 h-6 shrink-0 rounded-full bg-white/5 flex items-center justify-center text-sm font-bold mt-0.5">1</div>
-            <p><strong>Upsert Logic:</strong> If a student with the same Roll Number, Standard, and Section already exists, their information will be updated. If not, a new student will be created.</p>
+            <p><strong>Upsert Logic:</strong> If a student with the same EMIS Number, Standard, and Section already exists, their information will be updated. If not, a new student will be created.</p>
           </li>
           <li className="flex items-start gap-3">
             <div className="w-6 h-6 shrink-0 rounded-full bg-white/5 flex items-center justify-center text-sm font-bold mt-0.5">2</div>
-            <p><strong>Required Fields:</strong> Roll Number, Name, Standard, Section, and Medium are strictly required. Rows missing these will be skipped.</p>
+            <p><strong>Required Fields:</strong> EMIS Number, Name, Standard, Section, and Medium are strictly required. Rows missing these will be skipped.</p>
           </li>
           <li className="flex items-start gap-3">
             <div className="w-6 h-6 shrink-0 rounded-full bg-white/5 flex items-center justify-center text-sm font-bold mt-0.5">3</div>

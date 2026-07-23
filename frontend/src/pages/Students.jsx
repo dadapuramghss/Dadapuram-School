@@ -3,13 +3,14 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { useAuth } from '../context/AuthContext';
 import { NeonButton } from '../components/ui/NeonButton';
 import { api } from '../lib/api';
+import { useClassConfig } from '../context/ClassConfigContext';
 import { compressImage } from '../lib/utils';
 import { Pencil, Trash2, Plus, X } from 'lucide-react';
 
 export function Students() {
   const [formData, setFormData] = useState({
     name: '',
-    rollNumber: '',
+    emisNumber: '',
     standard: '6',
     section: 'A',
     gender: 'Other',
@@ -27,6 +28,9 @@ export function Students() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   
+  const [listStandard, setListStandard] = useState('All');
+  const [listSection, setListSection] = useState('All');
+  
   const [studentsList, setStudentsList] = useState([]);
   const [listLoading, setListLoading] = useState(false);
   
@@ -35,11 +39,15 @@ export function Students() {
   const [editingId, setEditingId] = useState(null);
   
   const { dbUser } = useAuth();
+  const { classConfigs } = useClassConfig();
 
-  let availableStandards = ['6', '7', '8', '9', '10', '11', '12'];
-  let availableSections = ['A', 'B', 'C', 'D', 'A1', 'A2', 'B1'];
+  let availableStandards = [];
+  let availableSections = [];
 
-  if (dbUser?.role !== 'admin' && dbUser?.assignedClasses?.length > 0) {
+  if (dbUser?.role === 'admin') {
+    availableStandards = [...new Set(classConfigs.map(c => c.standard))].sort((a,b) => Number(a) - Number(b));
+    availableSections = classConfigs.filter(c => c.standard === formData.standard).map(c => c.section).sort();
+  } else if (dbUser?.assignedClasses) {
     availableStandards = [...new Set(dbUser.assignedClasses.map(c => c.standard))].sort((a,b) => Number(a) - Number(b));
     availableSections = dbUser.assignedClasses
       .filter(c => c.standard === formData.standard)
@@ -64,10 +72,10 @@ export function Students() {
   }, [availableSections, formData.section, formData.standard]);
 
   const fetchStudents = async () => {
-    if (!formData.standard || !formData.section) return;
+    if (!listStandard || !listSection) return;
     setListLoading(true);
     try {
-      const response = await api.getStudents(formData.standard, formData.section);
+      const response = await api.getStudents(listStandard, listSection);
       setStudentsList(response.data || []);
     } catch (err) {
       console.error('Error fetching student list:', err);
@@ -78,7 +86,7 @@ export function Students() {
 
   useEffect(() => {
     fetchStudents();
-  }, [formData.standard, formData.section]);
+  }, [listStandard, listSection]);
 
   const handleFileChange = (e) => {
     if (e.target.files[0]) {
@@ -90,7 +98,7 @@ export function Students() {
     setEditingId(null);
     setFormData(prev => ({
       ...prev,
-      name: '', rollNumber: '', medium: 'TAMIL', gender: 'Other',
+      name: '', emisNumber: '', medium: 'TAMIL', gender: 'Other',
       tamilName: '', fatherName: '', dob: '', admissionNumber: '', religion: '', community: '', address: '', photoUrl: '', mobileNumber: ''
     }));
     setFile(null);
@@ -102,7 +110,7 @@ export function Students() {
     setEditingId(student._id);
     setFormData({
       name: student.name || '',
-      rollNumber: student.rollNumber || '',
+      emisNumber: student.emisNumber || '',
       standard: student.standard || formData.standard,
       section: student.section || formData.section,
       gender: student.gender || 'Other',
@@ -194,11 +202,11 @@ export function Students() {
         <div className="space-y-2 flex-1 min-w-[200px]">
           <label className="block text-sm font-medium text-[#4C677C] dark:text-[#E5D9C4] font-semibold ">Class / Standard</label>
           <select 
-            value={formData.standard}
-            onChange={(e) => setFormData({...formData, standard: e.target.value})}
+            value={listStandard}
+            onChange={(e) => setListStandard(e.target.value)}
             className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
-            disabled={availableStandards.length === 0}
           >
+            <option value="All">All Standards</option>
             {availableStandards.map(std => (
               <option key={std} value={std}>Standard {std}</option>
             ))}
@@ -208,11 +216,11 @@ export function Students() {
         <div className="space-y-2 flex-1 min-w-[200px]">
           <label className="block text-sm font-medium text-[#4C677C] dark:text-[#E5D9C4] font-semibold ">Section</label>
           <select 
-            value={formData.section}
-            onChange={(e) => setFormData({...formData, section: e.target.value})}
+            value={listSection}
+            onChange={(e) => setListSection(e.target.value)}
             className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
-            disabled={availableSections.length === 0}
           >
+            <option value="All">All Sections</option>
             {availableSections.map(sec => (
               <option key={sec} value={sec}>{sec}</option>
             ))}
@@ -224,7 +232,7 @@ export function Students() {
       <GlassCard className="  ">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h2 className="text-xl font-bold text-[#2E1C40] dark:text-white">
-            Students in {formData.standard}-{formData.section}
+            {listStandard === 'All' ? 'All Students' : `Students in ${listStandard}${listSection !== 'All' ? '-' + listSection : ''}`}
           </h2>
           {hasFullAccess && (
             <NeonButton onClick={openAddForm} className="py-2 px-4 flex items-center gap-2">
@@ -252,7 +260,7 @@ export function Students() {
               <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                 {studentsList.map((s) => (
                   <tr key={s._id} className="hover:bg-[#F2FCFA] dark:hover:bg-[#2E1C40]/20 transition-colors">
-                    <td className="p-3 text-[#4C677C] dark:text-gray-300">{s.rollNumber}</td>
+                    <td className="p-3 text-[#4C677C] dark:text-gray-300">{s.emisNumber}</td>
                     <td className="p-3 font-medium text-[#2E1C40] dark:text-white">{s.name}</td>
                     <td className="p-3 text-[#4C677C] dark:text-gray-300">{s.medium}</td>
                     {hasFullAccess && (
@@ -361,12 +369,12 @@ export function Students() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">Roll Number</label>
+                    <label className="block text-sm font-medium text-[#4C677C]  font-semibold ">EMIS Number</label>
                     <input 
                       type="text" 
                       required
-                      value={formData.rollNumber}
-                      onChange={(e) => setFormData({...formData, rollNumber: e.target.value})}
+                      value={formData.emisNumber}
+                      onChange={(e) => setFormData({...formData, emisNumber: e.target.value})}
                       className="glass-input w-full"
                       placeholder="e.g. 101"
                     />

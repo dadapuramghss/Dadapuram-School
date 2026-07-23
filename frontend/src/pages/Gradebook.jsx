@@ -3,8 +3,9 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { useAuth } from '../context/AuthContext';
 import { NeonButton } from '../components/ui/NeonButton';
 import { api } from '../lib/api';
+import { useClassConfig } from '../context/ClassConfigContext';
 
-const subjects = ['Tamil', 'English', 'Math', 'Science', 'Social Science'];
+
 
 export function Gradebook() {
   const [selectedClass, setSelectedClass] = useState('All');
@@ -14,14 +15,24 @@ export function Gradebook() {
   const [loadingStudents, setLoadingStudents] = useState(false);
 
   const { dbUser } = useAuth();
+  const { classConfigs } = useClassConfig();
+  
+  let currentSubjects = [];
+  if (selectedClass === 'All') {
+    currentSubjects = [...new Set(classConfigs.flatMap(c => c.subjects))];
+  } else if (selectedSection === 'All') {
+    currentSubjects = [...new Set(classConfigs.filter(c => c.standard === selectedClass).flatMap(c => c.subjects))];
+  } else {
+    currentSubjects = classConfigs.find(c => c.standard === selectedClass && c.section === selectedSection)?.subjects || [];
+  }
   
   // Compute available standards and sections based on user role
   let availableStandards = [];
   let availableSections = [];
 
   if (dbUser?.role === 'admin') {
-    availableStandards = ['6', '7', '8', '9', '10', '11', '12'];
-    availableSections = ['A', 'B', 'C', 'D', 'A1', 'A2', 'B1'];
+    availableStandards = [...new Set(classConfigs.map(c => c.standard))].sort((a,b) => Number(a) - Number(b));
+    availableSections = classConfigs.filter(c => c.standard === selectedClass).map(c => c.section).sort();
   } else if (dbUser?.assignedClasses) {
     availableStandards = [...new Set(dbUser.assignedClasses.map(c => c.standard))].sort((a,b) => Number(a) - Number(b));
     availableSections = dbUser.assignedClasses
@@ -81,7 +92,7 @@ export function Gradebook() {
     students.forEach(student => {
       let studentTotal = 0;
       
-      subjects.forEach(sub => {
+      currentSubjects.forEach(sub => {
         let score = 0;
         
         if (selectedTerm === 'All Terms') {
@@ -204,9 +215,9 @@ export function Gradebook() {
             <table className="w-full text-left border-collapse">
               <thead className="bg-[#D8FDF6]/40 dark:bg-[#0B132B] text-[#4C677C] dark:text-[#E5D9C4]">
                 <tr className="border-b border-[#E5D9C4] dark:border-[#4C677C]/30">
-                  <th className="p-4 font-bold rounded-tl-lg whitespace-nowrap">Roll No</th>
+                  <th className="p-4 font-bold rounded-tl-lg whitespace-nowrap">EMIS No</th>
                   <th className="p-4 font-bold whitespace-nowrap">Name</th>
-                  {subjects.map(sub => (
+                  {currentSubjects.map(sub => (
                     <th key={sub} className="p-4 font-bold">{sub}</th>
                   ))}
                   <th className="p-4 font-black text-[#732A26] dark:text-[#FA7848] rounded-tr-lg">Total</th>
@@ -216,11 +227,11 @@ export function Gradebook() {
                 {students.map(student => (
                   <tr key={student._id} className="border-b border-[#E5D9C4]/40 dark:border-[#4C677C]/30 hover:bg-[#D8FDF6]/20 dark:hover:bg-[#2E1C40]/20 transition-colors">
                     <td className="p-4 text-[#4C677C] dark:text-gray-300 font-medium whitespace-nowrap">
-                      {student.rollNumber}
+                      {student.emisNumber}
                       {isReportView && <span className="ml-2 bg-[#62D4CA]/20 text-[#2E1C40] dark:text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block whitespace-nowrap">Std {student.standard}-{student.section}</span>}
                     </td>
                     <td className="p-4 font-bold text-[#2E1C40] dark:text-white whitespace-nowrap">{student.name}</td>
-                    {subjects.map(sub => (
+                    {currentSubjects.map(sub => (
                       <td key={sub} className="p-4">
                         <input 
                           type="number"
@@ -235,7 +246,7 @@ export function Gradebook() {
                       </td>
                     ))}
                     <td className="p-4 font-black text-[#732A26] dark:text-[#FA7848] text-lg">
-                      {subjects.reduce((sum, sub) => sum + (Number(marks[`${student._id}-${sub}`]) || 0), 0)}
+                      {currentSubjects.reduce((sum, sub) => sum + (Number(marks[`${student._id}-${sub}`]) || 0), 0)}
                     </td>
                   </tr>
                 ))}

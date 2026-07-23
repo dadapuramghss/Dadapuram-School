@@ -16,7 +16,7 @@ export default function Login() {
     setError('');
     
     if (!identifier) {
-      setError('Please enter your mobile number or roll number');
+      setError('Please enter your mobile number or EMIS Number');
       return;
     }
 
@@ -90,7 +90,7 @@ export default function Login() {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors">{student.name}</h3>
-                      <p className="text-xs text-gray-500">Class {student.standard} - {student.section} | Roll: {student.rollNumber}</p>
+                      <p className="text-xs text-gray-500">Class {student.standard} - {student.section} | EMIS: {student.emisNumber}</p>
                     </div>
                     {loading ? <Loader2 className="w-4 h-4 text-indigo-600 animate-spin" /> : <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-600 transition-colors transform group-hover:translate-x-1" />}
                   </button>
@@ -126,7 +126,7 @@ export default function Login() {
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-2">
                   <label htmlFor="identifier" className="text-sm font-medium text-gray-700 block">
-                    Mobile Number or Roll Number
+                    Mobile Number or EMIS Number
                   </label>
                   <div className="relative">
                     <input
@@ -134,7 +134,7 @@ export default function Login() {
                       type="text"
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
-                      placeholder="Enter your registered mobile number or roll number"
+                      placeholder="Enter your registered mobile number or EMIS Number"
                       className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none placeholder:text-gray-400"
                       disabled={loading}
                     />

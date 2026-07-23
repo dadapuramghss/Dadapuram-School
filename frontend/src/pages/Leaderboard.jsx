@@ -137,7 +137,7 @@ export function Leaderboard() {
               <div className="flex-1 min-w-0">
                 <h3 className="text-xl font-bold truncate text-[#2E1C40] dark:text-white">{student.name}</h3>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[#4C677C] dark:text-gray-300 text-xs sm:text-sm mt-1">
-                  <span className="whitespace-nowrap">Roll No: {student.rollNumber}</span>
+                  <span className="whitespace-nowrap">EMIS No: {student.emisNumber}</span>
                   {(selectedClass === 'All' || selectedSection === 'All') && (
                     <span className="bg-[#D8FDF6]/40 dark:bg-[#131E3A] text-[#2E1C40] dark:text-white px-2 py-0.5 rounded-full text-xs font-bold whitespace-nowrap inline-block">
                       Std {student.standard} - {student.section}
@@ -188,7 +188,7 @@ export function Leaderboard() {
                     />
                     <div>
                       <h3 className="text-2xl font-bold text-[#2E1C40] dark:text-white">{studentDetails.name}</h3>
-                      <div className="text-[#4C677C] dark:text-gray-300 font-medium">Roll No: {studentDetails.rollNumber}</div>
+                      <div className="text-[#4C677C] dark:text-gray-300 font-medium">EMIS No: {studentDetails.emisNumber}</div>
                       <div className="text-[#4C677C] dark:text-gray-300 font-medium">Class: Std {studentDetails.standard} - {studentDetails.section}</div>
                     </div>
                   </div>

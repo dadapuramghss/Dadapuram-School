@@ -24,7 +24,7 @@ const termSchema = new mongoose.Schema({
 }, { _id: false });
 
 const studentSchema = new mongoose.Schema({
-  rollNumber: {
+  emisNumber: {
     type: String,
     required: true,
     trim: true
@@ -37,13 +37,11 @@ const studentSchema = new mongoose.Schema({
   standard: {
     type: String,
     required: true,
-    enum: ['6', '7', '8', '9', '10', '11', '12'],
     trim: true
   },
   section: {
     type: String,
     required: true,
-    enum: ['A', 'B', 'C', 'D', 'A1', 'A2', 'B1'],
     trim: true
   },
   gender: {
@@ -100,7 +98,7 @@ const studentSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Ensure unique roll number per standard and section
-studentSchema.index({ standard: 1, section: 1, rollNumber: 1 }, { unique: true });
+// Ensure unique EMIS number per standard and section
+studentSchema.index({ standard: 1, section: 1, emisNumber: 1 }, { unique: true });
 
 module.exports = mongoose.model('Student', studentSchema);

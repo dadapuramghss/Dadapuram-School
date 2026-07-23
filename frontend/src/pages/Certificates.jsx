@@ -3,7 +3,8 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { NeonButton } from '../components/ui/NeonButton';
 import { Printer, FileOutput } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import api from '../lib/api';
+import { api } from '../lib/api';
+import { useClassConfig } from '../context/ClassConfigContext';
 import { StudyCertificatePrint } from '../components/certificates/StudyCertificatePrint';
 import { RankCardPrint } from '../components/certificates/RankCardPrint';
 
@@ -23,12 +24,16 @@ export function Certificates() {
   });
 
   const { dbUser } = useAuth();
+  const { classConfigs } = useClassConfig();
   const printRef = useRef();
 
-  let availableStandards = ['6', '7', '8', '9', '10', '11', '12'];
-  let availableSections = ['A', 'B', 'C', 'D', 'A1', 'A2', 'B1'];
+  let availableStandards = [];
+  let availableSections = [];
 
-  if (dbUser?.role !== 'admin' && dbUser?.assignedClasses?.length > 0) {
+  if (dbUser?.role === 'admin') {
+    availableStandards = [...new Set(classConfigs.map(c => c.standard))].sort((a,b) => Number(a) - Number(b));
+    availableSections = classConfigs.filter(c => c.standard === filters.standard).map(c => c.section).sort();
+  } else if (dbUser?.assignedClasses) {
     availableStandards = [...new Set(dbUser.assignedClasses.map(c => c.standard))].sort((a,b) => Number(a) - Number(b));
     availableSections = dbUser.assignedClasses
       .filter(c => c.standard === filters.standard)
@@ -192,7 +197,7 @@ export function Certificates() {
                   <th className="py-3 font-bold text-[#4C677C] dark:text-[#E5D9C4] ">EMIS Number</th>
                   <td className="py-3">
                     <div className="w-full bg-[#D8FDF6]/40 border border-[#E5D9C4] dark:border-[#4C677C]/30 dark:bg-[#121212] rounded-xl px-4 py-3 text-[#2E1C40] dark:text-white font-bold">
-                      {selectedStudent ? selectedStudent.rollNumber : '-'}
+                      {selectedStudent ? selectedStudent.emisNumber : '-'}
                     </div>
                   </td>
                 </tr>

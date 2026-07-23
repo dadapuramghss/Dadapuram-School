@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, Bot, BookOpen, Database } from 'lucide-react';
+import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, Bot, BookOpen, Database, Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export function AdminLayout() {
@@ -17,6 +17,7 @@ export function AdminLayout() {
   const navItems = [
     { name: 'System Dashboard', path: '/admin', exact: true, icon: LayoutDashboard },
     { name: 'User Management', path: '/admin/users', exact: false, icon: Users },
+    { name: 'Class Config', path: '/admin/classes', exact: false, icon: Settings },
     { name: 'Students', path: '/admin/students', exact: false, icon: Backpack },
     { name: 'Gradebook', path: '/admin/gradebook', exact: false, icon: GraduationCap },
     { name: 'Homework', path: '/admin/homework', exact: false, icon: BookOpen },

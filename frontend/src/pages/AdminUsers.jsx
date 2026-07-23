@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { NeonButton } from '../components/ui/NeonButton';
-import api from '../lib/api';
+import { api } from '../lib/api';
+import { useClassConfig } from '../context/ClassConfigContext';
 
 export function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('pending');
+  const { classConfigs } = useClassConfig();
+  const availableStandards = [...new Set(classConfigs.map(c => c.standard))].sort((a,b) => Number(a) - Number(b));
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -241,10 +244,19 @@ export function AdminUsers() {
                   <label className="text-sm text-gray-400">Class/Standard</label>
                   <select 
                     value={newClass.standard}
-                    onChange={(e) => setNewClass({...newClass, standard: e.target.value})}
+                    onChange={(e) => {
+                      const newStandard = e.target.value;
+                      const validSections = classConfigs.filter(c => c.standard === newStandard).map(c => c.section).sort();
+                      setNewClass({
+                        ...newClass, 
+                        standard: newStandard,
+                        section: validSections.includes(newClass.section) ? newClass.section : (validSections[0] || '')
+                      });
+                    }}
                     className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white [&>option]:bg-gray-800"
                   >
-                    {[6,7,8,9,10,11,12].map(n => <option key={n} value={n.toString()}>Standard {n}</option>)}
+                    <option value="">Select Class</option>
+                    {availableStandards.map(n => <option key={n} value={n.toString()}>Standard {n}</option>)}
                   </select>
                 </div>
                 <div className="flex-1 space-y-1">
@@ -253,8 +265,10 @@ export function AdminUsers() {
                     value={newClass.section}
                     onChange={(e) => setNewClass({...newClass, section: e.target.value})}
                     className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white [&>option]:bg-gray-800"
+                    disabled={!newClass.standard}
                   >
-                    {['A','B','C','D','A1','A2','B1'].map(s => <option key={s} value={s}>{s}</option>)}
+                    <option value="">Select Section</option>
+                    {classConfigs.filter(c => c.standard === newClass.standard).map(c => c.section).sort().map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div className="flex-1 space-y-1">

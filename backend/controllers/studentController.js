@@ -16,21 +16,23 @@ const isAuthorizedForClass = (user, standard, section, requireFullAccess = false
 const addStudent = async (req, res) => {
   try {
     const { 
-      rollNumber, name, standard, section, gender, medium, photoUrl,
-      tamilName, fatherName, dob, admissionNumber, religion, community, address, mobileNumber
+      emisNumber, name, standard, section, gender, medium, photoUrl, 
+      tamilName, fatherName, dob, admissionNumber, religion, community, 
+      address, mobileNumber 
     } = req.body;
 
     if (!isAuthorizedForClass(req.dbUser, standard, section, true)) {
       return res.status(403).json({ error: 'Not authorized for full access to this class and section' });
     }
 
-    const existingStudent = await Student.findOne({ rollNumber, standard, section });
+    // Check if student with same emisNumber in this class exists
+    const existingStudent = await Student.findOne({ emisNumber, standard, section });
     if (existingStudent) {
-      return res.status(400).json({ error: 'Student with this roll number already exists in this class section.' });
+      return res.status(400).json({ error: 'Student with this EMIS number already exists in this class section.' });
     }
 
     const newStudent = new Student({
-      rollNumber,
+      emisNumber,
       name,
       standard,
       section,
@@ -75,15 +77,15 @@ const bulkAddStudents = async (req, res) => {
     };
 
     for (const studentData of students) {
-      const { rollNumber, name, standard, section, gender, medium } = studentData;
+      const { emisNumber, name, standard, section, gender, medium } = studentData;
       
-      if (!rollNumber || !name || !standard || !section || !medium) {
-        results.errors.push(`Row missing required fields (Roll: ${rollNumber || 'N/A'})`);
+      if (!emisNumber || !name || !standard || !section || !medium) {
+        results.errors.push(`Row missing required fields (EMIS: ${emisNumber || 'N/A'})`);
         continue;
       }
 
       try {
-        const existingStudent = await Student.findOne({ rollNumber, standard, section });
+        const existingStudent = await Student.findOne({ emisNumber, standard, section });
         
         if (existingStudent) {
           await Student.findByIdAndUpdate(existingStudent._id, studentData);
@@ -97,7 +99,7 @@ const bulkAddStudents = async (req, res) => {
           results.added++;
         }
       } catch (err) {
-        results.errors.push(`Error processing ${rollNumber}: ${err.message}`);
+        results.errors.push(`Error processing ${emisNumber}: ${err.message}`);
       }
     }
 
@@ -116,18 +118,36 @@ const getStudentsByClass = async (req, res) => {
       return res.status(400).json({ error: 'Standard and section are required parameters' });
     }
 
-    if (standard !== 'All' && section !== 'All' && !isAuthorizedForClass(req.dbUser, standard, section)) {
-      return res.status(403).json({ error: 'Not authorized for this class and section' });
-    }
-
     const query = {};
     if (standard !== 'All') query.standard = standard;
     if (section !== 'All') query.section = section;
 
-    const students = await Student.find(query).sort({ rollNumber: 1 });
+    if (req.dbUser && req.dbUser.role !== 'admin') {
+      if (!req.dbUser.assignedClasses || req.dbUser.assignedClasses.length === 0) {
+        return res.json({ success: true, data: [] });
+      }
+
+      if (standard !== 'All' && section !== 'All') {
+        if (!isAuthorizedForClass(req.dbUser, standard, section)) {
+          return res.status(403).json({ error: 'Not authorized for this class and section' });
+        }
+      } else {
+        let validClasses = req.dbUser.assignedClasses;
+        if (standard !== 'All') validClasses = validClasses.filter(c => c.standard === standard);
+        if (section !== 'All') validClasses = validClasses.filter(c => c.section === section);
+        
+        if (validClasses.length === 0) {
+           return res.json({ success: true, data: [] });
+        }
+        
+        query.$or = validClasses.map(c => ({ standard: c.standard, section: c.section }));
+      }
+    }
+
+    const students = await Student.find(query).sort({ emisNumber: 1 });
     res.status(200).json({ success: true, data: students });
-  } catch (error) {
-    console.error('Error fetching students:', error);
+  } catch (err) {
+    console.error('Error fetching students:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

@@ -101,7 +101,7 @@ export function AdminDashboard() {
                         </div>
                         <div>
                           <p className="font-bold text-white text-base tracking-tight">{student.name}</p>
-                          <p className="text-[10px] text-white/50 font-medium mt-0.5">Class: {student.standard}-{student.section} <span className="mx-1.5 opacity-50">•</span> Roll: {student.rollNumber}</p>
+                          <p className="text-[10px] text-white/50 font-medium mt-0.5">Class: {student.standard}-{student.section} <span className="mx-1.5 opacity-50">•</span> EMIS: {student.emisNumber}</p>
                         </div>
                       </div>
                       <div className="text-right">

@@ -3,10 +3,11 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { useAuth } from '../context/AuthContext';
 import { NeonButton } from '../components/ui/NeonButton';
 import { api } from '../lib/api';
+import { useClassConfig } from '../context/ClassConfigContext';
 import { compressImage } from '../lib/utils';
 import { Trash2, Plus, Calendar, BookOpen, Camera, Upload, Mic, Square, Play, Image as ImageIcon } from 'lucide-react';
 
-const subjects = ['Tamil', 'English', 'Math', 'Science', 'Social Science'];
+
 
 export function Homework() {
   const [selectedClass, setSelectedClass] = useState('All');
@@ -15,10 +16,21 @@ export function Homework() {
   const [loading, setLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
+  const { classConfigs } = useClassConfig();
+  
+  let currentSubjects = [];
+  if (selectedClass === 'All') {
+    currentSubjects = [...new Set(classConfigs.flatMap(c => c.subjects))];
+  } else if (selectedSection === 'All') {
+    currentSubjects = [...new Set(classConfigs.filter(c => c.standard === selectedClass).flatMap(c => c.subjects))];
+  } else {
+    currentSubjects = classConfigs.find(c => c.standard === selectedClass && c.section === selectedSection)?.subjects || [];
+  }
+
   const [newHomework, setNewHomework] = useState({
     title: '',
     description: '',
-    subject: subjects[0],
+    subject: 'Tamil',
     dueDate: new Date().toISOString().split('T')[0]
   });
 
@@ -39,8 +51,8 @@ export function Homework() {
   let availableSections = [];
 
   if (dbUser?.role === 'admin') {
-    availableStandards = ['6', '7', '8', '9', '10', '11', '12'];
-    availableSections = ['A', 'B', 'C', 'D', 'A1', 'A2', 'B1'];
+    availableStandards = [...new Set(classConfigs.map(c => c.standard))].sort((a,b) => Number(a) - Number(b));
+    availableSections = classConfigs.filter(c => c.standard === selectedClass).map(c => c.section).sort();
   } else if (dbUser?.assignedClasses) {
     availableStandards = [...new Set(dbUser.assignedClasses.map(c => c.standard))].sort((a,b) => Number(a) - Number(b));
     availableSections = dbUser.assignedClasses
@@ -190,7 +202,7 @@ export function Homework() {
     setNewHomework({
       title: '',
       description: '',
-      subject: subjects[0],
+      subject: 'Tamil',
       dueDate: new Date().toISOString().split('T')[0]
     });
     setFile(null);
@@ -284,7 +296,7 @@ export function Homework() {
                   onChange={e => setNewHomework({...newHomework, subject: e.target.value})}
                   className="glass-input w-full dark:text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A]"
                 >
-                  {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                  {currentSubjects.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
               <div className="md:col-span-2">

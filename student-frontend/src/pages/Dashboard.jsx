@@ -49,7 +49,7 @@ export default function Dashboard() {
                 Std {student.standard} - {student.section}
               </span>
               <span className="bg-white/20 px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm border border-white/10">
-                Roll No: {student.rollNumber}
+                EMIS No: {student.emisNumber}
               </span>
             </div>
           </div>

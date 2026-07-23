@@ -10,7 +10,7 @@ export const RankCardPrint = React.forwardRef(({ student, language = 'TAMIL' }, 
     schoolName: isEnglish ? 'GOVERNMENT HR SEC SCHOOL DADAPURAM' : 'அரசு மேல்நிலைப் பள்ளி தாதாபுரம்',
     name: isEnglish ? 'Name' : 'பெயர்',
     classSection: isEnglish ? 'Class & Section' : 'வகுப்பு மற்றும் பிரிவு',
-    rollNumber: isEnglish ? 'Roll/EMIS Number' : 'பதிவு / EMIS எண்',
+    emisNumber: isEnglish ? 'Roll/EMIS Number' : 'பதிவு / EMIS எண்',
     dob: isEnglish ? 'DOB' : 'பிறந்த தேதி',
     noMarks: isEnglish ? 'No marks available for this student.' : 'இந்த மாணவருக்கு மதிப்பெண்கள் இல்லை.',
     examSuffix: isEnglish ? 'Examination' : 'தேர்வு',
@@ -46,7 +46,7 @@ export const RankCardPrint = React.forwardRef(({ student, language = 'TAMIL' }, 
           <p><span className="font-semibold">{t.classSection}:</span> {student.standard} - {student.section}</p>
         </div>
         <div className="text-right">
-          <p><span className="font-semibold">{t.rollNumber}:</span> {student.rollNumber || student.admissionNumber || '-'}</p>
+          <p><span className="font-semibold">{t.emisNumber}:</span> {student.emisNumber || student.admissionNumber || '-'}</p>
           <p><span className="font-semibold">{t.dob}:</span> {student.dob || '-'}</p>
         </div>
       </div>

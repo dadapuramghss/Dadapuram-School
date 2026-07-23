@@ -13,18 +13,18 @@ router.post('/login', async (req, res) => {
     const loginId = identifier || mobileNumber;
 
     if (!loginId) {
-      return res.status(400).json({ message: 'Mobile number or Roll number is required' });
+      return res.status(400).json({ message: 'Mobile number or EMIS number is required' });
     }
 
     const students = await Student.find({
       $or: [
         { mobileNumber: loginId },
-        { rollNumber: loginId }
+        { emisNumber: loginId }
       ]
     });
 
     if (!students || students.length === 0) {
-      return res.status(404).json({ message: 'Student not found with this Mobile or Roll number' });
+      return res.status(404).json({ message: 'Student not found with this Mobile or EMIS number' });
     }
 
     if (students.length > 1) {
@@ -34,7 +34,7 @@ router.post('/login', async (req, res) => {
         name: s.name,
         standard: s.standard,
         section: s.section,
-        rollNumber: s.rollNumber
+        emisNumber: s.emisNumber
       }));
       return res.json({ requiresSelection: true, students: mappedStudents });
     }
@@ -74,7 +74,7 @@ router.post('/login-select', async (req, res) => {
       _id: studentId,
       $or: [
         { mobileNumber: loginId },
-        { rollNumber: loginId }
+        { emisNumber: loginId }
       ]
     });
     

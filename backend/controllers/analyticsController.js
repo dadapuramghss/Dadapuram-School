@@ -40,7 +40,7 @@ const getClassLeaderboard = async (req, res) => {
       {
         $group: {
           _id: "$_id",
-          rollNumber: { $first: "$rollNumber" },
+          emisNumber: { $first: "$emisNumber" },
           name: { $first: "$name" },
           photoUrl: { $first: "$photoUrl" },
           standard: { $first: "$standard" },
@@ -122,7 +122,7 @@ const getDashboardStats = async (req, res) => {
       {
         $group: {
           _id: "$_id",
-          rollNumber: { $first: "$rollNumber" },
+          emisNumber: { $first: "$emisNumber" },
           name: { $first: "$name" },
           standard: { $first: "$standard" },
           section: { $first: "$section" },

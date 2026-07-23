@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ClassConfigProvider } from './context/ClassConfigContext';
 import { TeacherLayout } from './components/layout/TeacherLayout';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { Login } from './pages/Login';
@@ -18,6 +19,7 @@ import { AiDashboard } from './pages/AiDashboard';
 import { Register } from './pages/Register';
 import { PendingApproval } from './pages/PendingApproval';
 import { AdminUsers } from './pages/AdminUsers';
+import { AdminClasses } from './pages/AdminClasses';
 
 import { DataSync } from './pages/DataSync';
 
@@ -83,6 +85,7 @@ function AppRoutes() {
       }>
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<AdminUsers />} />
+        <Route path="classes" element={<AdminClasses />} />
         <Route path="profile" element={<Profile />} />
         <Route path="students" element={<Students />} />
         <Route path="gradebook" element={<Gradebook />} />
@@ -100,9 +103,11 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <ClassConfigProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </ClassConfigProvider>
     </AuthProvider>
   );
 }

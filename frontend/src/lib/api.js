@@ -97,6 +97,20 @@ export const api = {
     body: JSON.stringify(data),
   }),
   getAllUsers: () => fetchWithAuth('/auth/users'),
+
+  // Class Configurations
+  getClassConfigs: () => fetchWithAuth('/classes'),
+  addClassConfig: (data) => fetchWithAuth('/classes', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+  updateClassConfig: (id, data) => fetchWithAuth(`/classes/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }),
+  deleteClassConfig: (id) => fetchWithAuth(`/classes/${id}`, {
+    method: 'DELETE'
+  }),
 };
 
 export default api;

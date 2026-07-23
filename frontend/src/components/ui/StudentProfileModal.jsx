@@ -79,8 +79,8 @@ export function StudentProfileModal({ studentId, onClose }) {
             {/* Details Grid */}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-xl">
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider font-semibold">Roll Number</p>
-                <p className="font-medium text-slate-800 dark:text-white">{student.rollNumber || 'N/A'}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider font-semibold">EMIS Number</p>
+                <p className="font-medium text-slate-800 dark:text-white">{student.emisNumber || 'N/A'}</p>
               </div>
               <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-xl">
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider font-semibold">Medium</p>
