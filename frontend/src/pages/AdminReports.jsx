@@ -1,25 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { PieChart, FileText, Download, X, Eye, Grid } from 'lucide-react';
+import { FileText, Download, X, Eye, Grid } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export function AdminReports() {
   const [allStudents, setAllStudents] = useState([]);
-  const [demographicFilter, setDemographicFilter] = useState('all');
-  const [selectedGroup, setSelectedGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedStudentDetails, setSelectedStudentDetails] = useState(null);
+  
+  // Matrix specific state
+  const [selectedMatrixGroup, setSelectedMatrixGroup] = useState(null);
+  const [selectedMatrixStudents, setSelectedMatrixStudents] = useState([]);
 
-  const demographicOptions = [
-    { id: 'all', label: 'All' },
-    { id: 'class', label: 'Class' },
-    { id: 'section', label: 'Section' },
-    { id: 'gender', label: 'Gender' },
-    { id: 'community', label: 'Community' }
-  ];
-
-  const [matrixRow, setMatrixRow] = useState('standard');
-  const [matrixCol, setMatrixCol] = useState('gender');
+  const [matrixRow, setMatrixRow] = useState(['standard']);
+  const [matrixCol, setMatrixCol] = useState(['gender']);
+  const [showGlobalPreview, setShowGlobalPreview] = useState(false);
+  
+  // Reset preview when dimensions change
+  useEffect(() => {
+    setSelectedMatrixGroup(null);
+    setSelectedMatrixStudents([]);
+    setShowGlobalPreview(false);
+  }, [matrixRow, matrixCol]);
   
   const matrixDimensions = [
     { id: 'standard', label: 'Class' },
@@ -30,9 +32,21 @@ export function AdminReports() {
     { id: 'medium', label: 'Medium' }
   ];
 
-  const getDimensionValue = (student, dimId) => {
-    const val = student[dimId];
-    return val ? String(val).toUpperCase() : 'UNKNOWN';
+  const getDimensionValue = (student, dimIds) => {
+    if (!Array.isArray(dimIds)) dimIds = [dimIds];
+    if (dimIds.length === 0) return 'ALL';
+    return dimIds.map(dimId => {
+      const val = student[dimId];
+      return val ? String(val).toUpperCase() : 'UNKNOWN';
+    }).join(' - ');
+  };
+
+  const toggleDimension = (type, id) => {
+    if (type === 'row') {
+      setMatrixRow(prev => prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]);
+    } else {
+      setMatrixCol(prev => prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]);
+    }
   };
 
   useEffect(() => {
@@ -48,24 +62,6 @@ export function AdminReports() {
     };
     fetchStudents();
   }, []);
-
-  // Reset or auto-select group when filter changes
-  useEffect(() => {
-    if (demographicFilter === 'all') {
-      setSelectedGroup('ALL STUDENTS');
-    } else {
-      setSelectedGroup(null);
-    }
-  }, [demographicFilter]);
-
-  const getGroupKey = (student, filter) => {
-    if (filter === 'community') return student.community ? student.community.toUpperCase() : 'UNKNOWN';
-    if (filter === 'class') return `Standard ${student.standard || 'Unknown'}`;
-    if (filter === 'section') return `Section ${student.section || 'Unknown'}`;
-    if (filter === 'gender') return student.gender || 'Unknown';
-    if (filter === 'all') return 'ALL STUDENTS';
-    return 'UNKNOWN';
-  };
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
@@ -134,7 +130,12 @@ export function AdminReports() {
     if (loading) return <div className="text-white/40 text-center py-10 font-medium">Loading report data...</div>;
     if (!allStudents.length) return <div className="text-white/40 text-center py-10 font-medium">No student data available for reports.</div>;
 
-    const matrixData = { colTotals: {}, grandTotal: 0 };
+    const matrixData = { 
+      grandTotal: 0, 
+      colTotals: {}, 
+      colStudents: {}, 
+      grandTotalStudents: [] 
+    };
     const rowSet = new Set();
     const colSet = new Set();
 
@@ -144,28 +145,52 @@ export function AdminReports() {
       rowSet.add(rVal);
       colSet.add(cVal);
 
-      if (!matrixData[rVal]) matrixData[rVal] = { total: 0 };
+      if (!matrixData[rVal]) {
+        matrixData[rVal] = { total: 0, students: {}, totalStudents: [] };
+      }
+      if (!matrixData[rVal].students[cVal]) {
+        matrixData[rVal].students[cVal] = [];
+      }
+      
+      // Store counts
       matrixData[rVal][cVal] = (matrixData[rVal][cVal] || 0) + 1;
       matrixData[rVal].total += 1;
-      
       matrixData.colTotals[cVal] = (matrixData.colTotals[cVal] || 0) + 1;
       matrixData.grandTotal += 1;
+      
+      // Store actual student objects for preview
+      matrixData[rVal].students[cVal].push(student);
+      matrixData[rVal].totalStudents.push(student);
+      
+      if (!matrixData.colStudents[cVal]) {
+        matrixData.colStudents[cVal] = [];
+      }
+      matrixData.colStudents[cVal].push(student);
+      matrixData.grandTotalStudents.push(student);
     });
 
     const customSort = (a, b) => {
       if (a === 'UNKNOWN') return 1;
       if (b === 'UNKNOWN') return -1;
-      const numA = parseInt(a);
-      const numB = parseInt(b);
-      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-      return a.localeCompare(b);
+      // Handle combined keys sorting by sorting each part
+      const partsA = a.split(' - ');
+      const partsB = b.split(' - ');
+      for (let i = 0; i < Math.min(partsA.length, partsB.length); i++) {
+        const pA = partsA[i];
+        const pB = partsB[i];
+        const numA = parseInt(pA);
+        const numB = parseInt(pB);
+        if (!isNaN(numA) && !isNaN(numB) && numA !== numB) return numA - numB;
+        if (pA !== pB) return pA.localeCompare(pB);
+      }
+      return partsA.length - partsB.length;
     };
 
     const rowValues = Array.from(rowSet).sort(customSort);
     const colValues = Array.from(colSet).sort(customSort);
 
-    const rowLabel = matrixDimensions.find(d => d.id === matrixRow)?.label || 'Row';
-    const colLabel = matrixDimensions.find(d => d.id === matrixCol)?.label || 'Column';
+    const rowLabel = matrixRow.map(id => matrixDimensions.find(d => d.id === id)?.label).filter(Boolean).join(' - ') || 'Row';
+    const colLabel = matrixCol.map(id => matrixDimensions.find(d => d.id === id)?.label).filter(Boolean).join(' - ') || 'Column';
 
     return (
       <div className="mt-6 animate-in slide-in-from-top-4 duration-300">
@@ -177,13 +202,6 @@ export function AdminReports() {
                 {rowLabel} vs {colLabel} Breakdown
               </h3>
             </div>
-            <button 
-              onClick={() => handleDownloadMatrixExcel(matrixData, rowValues, colValues, rowLabel, colLabel)}
-              className="flex items-center justify-center gap-2 bg-[#F9CB84]/10 hover:bg-[#F9CB84]/20 text-[#F9CB84] border border-[#F9CB84]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
-            >
-              <Download className="w-4 h-4" />
-              Download Excel
-            </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-center border-collapse">
@@ -200,94 +218,134 @@ export function AdminReports() {
                 {rowValues.map(r => (
                   <tr key={r} className="hover:bg-white/[0.02] transition-colors">
                     <td className="p-4 text-left font-bold text-[#EBD8BE] border-r border-white/5 bg-white/[0.01]">{r}</td>
-                    {colValues.map(c => (
-                      <td key={c} className="p-4 text-white/70">{matrixData[r]?.[c] || 0}</td>
-                    ))}
-                    <td className="p-4 font-bold text-[#F9CB84] bg-white/[0.03] border-l border-white/5">{matrixData[r]?.total || 0}</td>
+                    {colValues.map(c => {
+                      const count = matrixData[r]?.[c] || 0;
+                      return (
+                        <td key={c} className="p-4 text-white/70">
+                          {count > 0 ? (
+                            <button 
+                              onClick={() => {
+                                setSelectedMatrixGroup(`${r} / ${c}`);
+                                setSelectedMatrixStudents(matrixData[r].students[c]);
+                              }}
+                              className="hover:text-[#62D4CA] underline decoration-dashed underline-offset-4 transition-colors"
+                            >
+                              {count}
+                            </button>
+                          ) : (
+                            0
+                          )}
+                        </td>
+                      );
+                    })}
+                    <td className="p-4 font-bold text-[#F9CB84] bg-white/[0.03] border-l border-white/5">
+                      {matrixData[r]?.total > 0 ? (
+                        <button 
+                          onClick={() => {
+                            setSelectedMatrixGroup(`${r} (Total)`);
+                            setSelectedMatrixStudents(matrixData[r].totalStudents);
+                          }}
+                          className="hover:text-white underline decoration-dashed underline-offset-4 transition-colors"
+                        >
+                          {matrixData[r].total}
+                        </button>
+                      ) : (
+                        0
+                      )}
+                    </td>
                   </tr>
                 ))}
                 <tr className="bg-white/[0.03] font-bold text-white border-t-2 border-white/10">
                   <td className="p-4 text-left border-r border-white/5 text-[#EBD8BE]">GRAND TOTAL</td>
-                  {colValues.map(c => (
-                    <td key={c} className="p-4 text-[#62D4CA]">{matrixData.colTotals[c] || 0}</td>
-                  ))}
-                  <td className="p-4 text-white bg-[#F9CB84]/15 border-l border-white/5">{matrixData.grandTotal}</td>
+                  {colValues.map(c => {
+                    const count = matrixData.colTotals[c] || 0;
+                    return (
+                      <td key={c} className="p-4 text-[#62D4CA]">
+                        {count > 0 ? (
+                          <button 
+                            onClick={() => {
+                              setSelectedMatrixGroup(`${c} (Total)`);
+                              setSelectedMatrixStudents(matrixData.colStudents[c]);
+                            }}
+                            className="hover:text-white underline decoration-dashed underline-offset-4 transition-colors"
+                          >
+                            {count}
+                          </button>
+                        ) : (
+                          0
+                        )}
+                      </td>
+                    );
+                  })}
+                  <td className="p-4 text-white bg-[#F9CB84]/15 border-l border-white/5">
+                    {matrixData.grandTotal > 0 ? (
+                      <button 
+                        onClick={() => {
+                          setSelectedMatrixGroup(`Grand Total`);
+                          setSelectedMatrixStudents(matrixData.grandTotalStudents);
+                        }}
+                        className="hover:text-white underline decoration-dashed underline-offset-4 transition-colors"
+                      >
+                        {matrixData.grandTotal}
+                      </button>
+                    ) : (
+                      0
+                    )}
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderDemographics = () => {
-    if (loading) return <div className="text-white/40 text-center py-10 font-medium">Loading report data...</div>;
-    if (!allStudents.length) return <div className="text-white/40 text-center py-10 font-medium">No student data available for reports.</div>;
-    
-    const grouped = allStudents.reduce((acc, curr) => {
-      const key = getGroupKey(curr, demographicFilter);
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(curr);
-      return acc;
-    }, {});
-
-    // Sort entries alphabetically by key
-    const sortedEntries = Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b));
-
-    const selectedStudents = selectedGroup ? grouped[selectedGroup] || [] : [];
-
-    return (
-      <>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-6">
-          {sortedEntries.map(([key, studentsInGroup]) => {
-            const isSelected = selectedGroup === key;
-            return (
-              <div 
-                key={key} 
-                onClick={() => setSelectedGroup(isSelected ? null : key)}
-                className={`border rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 ${
-                  isSelected 
-                    ? 'bg-[#62D4CA]/20 border-[#62D4CA] shadow-[0_0_15px_rgba(98,212,202,0.2)]' 
-                    : 'bg-white/[0.03] border-white/5 hover:bg-white/[0.06] hover:-translate-y-1 hover:shadow-lg'
-                }`}
-              >
-                <span className={`text-xs font-bold uppercase tracking-widest mb-3 text-center ${isSelected ? 'text-[#62D4CA]' : 'text-[#EBD8BE]/70'}`}>
-                  {key}
-                </span>
-                <span className={`text-4xl font-black drop-shadow-sm ${isSelected ? 'text-white' : 'text-white'}`}>
-                  {studentsInGroup.length}
-                </span>
-              </div>
-            );
-          })}
+          
+          <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-white/5">
+            <button 
+              onClick={() => {
+                setSelectedMatrixGroup("Custom Matrix Report");
+                setSelectedMatrixStudents(matrixData.grandTotalStudents);
+              }}
+              className="flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
+            >
+              <Eye className="w-4.5 h-4.5" />
+              Preview
+            </button>
+            <button 
+              onClick={() => handleDownloadMatrixExcel(matrixData, rowValues, colValues, rowLabel, colLabel)}
+              className="flex items-center justify-center gap-2 bg-[#F9CB84]/10 hover:bg-[#F9CB84]/20 text-[#F9CB84] border border-[#F9CB84]/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
+            >
+              <Download className="w-4.5 h-4.5" />
+              Download Excel
+            </button>
+          </div>
         </div>
 
         {/* Selected Group Preview Section */}
-        {selectedGroup && (
+        {selectedMatrixGroup && selectedMatrixStudents.length > 0 && (
           <div className="mt-8 animate-in slide-in-from-top-4 duration-300">
-            <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden">
+            <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
               <div className="p-4 md:p-5 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.02]">
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-bold text-white flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
-                    {selectedGroup} Students Preview
+                    {selectedMatrixGroup} Students Preview
                   </h3>
                   <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-white/70 text-xs font-bold">
-                    {selectedStudents.length} Total
+                    {selectedMatrixStudents.length} Total
                   </span>
                 </div>
                 
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button 
-                    onClick={() => handleDownloadExcel(selectedGroup, selectedStudents)}
+                    onClick={() => handleDownloadExcel(selectedMatrixGroup, selectedMatrixStudents)}
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
                   >
                     <Download className="w-4 h-4" />
                     Download Excel
                   </button>
                   <button 
-                    onClick={() => setSelectedGroup(null)}
+                    onClick={() => {
+                      setSelectedMatrixGroup(null);
+                      setSelectedMatrixStudents([]);
+                    }}
                     className="p-2 hover:bg-white/10 rounded-xl text-white/50 hover:text-white transition-colors"
                   >
                     <X className="w-5 h-5" />
@@ -295,9 +353,9 @@ export function AdminReports() {
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
+              <div className="overflow-x-auto max-h-[500px]">
+                <table className="w-full text-left border-collapse relative">
+                  <thead className="sticky top-0 bg-[#0B132B] z-10 shadow-md">
                     <tr className="bg-white/[0.02] border-b border-white/5 text-[10px] uppercase tracking-wider text-white/50 font-bold">
                       <th className="p-4 font-semibold">EMIS Number</th>
                       <th className="p-4 font-semibold">Name</th>
@@ -308,7 +366,7 @@ export function AdminReports() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    {selectedStudents.map((student) => (
+                    {selectedMatrixStudents.map((student) => (
                       <tr key={student._id} className="hover:bg-white/[0.02] transition-colors">
                         <td className="p-4 text-sm text-white/70 font-medium">{student.emisNumber || student.rollNumber || 'N/A'}</td>
                         <td className="p-4 text-sm font-bold text-[#EBD8BE]">{student.name}</td>
@@ -343,7 +401,7 @@ export function AdminReports() {
             </div>
           </div>
         )}
-      </>
+      </div>
     );
   };
 
@@ -360,51 +418,6 @@ export function AdminReports() {
           </h1>
           <p className="text-white/60 mt-2 font-medium">View and analyze school-wide student data demographics.</p>
         </div>
-      </div>
-
-      {/* Student Demographics Report */}
-      <div className="bg-[#131E3A]/50 border border-white/5 shadow-xl rounded-3xl p-6 md:p-8 backdrop-blur-sm">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 border-b border-white/5 pb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#62D4CA]/15 rounded-xl border border-[#62D4CA]/20">
-              <PieChart className="w-5 h-5 text-[#62D4CA]" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">Student Demographics</h2>
-              <p className="text-sm text-white/50 mt-1">Breakdown of total student population.</p>
-            </div>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto bg-[#0B132B] p-4 sm:p-3 rounded-2xl border border-white/5 shadow-inner">
-            <span className="text-xs text-[#62D4CA] uppercase font-bold tracking-widest px-1 whitespace-nowrap">Group By</span>
-            <div className="flex flex-wrap gap-2">
-              {demographicOptions.map(opt => {
-                const isSelected = demographicFilter === opt.id;
-                return (
-                  <label key={`filter-${opt.id}`} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer transition-all ${
-                    isSelected ? 'bg-[#62D4CA]/20 border-[#62D4CA] text-[#62D4CA] shadow-[0_0_10px_rgba(98,212,202,0.2)]' : 
-                    'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
-                  }`}>
-                    <input 
-                      type="radio" 
-                      name="demographicFilter" 
-                      value={opt.id} 
-                      checked={isSelected} 
-                      onChange={(e) => setDemographicFilter(e.target.value)}
-                      className="hidden" 
-                    />
-                    <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-[#62D4CA] bg-[#62D4CA]/20' : 'border-white/30'}`}>
-                      {isSelected && <div className="w-1.5 h-1.5 rounded-sm bg-[#62D4CA]" />}
-                    </div>
-                    <span className="text-sm font-medium">{opt.label}</span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-        
-        {renderDemographics()}
       </div>
 
       {/* Custom Matrix Report Builder */}
@@ -430,8 +443,8 @@ export function AdminReports() {
             </h3>
             <div className="flex flex-wrap gap-3">
               {matrixDimensions.map(dim => {
-                const isSelected = matrixRow === dim.id;
-                const isDisabled = matrixCol === dim.id;
+                const isSelected = matrixRow.includes(dim.id);
+                const isDisabled = matrixCol.includes(dim.id);
                 return (
                   <label key={`row-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
                     isSelected ? 'bg-[#F9CB84]/20 border-[#F9CB84] text-[#F9CB84] shadow-[0_0_10px_rgba(249,203,132,0.2)]' : 
@@ -439,12 +452,12 @@ export function AdminReports() {
                     'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
                   }`}>
                     <input 
-                      type="radio" 
+                      type="checkbox" 
                       name="matrixRow" 
                       value={dim.id} 
                       checked={isSelected} 
                       disabled={isDisabled}
-                      onChange={(e) => setMatrixRow(e.target.value)}
+                      onChange={() => toggleDimension('row', dim.id)}
                       className="hidden" 
                     />
                     <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-[#F9CB84] bg-[#F9CB84]/20' : 'border-white/30'}`}>
@@ -465,8 +478,8 @@ export function AdminReports() {
             </h3>
             <div className="flex flex-wrap gap-3">
               {matrixDimensions.map(dim => {
-                const isSelected = matrixCol === dim.id;
-                const isDisabled = matrixRow === dim.id;
+                const isSelected = matrixCol.includes(dim.id);
+                const isDisabled = matrixRow.includes(dim.id);
                 return (
                   <label key={`col-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
                     isSelected ? 'bg-[#62D4CA]/20 border-[#62D4CA] text-[#62D4CA] shadow-[0_0_10px_rgba(98,212,202,0.2)]' : 
@@ -474,12 +487,12 @@ export function AdminReports() {
                     'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
                   }`}>
                     <input 
-                      type="radio" 
+                      type="checkbox" 
                       name="matrixCol" 
                       value={dim.id} 
                       checked={isSelected} 
                       disabled={isDisabled}
-                      onChange={(e) => setMatrixCol(e.target.value)}
+                      onChange={() => toggleDimension('col', dim.id)}
                       className="hidden" 
                     />
                     <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-[#62D4CA] bg-[#62D4CA]/20' : 'border-white/30'}`}>
