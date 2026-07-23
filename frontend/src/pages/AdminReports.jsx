@@ -413,19 +413,39 @@ export function AdminReports() {
       </div>
     );
   };
-  const handleDownloadHomeworkExcel = (matrix, classes, subjects) => {
-    const excelData = classes.map(c => {
-      const row = { 'Class & Section': `${c.standard} - ${c.section}` };
-      subjects.forEach(sub => {
-        if (!c.subjects?.includes(sub)) {
-          row[sub] = 'N/A';
-        } else {
-          row[sub] = matrix[`${c.standard}-${c.section}`]?.[sub] ? 'Added' : 'Not Added';
-        }
+  const handleDownloadHomeworkExcel = (matrix, classes) => {
+    const group1 = classes.filter(c => ['6','7','8','9','10'].includes(String(c.standard)));
+    const group2 = classes.filter(c => ['11','12'].includes(String(c.standard)));
+    const groupOther = classes.filter(c => !['6','7','8','9','10','11','12'].includes(String(c.standard)));
+    
+    const aoa = [];
+    
+    const addGroupToAoA = (groupClasses) => {
+      if (groupClasses.length === 0) return;
+      const groupSubjects = Array.from(new Set(groupClasses.flatMap(c => c.subjects || []))).sort();
+      
+      const headerRow = ['Class & Section', ...groupSubjects];
+      aoa.push(headerRow);
+      
+      groupClasses.forEach(c => {
+        const row = [`${c.standard} - ${c.section}`];
+        groupSubjects.forEach(sub => {
+          if (!c.subjects?.includes(sub)) {
+            row.push('');
+          } else {
+            row.push(matrix[`${c.standard}-${c.section}`]?.[sub] ? 'Added' : 'Not Added');
+          }
+        });
+        aoa.push(row);
       });
-      return row;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(excelData);
+      aoa.push([]); // Empty row separator
+    };
+
+    addGroupToAoA(group1);
+    addGroupToAoA(group2);
+    addGroupToAoA(groupOther);
+    
+    const worksheet = XLSX.utils.aoa_to_sheet(aoa);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Homework Report");
     XLSX.writeFile(workbook, `Homework_Report.xlsx`);
@@ -516,7 +536,7 @@ export function AdminReports() {
       <div className="mt-6 animate-in slide-in-from-top-4 duration-300">
         <div className="flex justify-end mb-4">
           <button 
-            onClick={() => handleDownloadHomeworkExcel(hwMap, sortedClasses, allSubjects)}
+            onClick={() => handleDownloadHomeworkExcel(hwMap, sortedClasses)}
             className="flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
           >
             <Download className="w-4 h-4" />
