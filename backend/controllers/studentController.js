@@ -179,7 +179,9 @@ const updateStudentMarks = async (req, res) => {
       student.terms.push({ termName, marks });
     }
 
-    await student.save();
+    // Save with validateModifiedOnly to bypass validation errors for existing dirty data 
+    // (e.g. students missing emisNumber)
+    await student.save({ validateModifiedOnly: true });
     res.status(200).json({ success: true, data: student });
   } catch (error) {
     console.error('Error updating marks:', error);
