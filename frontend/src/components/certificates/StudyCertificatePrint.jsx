@@ -12,6 +12,7 @@ export const StudyCertificatePrint = React.forwardRef(({ student, language = 'TA
     schoolCodeLabel: isEnglish ? 'School Code' : 'பள்ளி எண்',
     studentNameLabel: isEnglish ? 'Name of the student' : 'மாணவரின் பெயர்',
     fatherNameLabel: isEnglish ? 'Name of the Father' : 'தந்தையின் பெயர்',
+    emisNoLabel: isEnglish ? 'EMIS Number' : 'EMIS எண்',
     dobLabel: isEnglish ? 'Date of Birth' : 'பிறந்த தேதி',
     admissionNoLabel: isEnglish ? 'Admission Number' : 'சேர்க்கை எண்',
     academicYearLabel: isEnglish ? 'Academic Year' : 'கல்வி ஆண்டு',
@@ -73,6 +74,11 @@ export const StudyCertificatePrint = React.forwardRef(({ student, language = 'TA
         <div className="grid grid-cols-[300px_auto] gap-4">
           <div className="font-semibold">{t.fatherNameLabel}</div>
           <div>: {student.fatherName || '-'}</div>
+        </div>
+
+        <div className="grid grid-cols-[300px_auto] gap-4">
+          <div className="font-semibold">{t.emisNoLabel}</div>
+          <div>: {student.emisNumber || '-'}</div>
         </div>
 
         <div className="grid grid-cols-[300px_auto] gap-4">
