@@ -375,7 +375,23 @@ export function AdminReports() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    {selectedMatrixStudents.map((student) => (
+                    {[...selectedMatrixStudents].sort((a, b) => {
+                      const classA = parseInt(a.standard) || 0;
+                      const classB = parseInt(b.standard) || 0;
+                      if (classA !== classB) return classA - classB;
+                      
+                      const genderA = (a.gender || '').toLowerCase();
+                      const genderB = (b.gender || '').toLowerCase();
+                      if (genderA !== genderB) {
+                        if (genderA === 'male') return -1;
+                        if (genderB === 'male') return 1;
+                        return genderA.localeCompare(genderB);
+                      }
+                      
+                      const nameA = (a.name || '').toLowerCase();
+                      const nameB = (b.name || '').toLowerCase();
+                      return nameA.localeCompare(nameB);
+                    }).map((student) => (
                       <tr key={student._id} className="hover:bg-white/[0.02] transition-colors">
                         <td className="p-4 text-sm text-white/70 font-medium">{student.emisNumber || student.rollNumber || 'N/A'}</td>
                         <td className="p-4 text-sm font-bold text-[#EBD8BE]">{student.name}</td>
