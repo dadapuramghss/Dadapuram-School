@@ -653,16 +653,22 @@ export function AdminReports() {
           if (!term.termName || !term.marks || term.marks.length === 0) return;
           
           if (!abstractData[std][term.termName]) {
-            abstractData[std][term.termName] = { total: 0, pass: 0, fail: 0 };
+            abstractData[std][term.termName] = { 
+              total: 0, pass: 0, fail: 0,
+              totalStudents: [], passStudents: [], failStudents: []
+            };
           }
           
           abstractData[std][term.termName].total += 1;
+          abstractData[std][term.termName].totalStudents.push(student);
           
           const passedAll = term.marks.every(m => m.score >= 35);
           if (passedAll) {
             abstractData[std][term.termName].pass += 1;
+            abstractData[std][term.termName].passStudents.push(student);
           } else {
             abstractData[std][term.termName].fail += 1;
+            abstractData[std][term.termName].failStudents.push(student);
           }
         });
       }
@@ -741,9 +747,45 @@ export function AdminReports() {
                       }
                       return (
                         <React.Fragment key={`${std}-${exam}`}>
-                          <td className="p-3 border-r border-white/5 font-semibold text-white/80">{stats.total}</td>
-                          <td className="p-3 border-r border-white/5 font-bold text-green-400">{stats.pass}</td>
-                          <td className="p-3 border-r border-white/5 font-bold text-red-400">{stats.fail}</td>
+                          <td className="p-3 border-r border-white/5 font-semibold text-white/80">
+                            {stats.total > 0 ? (
+                              <button 
+                                onClick={() => {
+                                  setSelectedMatrixGroup(`Class ${std} - ${exam} (Total)`);
+                                  setSelectedMatrixStudents(stats.totalStudents);
+                                }}
+                                className="hover:text-white underline decoration-dashed underline-offset-4 transition-colors"
+                              >
+                                {stats.total}
+                              </button>
+                            ) : 0}
+                          </td>
+                          <td className="p-3 border-r border-white/5 font-bold text-green-400">
+                            {stats.pass > 0 ? (
+                              <button 
+                                onClick={() => {
+                                  setSelectedMatrixGroup(`Class ${std} - ${exam} (Pass)`);
+                                  setSelectedMatrixStudents(stats.passStudents);
+                                }}
+                                className="hover:text-green-300 underline decoration-dashed underline-offset-4 transition-colors"
+                              >
+                                {stats.pass}
+                              </button>
+                            ) : 0}
+                          </td>
+                          <td className="p-3 border-r border-white/5 font-bold text-red-400">
+                            {stats.fail > 0 ? (
+                              <button 
+                                onClick={() => {
+                                  setSelectedMatrixGroup(`Class ${std} - ${exam} (Fail)`);
+                                  setSelectedMatrixStudents(stats.failStudents);
+                                }}
+                                className="hover:text-red-300 underline decoration-dashed underline-offset-4 transition-colors"
+                              >
+                                {stats.fail}
+                              </button>
+                            ) : 0}
+                          </td>
                           <td className="p-3 border-r border-white/5 font-bold text-[#EBD8BE]">{stats.passPercent}%</td>
                         </React.Fragment>
                       );
