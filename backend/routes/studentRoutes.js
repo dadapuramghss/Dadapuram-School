@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { addStudent, getStudentsByClass, getStudentById, updateStudentMarks, updateStudent, deleteStudent, bulkAddStudents, bulkDeleteStudents, fixDbIndex } = require('../controllers/studentController');
+const { addStudent, getStudentsByClass, getStudentById, updateStudentMarks, updateStudent, deleteStudent, bulkAddStudents, bulkDeleteStudents, fixDbIndex, fixSubjects } = require('../controllers/studentController');
 
 // Public route to fix DB indexes
 router.get('/fix-db-index', fixDbIndex);
+
+// Public route to fix subjects
+router.get('/fix-subjects', fixSubjects);
 
 const { verifyToken } = require('../middleware/auth');
 

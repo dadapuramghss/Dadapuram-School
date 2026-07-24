@@ -1,4 +1,5 @@
 const Student = require('../models/Student');
+const ClassConfig = require('../models/ClassConfig');
 
 const isAuthorizedForClass = (user, standard, section, requireFullAccess = false) => {
   if (!user) return false;
@@ -339,6 +340,59 @@ const fixDbIndex = async (req, res) => {
   }
 };
 
+// Temporary fix to sync old student marks with current Class Config subjects
+const fixSubjects = async (req, res) => {
+  try {
+    const students = await Student.find();
+    const classConfigs = await ClassConfig.find();
+    let updatedCount = 0;
+
+    for (let student of students) {
+      const config = classConfigs.find(c => c.standard === student.standard && c.section === student.section);
+      if (!config || !config.subjects || config.subjects.length === 0) continue;
+
+      let modified = false;
+      for (let term of student.terms) {
+        if (!term.marks) continue;
+        const newMarks = [];
+        
+        for (let subj of config.subjects) {
+          // Try to match existing marks case-insensitively (e.g. "TAMIL" matches "Tamil")
+          const existingMark = term.marks.find(m => m.subject.toLowerCase() === subj.toLowerCase());
+          if (existingMark) {
+             newMarks.push({ subject: subj, score: existingMark.score });
+          } else {
+             newMarks.push({ subject: subj, score: 0 }); // Missing subjects get 0
+          }
+        }
+        
+        // Check if marks array actually changed
+        if (JSON.stringify(term.marks) !== JSON.stringify(newMarks)) {
+          term.marks = newMarks;
+          modified = true;
+        }
+      }
+
+      if (modified) {
+        await student.save({ validateModifiedOnly: true });
+        updatedCount++;
+      }
+    }
+
+    res.status(200).send(`
+      <html>
+        <body style="font-family: sans-serif; text-align: center; padding: 50px;">
+          <h2 style="color: #62D4CA;">Subject Fix Completed!</h2>
+          <p>Successfully aligned database subjects with current Class Configs for <strong>${updatedCount}</strong> students.</p>
+          <p>You can now go back to the Student Portal and the subjects will display correctly.</p>
+        </body>
+      </html>
+    `);
+  } catch (error) {
+    res.status(500).send(`Error: ${error.message}`);
+  }
+};
+
 module.exports = {
   addStudent,
   getStudentsByClass,
@@ -348,5 +402,6 @@ module.exports = {
   deleteStudent,
   bulkAddStudents,
   bulkDeleteStudents,
-  fixDbIndex
+  fixDbIndex,
+  fixSubjects
 };
