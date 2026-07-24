@@ -53,9 +53,12 @@ export function Leaderboard() {
       }
     };
     loadConfigs();
+  }, []);
+
+  useEffect(() => {
     fetchLeaderboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedClass, selectedSection]);
 
   const renderRankIcon = (rank) => {
     switch(rank) {
@@ -113,7 +116,6 @@ export function Leaderboard() {
                 <option key={sec} value={sec}>Section {sec}</option>
               ))}
           </select>
-          <NeonButton onClick={fetchLeaderboard} className="w-full sm:w-auto mt-2 sm:mt-0">Refresh</NeonButton>
         </div>
       </div>
 
