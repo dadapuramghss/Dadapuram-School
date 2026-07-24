@@ -129,7 +129,7 @@ export function Leaderboard() {
               </div>
               
               <img 
-                src={student.photoUrl || 'https://via.placeholder.com/150'} 
+                src={student.photoUrl || 'https://placehold.co/150'} 
                 alt={student.name}
                 className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-white/20 shrink-0"
               />
@@ -182,7 +182,7 @@ export function Leaderboard() {
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
                     <img 
-                      src={studentDetails.photoUrl || 'https://via.placeholder.com/150'} 
+                      src={studentDetails.photoUrl || 'https://placehold.co/150'} 
                       alt={studentDetails.name}
                       className="w-20 h-20 rounded-xl object-cover border-2 border-white/20"
                     />
