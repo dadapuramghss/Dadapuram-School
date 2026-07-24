@@ -129,7 +129,10 @@ export function Gradebook() {
       const studentUpdates = {};
       
       Object.entries(marks).forEach(([key, score]) => {
-        const [studentId, subject] = key.split('-');
+        const firstHyphen = key.indexOf('-');
+        const studentId = key.substring(0, firstHyphen);
+        const subject = key.substring(firstHyphen + 1);
+
         if (!studentUpdates[studentId]) {
           studentUpdates[studentId] = [];
         }
@@ -137,12 +140,11 @@ export function Gradebook() {
         studentUpdates[studentId].push({ subject, score: Number(score) });
       });
 
-      // Submit all updates
-      const updatePromises = Object.entries(studentUpdates).map(([studentId, marksArray]) => {
-        return api.updateMarks(studentId, selectedTerm, marksArray);
-      });
+      // Submit all updates sequentially to prevent server overload (500 errors)
+      for (const [studentId, marksArray] of Object.entries(studentUpdates)) {
+        await api.updateMarks(studentId, selectedTerm, marksArray);
+      }
 
-      await Promise.all(updatePromises);
       alert(`${selectedTerm} marks saved successfully!`);
     } catch (err) {
       console.error('Failed to save marks', err);
