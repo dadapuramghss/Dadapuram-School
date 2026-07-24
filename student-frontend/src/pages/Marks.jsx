@@ -96,11 +96,20 @@ export default function Marks() {
                       <span className="text-xs text-gray-500 uppercase font-semibold block">Percentage</span>
                       <span className="text-green-600 font-bold">{percentage}%</span>
                     </div>
+                    {term.rank && (
+                      <>
+                        <div className="w-px h-8 bg-gray-200"></div>
+                        <div className="text-center">
+                          <span className="text-xs text-gray-500 uppercase font-semibold block">Class Rank</span>
+                          <span className="text-amber-600 font-bold">#{term.rank}</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
                 
                 <div className="p-6">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {subjects.map((subj, i) => {
                       const mark = term.marks.find(m => m.subject.toLowerCase() === subj.toLowerCase());
                       const score = mark ? mark.score : 0;

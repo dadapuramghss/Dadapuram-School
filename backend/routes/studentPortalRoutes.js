@@ -103,8 +103,35 @@ router.post('/login-select', async (req, res) => {
 // GET /api/student-portal/me
 router.get('/me', verifyStudentToken, async (req, res) => {
   try {
-    // req.student is populated by verifyStudentToken middleware
-    res.json(req.student);
+    const student = req.student.toObject();
+
+    // Calculate class rank for each term
+    const peers = await Student.find({ standard: student.standard, section: student.section }).lean();
+    
+    student.terms = student.terms.map(term => {
+      const myScore = term.marks.reduce((sum, m) => sum + m.score, 0);
+      let betterStudents = 0;
+      let totalAssessed = 0;
+      
+      peers.forEach(peer => {
+        const peerTerm = peer.terms?.find(t => t.termName === term.termName);
+        if (peerTerm && peerTerm.marks && peerTerm.marks.length > 0) {
+          totalAssessed++;
+          const peerScore = peerTerm.marks.reduce((sum, m) => sum + m.score, 0);
+          if (peerScore > myScore) {
+            betterStudents++;
+          }
+        }
+      });
+      
+      return {
+        ...term,
+        rank: betterStudents + 1,
+        totalAssessed
+      };
+    });
+
+    res.json(student);
   } catch (error) {
     console.error('Error fetching student profile:', error);
     res.status(500).json({ message: 'Server error' });
