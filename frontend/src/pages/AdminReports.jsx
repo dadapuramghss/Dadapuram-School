@@ -677,6 +677,7 @@ export function AdminReports() {
                                 onClick={() => {
                                   setSelectedMatrixGroup(`Class ${std} - ${exam} (Total)`);
                                   setSelectedMatrixStudents(stats.totalStudents);
+                                  setPreviewExamContext(exam);
                                 }}
                                 className="hover:text-white underline decoration-dashed underline-offset-4 transition-colors"
                               >
@@ -690,6 +691,7 @@ export function AdminReports() {
                                 onClick={() => {
                                   setSelectedMatrixGroup(`Class ${std} - ${exam} (Pass)`);
                                   setSelectedMatrixStudents(stats.passStudents);
+                                  setPreviewExamContext(exam);
                                 }}
                                 className="hover:text-green-300 underline decoration-dashed underline-offset-4 transition-colors"
                               >
@@ -703,6 +705,7 @@ export function AdminReports() {
                                 onClick={() => {
                                   setSelectedMatrixGroup(`Class ${std} - ${exam} (Fail)`);
                                   setSelectedMatrixStudents(stats.failStudents);
+                                  setPreviewExamContext(exam);
                                 }}
                                 className="hover:text-red-300 underline decoration-dashed underline-offset-4 transition-colors"
                               >
@@ -774,12 +777,15 @@ export function AdminReports() {
                       <th className="p-4 font-semibold">EMIS Number</th>
                       <th className="p-4 font-semibold">Name</th>
                       <th className="p-4 font-semibold">Class & Section</th>
-                      {previewExamContext && (
+                      {previewExamContext ? (
                         <th className="p-4 font-semibold text-center">Subject Status ({previewExamContext})</th>
+                      ) : (
+                        <>
+                          <th className="p-4 font-semibold">Gender</th>
+                          <th className="p-4 font-semibold">Community</th>
+                          <th className="p-4 font-semibold text-right">Actions</th>
+                        </>
                       )}
-                      <th className="p-4 font-semibold">Gender</th>
-                      <th className="p-4 font-semibold">Community</th>
-                      <th className="p-4 font-semibold text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
@@ -812,7 +818,7 @@ export function AdminReports() {
                             {student.standard} - {student.section}
                           </span>
                         </td>
-                        {previewExamContext && (
+                        {previewExamContext ? (
                           <td className="p-4">
                             <div className="flex flex-wrap gap-1 justify-center max-w-[250px]">
                               {student.terms?.find(t => t.termName === previewExamContext)?.marks?.map((m, i) => (
@@ -822,25 +828,28 @@ export function AdminReports() {
                               ))}
                             </div>
                           </td>
+                        ) : (
+                          <>
+                            <td className="p-4 text-sm text-white/70">{student.gender || 'N/A'}</td>
+                            <td className="p-4 text-sm text-white/70">{student.community || 'N/A'}</td>
+                            <td className="p-4 text-right flex items-center justify-end gap-2">
+                              <button 
+                                onClick={() => setSelectedStudentDetails(student)}
+                                className="p-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] rounded-xl transition-colors"
+                                title="View Student Details"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => handleDownloadSingleStudent(student)}
+                                className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl transition-colors"
+                                title="Download Student Record"
+                              >
+                                <Download className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </>
                         )}
-                        <td className="p-4 text-sm text-white/70">{student.gender || 'N/A'}</td>
-                        <td className="p-4 text-sm text-white/70">{student.community || 'N/A'}</td>
-                        <td className="p-4 text-right flex items-center justify-end gap-2">
-                          <button 
-                            onClick={() => setSelectedStudentDetails(student)}
-                            className="p-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] rounded-xl transition-colors"
-                            title="View Student Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleDownloadSingleStudent(student)}
-                            className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl transition-colors"
-                            title="Download Student Record"
-                          >
-                            <Download className="w-4 h-4" />
-                          </button>
-                        </td>
                       </tr>
                     ))}
                   </tbody>
