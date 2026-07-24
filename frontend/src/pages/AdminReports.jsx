@@ -380,6 +380,10 @@ export function AdminReports() {
                       const classB = parseInt(b.standard) || 0;
                       if (classA !== classB) return classA - classB;
                       
+                      const sectionA = (a.section || '').toLowerCase();
+                      const sectionB = (b.section || '').toLowerCase();
+                      if (sectionA !== sectionB) return sectionA.localeCompare(sectionB);
+                      
                       const genderA = (a.gender || '').toLowerCase();
                       const genderB = (b.gender || '').toLowerCase();
                       if (genderA !== genderB) {
