@@ -821,7 +821,13 @@ export function AdminReports() {
                         {previewExamContext ? (
                           <td className="p-4">
                             <div className="flex flex-wrap gap-1 justify-center max-w-[250px]">
-                              {student.terms?.find(t => t.termName === previewExamContext)?.marks?.map((m, i) => (
+                              {student.terms?.find(t => t.termName === previewExamContext)?.marks
+                                ?.filter(m => {
+                                  if (selectedMatrixGroup?.includes('(Pass)')) return m.score >= 35;
+                                  if (selectedMatrixGroup?.includes('(Fail)')) return m.score < 35;
+                                  return true;
+                                })
+                                .map((m, i) => (
                                  <span key={i} className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${m.score >= 35 ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
                                    {String(m.subject).substring(0,3)}: {m.score}
                                  </span>
