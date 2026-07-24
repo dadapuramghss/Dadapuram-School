@@ -14,6 +14,7 @@ export function AdminReports() {
   // Matrix specific state
   const [selectedMatrixGroup, setSelectedMatrixGroup] = useState(null);
   const [selectedMatrixStudents, setSelectedMatrixStudents] = useState([]);
+  const [previewExamContext, setPreviewExamContext] = useState(null);
 
   const [matrixRow, setMatrixRow] = useState(['standard']);
   const [matrixCol, setMatrixCol] = useState(['gender']);
@@ -24,6 +25,7 @@ export function AdminReports() {
     setSelectedMatrixGroup(null);
     setSelectedMatrixStudents([]);
     setShowGlobalPreview(false);
+    setPreviewExamContext(null);
   }, [matrixRow, matrixCol]);
   
   const matrixDimensions = [
@@ -354,6 +356,7 @@ export function AdminReports() {
                     onClick={() => {
                       setSelectedMatrixGroup(null);
                       setSelectedMatrixStudents([]);
+                      setPreviewExamContext(null);
                     }}
                     className="p-2 hover:bg-white/10 rounded-xl text-white/50 hover:text-white transition-colors"
                   >
@@ -369,6 +372,9 @@ export function AdminReports() {
                       <th className="p-4 font-semibold">EMIS Number</th>
                       <th className="p-4 font-semibold">Name</th>
                       <th className="p-4 font-semibold">Class & Section</th>
+                      {previewExamContext && (
+                        <th className="p-4 font-semibold text-center">Subject Status ({previewExamContext})</th>
+                      )}
                       <th className="p-4 font-semibold">Gender</th>
                       <th className="p-4 font-semibold">Community</th>
                       <th className="p-4 font-semibold text-right">Actions</th>
@@ -404,6 +410,17 @@ export function AdminReports() {
                             {student.standard} - {student.section}
                           </span>
                         </td>
+                        {previewExamContext && (
+                          <td className="p-4">
+                            <div className="flex flex-wrap gap-1 justify-center max-w-[250px]">
+                              {student.terms?.find(t => t.termName === previewExamContext)?.marks?.map((m, i) => (
+                                 <span key={i} className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${m.score >= 35 ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                                   {String(m.subject).substring(0,3)}: {m.score}
+                                 </span>
+                              ))}
+                            </div>
+                          </td>
+                        )}
                         <td className="p-4 text-sm text-white/70">{student.gender || 'N/A'}</td>
                         <td className="p-4 text-sm text-white/70">{student.community || 'N/A'}</td>
                         <td className="p-4 text-right flex items-center justify-end gap-2">
@@ -614,7 +631,7 @@ export function AdminReports() {
   const handleDownloadGradeBookExcel = (abstractData, standards) => {
     const excelData = [];
     standards.forEach(std => {
-      const row = { 'Class': std };
+      const row = { 'Class & Sec': std };
       EXAMS.forEach(exam => {
         const stats = abstractData[std]?.[exam];
         if (stats) {
@@ -643,41 +660,43 @@ export function AdminReports() {
     
     allStudents.forEach(student => {
       const std = student.standard;
-      if (!std) return;
-      stdSet.add(std);
+      const sec = student.section;
+      if (!std || !sec) return;
+      const clsSec = `${std} - ${sec}`;
+      stdSet.add(clsSec);
       
-      if (!abstractData[std]) abstractData[std] = {};
+      if (!abstractData[clsSec]) abstractData[clsSec] = {};
       
       if (student.terms && Array.isArray(student.terms)) {
         student.terms.forEach(term => {
           if (!term.termName || !term.marks || term.marks.length === 0) return;
           
-          if (!abstractData[std][term.termName]) {
-            abstractData[std][term.termName] = { 
+          if (!abstractData[clsSec][term.termName]) {
+            abstractData[clsSec][term.termName] = { 
               total: 0, pass: 0, fail: 0,
               totalStudents: [], passStudents: [], failStudents: []
             };
           }
           
-          abstractData[std][term.termName].total += 1;
-          abstractData[std][term.termName].totalStudents.push(student);
+          abstractData[clsSec][term.termName].total += 1;
+          abstractData[clsSec][term.termName].totalStudents.push(student);
           
           const passedAll = term.marks.every(m => m.score >= 35);
           if (passedAll) {
-            abstractData[std][term.termName].pass += 1;
-            abstractData[std][term.termName].passStudents.push(student);
+            abstractData[clsSec][term.termName].pass += 1;
+            abstractData[clsSec][term.termName].passStudents.push(student);
           } else {
-            abstractData[std][term.termName].fail += 1;
-            abstractData[std][term.termName].failStudents.push(student);
+            abstractData[clsSec][term.termName].fail += 1;
+            abstractData[clsSec][term.termName].failStudents.push(student);
           }
         });
       }
     });
 
     const standards = Array.from(stdSet).sort((a, b) => {
-      const numA = parseInt(a);
-      const numB = parseInt(b);
-      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      const numA = parseInt(a.split(' - ')[0]);
+      const numB = parseInt(b.split(' - ')[0]);
+      if (!isNaN(numA) && !isNaN(numB) && numA !== numB) return numA - numB;
       return a.localeCompare(b);
     });
     
@@ -698,22 +717,45 @@ export function AdminReports() {
             <div className="flex items-center gap-3">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#EBD8BE]"></span>
-                Class-wise Pass/Fail Abstract
+                Class & Section-wise Pass/Fail Abstract
               </h3>
             </div>
-            <button 
-              onClick={() => handleDownloadGradeBookExcel(abstractData, standards)}
-              className="flex items-center justify-center gap-2 bg-[#EBD8BE]/10 hover:bg-[#EBD8BE]/20 text-[#EBD8BE] border border-[#EBD8BE]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
-            >
-              <Download className="w-4 h-4" />
-              Download Excel
-            </button>
+            <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+              <button 
+                onClick={() => {
+                  setSelectedMatrixGroup(`All Classes & Sections (Total)`);
+                  const allStatsStudents = [];
+                  standards.forEach(std => {
+                    EXAMS.forEach(exam => {
+                       if (abstractData[std]?.[exam]?.totalStudents) {
+                         allStatsStudents.push(...abstractData[std][exam].totalStudents);
+                       }
+                    });
+                  });
+                  const uniqueStudents = Array.from(new Set(allStatsStudents.map(s => s._id)))
+                    .map(id => allStatsStudents.find(s => s._id === id));
+                  setSelectedMatrixStudents(uniqueStudents);
+                  setPreviewExamContext(null);
+                }}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+              >
+                <Eye className="w-4 h-4" />
+                Preview
+              </button>
+              <button 
+                onClick={() => handleDownloadGradeBookExcel(abstractData, standards)}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#EBD8BE]/10 hover:bg-[#EBD8BE]/20 text-[#EBD8BE] border border-[#EBD8BE]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Download Excel
+              </button>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-center border-collapse">
               <thead>
                 <tr className="bg-white/[0.02] border-b border-white/5 text-[11px] uppercase tracking-wider text-white/50 font-bold">
-                  <th className="p-4 text-left border-r border-white/5 bg-white/5 whitespace-nowrap sticky left-0 z-10" rowSpan="2">Class</th>
+                  <th className="p-4 text-left border-r border-white/5 bg-white/5 whitespace-nowrap sticky left-0 z-10" rowSpan="2">Class & Sec</th>
                   {EXAMS.map(exam => (
                     <th key={exam} className="p-3 border-b border-r border-white/5 bg-white/[0.01]" colSpan="4">{exam}</th>
                   ))}
