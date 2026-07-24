@@ -13,6 +13,7 @@ export function Leaderboard() {
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   const [studentDetails, setStudentDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [classConfigs, setClassConfigs] = useState([]);
 
   const fetchStudentDetails = async (id) => {
     try {
@@ -43,6 +44,15 @@ export function Leaderboard() {
   };
 
   useEffect(() => {
+    const loadConfigs = async () => {
+      try {
+        const res = await api.getClassConfigs();
+        setClassConfigs(Array.isArray(res) ? res : (res.data || []));
+      } catch (err) {
+        console.error('Failed to fetch configs', err);
+      }
+    };
+    loadConfigs();
     fetchLeaderboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -74,9 +84,7 @@ export function Leaderboard() {
             value={selectedClass} 
             onChange={e => {
               setSelectedClass(e.target.value);
-              if (e.target.value === 'All') {
-                setSelectedSection('All');
-              }
+              setSelectedSection('All');
             }}
             className="glass-input w-full sm:w-auto dark:!text-white dark:bg-transparent [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
           >
@@ -96,13 +104,14 @@ export function Leaderboard() {
             disabled={selectedClass === 'All'}
           >
             <option value="All">All Sections</option>
-            <option value="A">Section A</option>
-            <option value="B">Section B</option>
-            <option value="C">Section C</option>
-            <option value="D">Section D</option>
-            <option value="A1">Section A1</option>
-            <option value="A2">Section A2</option>
-            <option value="B1">Section B1</option>
+            {classConfigs
+              .filter(c => String(c.standard) === String(selectedClass))
+              .map(c => c.section)
+              .filter((v, i, a) => a.indexOf(v) === i) // unique
+              .sort()
+              .map(sec => (
+                <option key={sec} value={sec}>Section {sec}</option>
+              ))}
           </select>
           <NeonButton onClick={fetchLeaderboard} className="w-full sm:w-auto mt-2 sm:mt-0">Refresh</NeonButton>
         </div>
