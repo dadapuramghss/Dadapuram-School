@@ -329,124 +329,6 @@ export function AdminReports() {
           </div>
         </div>
 
-        {/* Selected Group Preview Section */}
-        {selectedMatrixGroup && selectedMatrixStudents.length > 0 && (
-          <div className="mt-8 animate-in slide-in-from-top-4 duration-300">
-            <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
-              <div className="p-4 md:p-5 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.02]">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
-                    {selectedMatrixGroup} Students Preview
-                  </h3>
-                  <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-white/70 text-xs font-bold">
-                    {selectedMatrixStudents.length} Total
-                  </span>
-                </div>
-                
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <button 
-                    onClick={() => handleDownloadExcel(selectedMatrixGroup, selectedMatrixStudents)}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download Excel
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setSelectedMatrixGroup(null);
-                      setSelectedMatrixStudents([]);
-                      setPreviewExamContext(null);
-                    }}
-                    className="p-2 hover:bg-white/10 rounded-xl text-white/50 hover:text-white transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto max-h-[500px]">
-                <table className="w-full text-left border-collapse relative">
-                  <thead className="sticky top-0 bg-[#0B132B] z-10 shadow-md">
-                    <tr className="bg-white/[0.02] border-b border-white/5 text-[10px] uppercase tracking-wider text-white/50 font-bold">
-                      <th className="p-4 font-semibold">EMIS Number</th>
-                      <th className="p-4 font-semibold">Name</th>
-                      <th className="p-4 font-semibold">Class & Section</th>
-                      {previewExamContext && (
-                        <th className="p-4 font-semibold text-center">Subject Status ({previewExamContext})</th>
-                      )}
-                      <th className="p-4 font-semibold">Gender</th>
-                      <th className="p-4 font-semibold">Community</th>
-                      <th className="p-4 font-semibold text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {[...selectedMatrixStudents].sort((a, b) => {
-                      const classA = parseInt(a.standard) || 0;
-                      const classB = parseInt(b.standard) || 0;
-                      if (classA !== classB) return classA - classB;
-                      
-                      const sectionA = (a.section || '').toLowerCase();
-                      const sectionB = (b.section || '').toLowerCase();
-                      if (sectionA !== sectionB) return sectionA.localeCompare(sectionB);
-                      
-                      const genderA = (a.gender || '').toLowerCase();
-                      const genderB = (b.gender || '').toLowerCase();
-                      if (genderA !== genderB) {
-                        if (genderA === 'male') return -1;
-                        if (genderB === 'male') return 1;
-                        return genderA.localeCompare(genderB);
-                      }
-                      
-                      const nameA = (a.name || '').toLowerCase();
-                      const nameB = (b.name || '').toLowerCase();
-                      return nameA.localeCompare(nameB);
-                    }).map((student) => (
-                      <tr key={student._id} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="p-4 text-sm text-white/70 font-medium">{student.emisNumber || student.rollNumber || 'N/A'}</td>
-                        <td className="p-4 text-sm font-bold text-[#EBD8BE]">{student.name}</td>
-                        <td className="p-4">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#5D7D9A]/10 text-[#5D7D9A] border border-[#5D7D9A]/20">
-                            {student.standard} - {student.section}
-                          </span>
-                        </td>
-                        {previewExamContext && (
-                          <td className="p-4">
-                            <div className="flex flex-wrap gap-1 justify-center max-w-[250px]">
-                              {student.terms?.find(t => t.termName === previewExamContext)?.marks?.map((m, i) => (
-                                 <span key={i} className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${m.score >= 35 ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                                   {String(m.subject).substring(0,3)}: {m.score}
-                                 </span>
-                              ))}
-                            </div>
-                          </td>
-                        )}
-                        <td className="p-4 text-sm text-white/70">{student.gender || 'N/A'}</td>
-                        <td className="p-4 text-sm text-white/70">{student.community || 'N/A'}</td>
-                        <td className="p-4 text-right flex items-center justify-end gap-2">
-                          <button 
-                            onClick={() => setSelectedStudentDetails(student)}
-                            className="p-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] rounded-xl transition-colors"
-                            title="View Student Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleDownloadSingleStudent(student)}
-                            className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl transition-colors"
-                            title="Download Student Record"
-                          >
-                            <Download className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     );
   };
@@ -847,6 +729,130 @@ export function AdminReports() {
     );
   };
 
+  const renderSelectedGroupPreview = () => {
+    return (
+      <>
+        {selectedMatrixGroup && selectedMatrixStudents.length > 0 && (
+          <div className="mt-8 animate-in slide-in-from-top-4 duration-300">
+            <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
+              <div className="p-4 md:p-5 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.02]">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
+                    {selectedMatrixGroup} Students Preview
+                  </h3>
+                  <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-white/70 text-xs font-bold">
+                    {selectedMatrixStudents.length} Total
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button 
+                    onClick={() => handleDownloadExcel(selectedMatrixGroup, selectedMatrixStudents)}
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download Excel
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setSelectedMatrixGroup(null);
+                      setSelectedMatrixStudents([]);
+                      setPreviewExamContext(null);
+                    }}
+                    className="p-2 hover:bg-white/10 rounded-xl text-white/50 hover:text-white transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto max-h-[500px]">
+                <table className="w-full text-left border-collapse relative">
+                  <thead className="sticky top-0 bg-[#0B132B] z-10 shadow-md">
+                    <tr className="bg-white/[0.02] border-b border-white/5 text-[10px] uppercase tracking-wider text-white/50 font-bold">
+                      <th className="p-4 font-semibold">EMIS Number</th>
+                      <th className="p-4 font-semibold">Name</th>
+                      <th className="p-4 font-semibold">Class & Section</th>
+                      {previewExamContext && (
+                        <th className="p-4 font-semibold text-center">Subject Status ({previewExamContext})</th>
+                      )}
+                      <th className="p-4 font-semibold">Gender</th>
+                      <th className="p-4 font-semibold">Community</th>
+                      <th className="p-4 font-semibold text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {[...selectedMatrixStudents].sort((a, b) => {
+                      const classA = parseInt(a.standard) || 0;
+                      const classB = parseInt(b.standard) || 0;
+                      if (classA !== classB) return classA - classB;
+                      
+                      const sectionA = (a.section || '').toLowerCase();
+                      const sectionB = (b.section || '').toLowerCase();
+                      if (sectionA !== sectionB) return sectionA.localeCompare(sectionB);
+                      
+                      const genderA = (a.gender || '').toLowerCase();
+                      const genderB = (b.gender || '').toLowerCase();
+                      if (genderA !== genderB) {
+                        if (genderA === 'male') return -1;
+                        if (genderB === 'male') return 1;
+                        return genderA.localeCompare(genderB);
+                      }
+                      
+                      const nameA = (a.name || '').toLowerCase();
+                      const nameB = (b.name || '').toLowerCase();
+                      return nameA.localeCompare(nameB);
+                    }).map((student) => (
+                      <tr key={student._id} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="p-4 text-sm text-white/70 font-medium">{student.emisNumber || student.rollNumber || 'N/A'}</td>
+                        <td className="p-4 text-sm font-bold text-[#EBD8BE]">{student.name}</td>
+                        <td className="p-4">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#5D7D9A]/10 text-[#5D7D9A] border border-[#5D7D9A]/20">
+                            {student.standard} - {student.section}
+                          </span>
+                        </td>
+                        {previewExamContext && (
+                          <td className="p-4">
+                            <div className="flex flex-wrap gap-1 justify-center max-w-[250px]">
+                              {student.terms?.find(t => t.termName === previewExamContext)?.marks?.map((m, i) => (
+                                 <span key={i} className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${m.score >= 35 ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                                   {String(m.subject).substring(0,3)}: {m.score}
+                                 </span>
+                              ))}
+                            </div>
+                          </td>
+                        )}
+                        <td className="p-4 text-sm text-white/70">{student.gender || 'N/A'}</td>
+                        <td className="p-4 text-sm text-white/70">{student.community || 'N/A'}</td>
+                        <td className="p-4 text-right flex items-center justify-end gap-2">
+                          <button 
+                            onClick={() => setSelectedStudentDetails(student)}
+                            className="p-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] rounded-xl transition-colors"
+                            title="View Student Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDownloadSingleStudent(student)}
+                            className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl transition-colors"
+                            title="Download Student Record"
+                          >
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
+
   return (
     <div className="space-y-6 pb-10">
       {/* Header */}
@@ -1081,6 +1087,8 @@ export function AdminReports() {
 
       {activeTab === 'homework' && renderHomeworkReport()}
       {activeTab === 'gradebook' && renderGradeBookReport()}
+
+      {renderSelectedGroupPreview()}
     </div>
   );
 }
