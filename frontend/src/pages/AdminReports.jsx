@@ -812,17 +812,7 @@ export function AdminReports() {
         <>
           {/* Custom Matrix Report Builder */}
           <div className="bg-[#131E3A]/50 border border-white/5 shadow-xl rounded-3xl p-6 md:p-8 backdrop-blur-sm">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#F9CB84]/15 rounded-xl border border-[#F9CB84]/20">
-              <Grid className="w-5 h-5 text-[#F9CB84]" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">Custom Matrix Report</h2>
 
-            </div>
-          </div>
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
           {/* Row Selection */}
