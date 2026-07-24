@@ -55,6 +55,11 @@ export const api = {
   deleteStudent: (studentId) => fetchWithAuth(`/students/${studentId}`, {
     method: 'DELETE'
   }),
+  
+  bulkDeleteStudents: (studentIds) => fetchWithAuth('/students/bulk-delete', {
+    method: 'POST',
+    body: JSON.stringify({ studentIds })
+  }),
 
   // Homework
   getHomeworkByClass: (standard, section) => fetchWithAuth(`/homework?standard=${standard}&section=${section}`),

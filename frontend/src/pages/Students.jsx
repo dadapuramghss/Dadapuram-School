@@ -225,9 +225,7 @@ export function Students() {
     if (!window.confirm(`Are you sure you want to delete ${selectedStudents.length} students?`)) return;
     setListLoading(true);
     try {
-      for (const id of selectedStudents) {
-        await api.deleteStudent(id);
-      }
+      await api.bulkDeleteStudents(selectedStudents);
       setSelectedStudents([]);
       fetchStudents();
     } catch (err) {

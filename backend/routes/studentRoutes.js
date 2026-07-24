@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { addStudent, getStudentsByClass, getStudentById, updateStudentMarks, updateStudent, deleteStudent, bulkAddStudents } = require('../controllers/studentController');
+const { addStudent, getStudentsByClass, getStudentById, updateStudentMarks, updateStudent, deleteStudent, bulkAddStudents, bulkDeleteStudents } = require('../controllers/studentController');
 const { verifyToken } = require('../middleware/auth');
 
 // All student routes require authentication
 router.use(verifyToken);
 
 router.post('/bulk', bulkAddStudents);
+router.post('/bulk-delete', bulkDeleteStudents);
 router.post('/', addStudent);
 router.get('/', getStudentsByClass);
 router.get('/:studentId', getStudentById);

@@ -253,6 +253,37 @@ const deleteStudent = async (req, res) => {
   }
 };
 
+// Bulk delete students
+const bulkDeleteStudents = async (req, res) => {
+  try {
+    const { studentIds } = req.body;
+    
+    if (!Array.isArray(studentIds) || studentIds.length === 0) {
+      return res.status(400).json({ error: 'No student IDs provided' });
+    }
+
+    // Find students first to verify authorization
+    const students = await Student.find({ _id: { $in: studentIds } });
+    
+    if (students.length === 0) {
+      return res.status(404).json({ error: 'No students found' });
+    }
+
+    // Verify auth for all students
+    for (const student of students) {
+      if (!isAuthorizedForClass(req.dbUser, student.standard, student.section, true)) {
+        return res.status(403).json({ error: 'Not authorized to delete some of these students' });
+      }
+    }
+
+    await Student.deleteMany({ _id: { $in: studentIds } });
+    res.status(200).json({ success: true, message: `${students.length} students deleted successfully` });
+  } catch (error) {
+    console.error('Error bulk deleting students:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
   addStudent,
   getStudentsByClass,
@@ -260,5 +291,6 @@ module.exports = {
   updateStudentMarks,
   updateStudent,
   deleteStudent,
-  bulkAddStudents
+  bulkAddStudents,
+  bulkDeleteStudents
 };
