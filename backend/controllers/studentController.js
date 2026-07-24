@@ -303,6 +303,42 @@ const bulkDeleteStudents = async (req, res) => {
   }
 };
 
+// Temporary fix to drop the old rollNumber index from the database
+const fixDbIndex = async (req, res) => {
+  try {
+    const collection = Student.collection;
+    let messages = [];
+
+    try {
+      await collection.dropIndex('standard_1_section_1_rollNumber_1');
+      messages.push('Successfully dropped standard_1_section_1_rollNumber_1');
+    } catch (e) {
+      messages.push(`Index standard_1_section_1_rollNumber_1 not found or error: ${e.message}`);
+    }
+
+    try {
+      await collection.dropIndex('rollNumber_1');
+      messages.push('Successfully dropped rollNumber_1');
+    } catch (e) {
+      messages.push(`Index rollNumber_1 not found or error: ${e.message}`);
+    }
+
+    // Ensure emisNumber index exists
+    await Student.syncIndexes();
+    messages.push('Synced new indexes (emisNumber).');
+
+    res.status(200).send(`
+      <html><body>
+        <h2>Database Index Fix Completed</h2>
+        <ul>${messages.map(m => `<li>${m}</li>`).join('')}</ul>
+        <p>You can now go back to your app and import the CSV!</p>
+      </body></html>
+    `);
+  } catch (error) {
+    res.status(500).send(`Error: ${error.message}`);
+  }
+};
+
 module.exports = {
   addStudent,
   getStudentsByClass,
@@ -311,5 +347,6 @@ module.exports = {
   updateStudent,
   deleteStudent,
   bulkAddStudents,
-  bulkDeleteStudents
+  bulkDeleteStudents,
+  fixDbIndex
 };
