@@ -517,7 +517,7 @@ export function AdminReports() {
       hwMap[key][hw.subject] = true;
     });
 
-    const renderHomeworkMatrix = (title, classesGroup) => {
+    const renderHomeworkMatrix = (title, classesGroup, showDownload = false) => {
       if (classesGroup.length === 0) return null;
       
       const uniqueSubjects = Array.from(new Set(classesGroup.flatMap(c => c.subjects || [])));
@@ -525,11 +525,22 @@ export function AdminReports() {
       
       return (
         <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-xl mb-6 last:mb-0">
-          <div className="p-4 md:p-5 border-b border-white/10 bg-white/[0.02]">
-             <h3 className="text-lg font-bold text-white flex items-center gap-2">
-               <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
-               {title}
-             </h3>
+          <div className="p-4 md:p-5 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.02]">
+             <div className="flex items-center gap-3">
+               <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                 <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
+                 {title}
+               </h3>
+             </div>
+             {showDownload && (
+               <button 
+                 onClick={() => handleDownloadHomeworkExcel(hwMap, sortedClasses)}
+                 className="flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+               >
+                 <Download className="w-4 h-4" />
+                 Download Excel
+               </button>
+             )}
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-center border-collapse">
@@ -583,25 +594,15 @@ export function AdminReports() {
 
     return (
       <div className="mt-6 animate-in slide-in-from-top-4 duration-300">
-        <div className="flex justify-end mb-4">
-          <button 
-            onClick={() => handleDownloadHomeworkExcel(hwMap, sortedClasses)}
-            className="flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            Download Excel
-          </button>
-        </div>
-        
         {sortedClasses.length === 0 ? (
           <div className="bg-[#0B132B] rounded-2xl border border-white/10 p-8 text-center text-white/40 font-medium shadow-xl">
             No class configurations found
           </div>
         ) : (
           <>
-            {renderHomeworkMatrix("Standards 6 to 10", group1)}
-            {renderHomeworkMatrix("Standards 11 & 12", group2)}
-            {renderHomeworkMatrix("Other Standards", groupOther)}
+            {renderHomeworkMatrix("Standards 6 to 10", group1, true)}
+            {renderHomeworkMatrix("Standards 11 & 12", group2, group1.length === 0)}
+            {renderHomeworkMatrix("Other Standards", groupOther, group1.length === 0 && group2.length === 0)}
           </>
         )}
       </div>
