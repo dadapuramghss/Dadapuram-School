@@ -58,7 +58,19 @@ export default function Marks() {
 
       {student.terms && student.terms.length > 0 ? (
         <div className="space-y-8">
-          {student.terms.map((term, index) => {
+          {[...student.terms]
+            .sort((a, b) => {
+              const termOrder = [
+                'First Midterm',
+                'Quarterly',
+                'Second Midterm',
+                'Half-Yearly',
+                'Third Midterm',
+                'Annual'
+              ];
+              return termOrder.indexOf(a.termName) - termOrder.indexOf(b.termName);
+            })
+            .map((term, index) => {
             let totalScore = 0;
             subjects.forEach(subj => {
               const mark = term.marks.find(m => m.subject.toLowerCase() === subj.toLowerCase());
