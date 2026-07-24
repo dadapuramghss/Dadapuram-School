@@ -374,6 +374,7 @@ const fixSubjects = async (req, res) => {
       }
 
       if (modified) {
+        student.markModified('terms');
         await student.save({ validateModifiedOnly: true });
         updatedCount++;
       }
