@@ -76,6 +76,9 @@ const bulkAddStudents = async (req, res) => {
       errors: []
     };
 
+    const bulkOps = [];
+    let validCount = 0;
+
     for (const studentData of students) {
       const { emisNumber, name, standard, section, gender, medium } = studentData;
       
@@ -83,23 +86,39 @@ const bulkAddStudents = async (req, res) => {
         results.errors.push(`Row missing required fields (EMIS: ${emisNumber || 'N/A'})`);
         continue;
       }
+      
+      validCount++;
 
-      try {
-        const existingStudent = await Student.findOne({ emisNumber, standard, section });
-        
-        if (existingStudent) {
-          await Student.findByIdAndUpdate(existingStudent._id, studentData);
-          results.updated++;
-        } else {
-          const newStudent = new Student({
-            ...studentData,
-            terms: []
-          });
-          await newStudent.save();
-          results.added++;
+      bulkOps.push({
+        updateOne: {
+          filter: { emisNumber, standard, section },
+          update: { 
+            $set: studentData,
+            $setOnInsert: { terms: [] }
+          },
+          upsert: true
         }
-      } catch (err) {
-        results.errors.push(`Error processing ${emisNumber}: ${err.message}`);
+      });
+    }
+
+    if (bulkOps.length > 0) {
+      try {
+        const bulkResult = await Student.bulkWrite(bulkOps);
+        results.added = bulkResult.upsertedCount || 0;
+        // Approximation of updated count since unchanged upserts don't count as modified
+        results.updated = validCount - results.added; 
+      } catch (bulkError) {
+        console.error('BulkWrite Error:', bulkError);
+        // Extract write errors if it's a bulk write error (e.g. duplicate key on old index)
+        if (bulkError.writeErrors) {
+          bulkError.writeErrors.forEach(err => {
+            results.errors.push(`DB Error: ${err.errmsg}`);
+          });
+          results.added = bulkError.result.nUpserted || 0;
+          results.updated = bulkError.result.nModified || 0;
+        } else {
+          results.errors.push(`Server Error during import: ${bulkError.message}`);
+        }
       }
     }
 
