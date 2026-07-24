@@ -16,7 +16,7 @@ export default function Login() {
     setError('');
     
     if (!identifier) {
-      setError('Please enter your mobile number or EMIS Number');
+      setError('Please enter your EMIS Number');
       return;
     }
 
@@ -126,7 +126,7 @@ export default function Login() {
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-2">
                   <label htmlFor="identifier" className="text-sm font-medium text-gray-700 block">
-                    Mobile Number or EMIS Number
+                    EMIS Number
                   </label>
                   <div className="relative">
                     <input
@@ -134,7 +134,7 @@ export default function Login() {
                       type="text"
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
-                      placeholder="Enter your registered mobile number or EMIS Number"
+                      placeholder="Enter your EMIS Number"
                       className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none placeholder:text-gray-400"
                       disabled={loading}
                     />

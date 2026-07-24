@@ -6,9 +6,10 @@ export default function Profile() {
   const { student } = useOutletContext();
 
   const details = [
+    { label: "EMIS Number", value: student.emisNumber, icon: Hash },
+    { label: "Admission No", value: student.admissionNumber, icon: Hash },
     { label: "Father's Name", value: student.fatherName, icon: User },
     { label: "Date of Birth", value: student.dob, icon: Calendar },
-    { label: "Admission No", value: student.admissionNumber, icon: Hash },
     { label: "Mobile Number", value: student.mobileNumber, icon: Phone },
     { label: "Community", value: student.community, icon: Shield },
     { label: "Religion", value: student.religion, icon: Shield },
