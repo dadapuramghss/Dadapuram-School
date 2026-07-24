@@ -24,8 +24,11 @@ export const RankCardPrint = React.forwardRef(({ student, language = 'TAMIL' }, 
   const translateTerm = (termName) => {
     if (isEnglish) return termName;
     const map = {
+      'First Midterm': 'முதல் இடைப்பருவம்',
       'Quarterly': 'காலாண்டு',
+      'Second Midterm': 'இரண்டாம் இடைப்பருவம்',
       'Half-Yearly': 'அரையாண்டு',
+      'Third Midterm': 'மூன்றாம் இடைப்பருவம்',
       'Annual': 'ஆண்டு'
     };
     return map[termName] || termName;

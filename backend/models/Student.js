@@ -17,7 +17,7 @@ const markSchema = new mongoose.Schema({
 const termSchema = new mongoose.Schema({
   termName: {
     type: String,
-    enum: ['Quarterly', 'Half-Yearly', 'Annual'],
+    enum: ['First Midterm', 'Quarterly', 'Second Midterm', 'Half-Yearly', 'Third Midterm', 'Annual'],
     required: true
   },
   marks: [markSchema]

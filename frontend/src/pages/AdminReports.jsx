@@ -609,7 +609,7 @@ export function AdminReports() {
     );
   };
 
-  const EXAMS = ['Quarterly', 'Half-Yearly', 'Annual'];
+  const EXAMS = ['First Midterm', 'Quarterly', 'Second Midterm', 'Half-Yearly', 'Third Midterm', 'Annual'];
   
   const handleDownloadGradeBookExcel = (abstractData, standards) => {
     const excelData = [];

@@ -196,8 +196,11 @@ export function Gradebook() {
               className="glass-input w-full font-bold text-[#2E1C40] dark:!text-white bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-[#62D4CA] disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
             >
               <option value="All Terms">All Terms (Total Sum)</option>
+              <option value="First Midterm">First Midterm</option>
               <option value="Quarterly">Quarterly</option>
+              <option value="Second Midterm">Second Midterm</option>
               <option value="Half-Yearly">Half-Yearly</option>
+              <option value="Third Midterm">Third Midterm</option>
               <option value="Annual">Annual</option>
             </select>
           </div>
