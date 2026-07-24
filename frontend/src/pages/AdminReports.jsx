@@ -773,7 +773,7 @@ export function AdminReports() {
             </div>
             Admin Reports
           </h1>
-          <p className="text-white/60 mt-2 font-medium">View and analyze school-wide student data demographics.</p>
+
         </div>
       </div>
       {/* Tabs */}
@@ -818,7 +818,7 @@ export function AdminReports() {
             </div>
             <div>
               <h2 className="text-xl font-bold text-white tracking-tight">Custom Matrix Report</h2>
-              <p className="text-sm text-white/50 mt-1">Cross-tabulate student data by selecting dimensions.</p>
+
             </div>
           </div>
         </div>
