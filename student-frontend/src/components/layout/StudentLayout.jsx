@@ -102,9 +102,9 @@ export default function StudentLayout() {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Profile', path: '/profile', icon: User },
     { name: 'Homework', path: '/homework', icon: BookOpen },
     { name: 'Marks', path: '/marks', icon: Award },
+    { name: 'Profile', path: '/profile', icon: User },
   ];
 
   if (loading) {
