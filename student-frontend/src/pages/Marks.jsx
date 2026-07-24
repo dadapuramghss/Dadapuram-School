@@ -1,9 +1,48 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Award, BookOpen } from 'lucide-react';
+import { Award, BookOpen, Loader2 } from 'lucide-react';
+import axios from 'axios';
 
 export default function Marks() {
   const { student } = useOutletContext();
+  const [subjects, setSubjects] = useState(null);
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const res = await axios.get(`${baseURL}/class-configs`);
+        const configs = res.data;
+        const config = configs.find(c => c.standard === student.standard && c.section === student.section);
+        
+        if (config && config.subjects && config.subjects.length > 0) {
+          setSubjects(config.subjects);
+        } else {
+          // Fallback based on standard (6-10 vs 11-12)
+          const isHigherSecondary = ['11', '12'].includes(student.standard);
+          setSubjects(isHigherSecondary 
+            ? ['Tamil', 'English', 'Physics', 'Chemistry', 'Biology', 'Maths'] 
+            : ['Tamil', 'English', 'Maths', 'Science', 'Social Science']);
+        }
+      } catch (e) {
+        console.error('Error fetching class configs:', e);
+        // Fallback based on standard
+        const isHigherSecondary = ['11', '12'].includes(student.standard);
+        setSubjects(isHigherSecondary 
+          ? ['Tamil', 'English', 'Physics', 'Chemistry', 'Biology', 'Maths'] 
+          : ['Tamil', 'English', 'Maths', 'Science', 'Social Science']);
+      }
+    };
+    fetchConfig();
+  }, [student]);
+
+  if (!subjects) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -20,8 +59,12 @@ export default function Marks() {
       {student.terms && student.terms.length > 0 ? (
         <div className="space-y-8">
           {student.terms.map((term, index) => {
-            const totalScore = term.marks.reduce((acc, curr) => acc + curr.score, 0);
-            const maxScore = term.marks.length * 100;
+            let totalScore = 0;
+            subjects.forEach(subj => {
+              const mark = term.marks.find(m => m.subject.toLowerCase() === subj.toLowerCase());
+              if (mark) totalScore += mark.score;
+            });
+            const maxScore = subjects.length * 100;
             const percentage = maxScore > 0 ? ((totalScore / maxScore) * 100).toFixed(1) : 0;
             
             return (
@@ -46,20 +89,24 @@ export default function Marks() {
                 
                 <div className="p-6">
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {term.marks.map((mark, i) => (
-                      <div key={i} className="bg-gray-50 hover:bg-white p-4 rounded-xl border border-gray-100 hover:border-indigo-200 transition-colors shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
-                        <div className={`absolute top-0 left-0 w-full h-1 ${mark.score >= 35 ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                        <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2 truncate w-full text-center" title={mark.subject}>
-                          {mark.subject}
-                        </span>
-                        <span className={`text-3xl font-black ${mark.score >= 35 ? 'text-gray-900' : 'text-red-500'}`}>
-                          {mark.score}
-                        </span>
-                        {mark.score < 35 && (
-                          <span className="text-[10px] text-red-500 font-bold uppercase mt-1">Needs Improvement</span>
-                        )}
-                      </div>
-                    ))}
+                    {subjects.map((subj, i) => {
+                      const mark = term.marks.find(m => m.subject.toLowerCase() === subj.toLowerCase());
+                      const score = mark ? mark.score : 0;
+                      return (
+                        <div key={i} className="bg-gray-50 hover:bg-white p-4 rounded-xl border border-gray-100 hover:border-indigo-200 transition-colors shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+                          <div className={`absolute top-0 left-0 w-full h-1 ${score >= 35 ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                          <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2 truncate w-full text-center" title={subj}>
+                            {subj}
+                          </span>
+                          <span className={`text-3xl font-black ${score >= 35 ? 'text-gray-900' : 'text-red-500'}`}>
+                            {score}
+                          </span>
+                          {score < 35 && (
+                            <span className="text-[10px] text-red-500 font-bold uppercase mt-1">Needs Improvement</span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
