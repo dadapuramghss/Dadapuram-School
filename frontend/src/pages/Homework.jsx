@@ -4,8 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { NeonButton } from '../components/ui/NeonButton';
 import { api } from '../lib/api';
 import { useClassConfig } from '../context/ClassConfigContext';
-import { compressImage } from '../lib/utils';
-import { Trash2, Plus, Calendar, BookOpen, Camera, Upload, Mic, Square, Play, Image as ImageIcon } from 'lucide-react';
+import { compressImage, fileToBase64 } from '../lib/utils';
+import { Trash2, Plus, Calendar, BookOpen, Camera, Upload, Mic, Square, Play, Image as ImageIcon, FileText, Link as LinkIcon } from 'lucide-react';
 
 
 
@@ -31,12 +31,13 @@ export function Homework() {
     title: '',
     description: '',
     subject: 'Tamil',
-    dueDate: new Date().toISOString().split('T')[0]
+    dueDate: new Date().toISOString().split('T')[0],
+    link: ''
   });
 
   // Media state
-  const [file, setFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [files, setFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
   
   // Audio state
   const [isRecording, setIsRecording] = useState(false);
@@ -104,11 +105,20 @@ export function Homework() {
   }, [selectedClass, selectedSection]);
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setPreviewUrl(URL.createObjectURL(selectedFile));
+    const selectedFiles = Array.from(e.target.files);
+    if (selectedFiles.length > 0) {
+      setFiles(prev => [...prev, ...selectedFiles]);
+      const newPreviewUrls = selectedFiles.map(file => URL.createObjectURL(file));
+      setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
     }
+  };
+
+  const removeFile = (index) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+    setPreviewUrls(prev => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const startRecording = async () => {
@@ -168,11 +178,13 @@ export function Homework() {
     setLoading(true);
     
     try {
-      let photoUrl = null;
+      let photoUrls = [];
       let voiceUrl = null;
       
-      if (file) {
-        photoUrl = await compressImage(file, 0.5); // Use 0.5 quality for better text readability
+      if (files.length > 0) {
+        photoUrls = await Promise.all(files.map(file => 
+          file.type.startsWith('image/') ? compressImage(file, 0.5) : fileToBase64(file)
+        ));
       }
       
       if (audioBlob) {
@@ -183,7 +195,8 @@ export function Homework() {
         ...newHomework,
         standard: selectedClass,
         section: selectedSection,
-        photoUrl,
+        photoUrl: photoUrls.length > 0 ? photoUrls[0] : null, // keep the first as photoUrl for backward compatibility
+        photoUrls, // send the array of all photos
         voiceUrl
       });
       
@@ -203,10 +216,11 @@ export function Homework() {
       title: '',
       description: '',
       subject: 'Tamil',
-      dueDate: new Date().toISOString().split('T')[0]
+      dueDate: new Date().toISOString().split('T')[0],
+      link: ''
     });
-    setFile(null);
-    setPreviewUrl(null);
+    setFiles([]);
+    setPreviewUrls([]);
     setAudioBlob(null);
     setAudioUrl(null);
   };
@@ -318,31 +332,52 @@ export function Homework() {
                   className="glass-input w-full dark:text-white"
                 />
               </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-bold text-[#4C677C] dark:text-[#E5D9C4] mb-1">External Link (Optional)</label>
+                <input 
+                  type="url"
+                  value={newHomework.link || ''}
+                  onChange={e => setNewHomework({...newHomework, link: e.target.value})}
+                  className="glass-input w-full dark:text-white"
+                  placeholder="https://example.com"
+                />
+              </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-[#E5D9C4]/40 dark:border-[#4C677C]/30 mt-4">
               {/* Photo Upload */}
               <div className="space-y-2">
-                <label className="block text-sm font-bold text-[#4C677C] dark:text-[#E5D9C4] mb-1">Attach Photo (Optional)</label>
-                {previewUrl && (
-                  <div className="relative mb-2 inline-block">
-                    <img src={previewUrl} alt="Preview" className="h-24 w-auto rounded-lg border border-[#E5D9C4] shadow-sm object-cover" />
-                    <button 
-                      type="button" 
-                      onClick={() => { setFile(null); setPreviewUrl(null); }}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                <label className="block text-sm font-bold text-[#4C677C] dark:text-[#E5D9C4] mb-1">Attach Files (Images, PDF, Docs)</label>
+                {files.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {files.map((f, index) => (
+                      <div key={index} className="relative inline-flex items-center justify-center w-24 h-24 rounded-lg border border-[#E5D9C4] shadow-sm overflow-hidden bg-white dark:bg-[#131E3A]">
+                        {f.type.startsWith('image/') ? (
+                          <img src={previewUrls[index]} alt={`Preview ${index}`} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center p-2 text-center h-full w-full">
+                            <FileText className="w-8 h-8 text-[#62D4CA] mb-1" />
+                            <span className="text-[10px] text-[#4C677C] dark:text-[#E5D9C4] truncate w-full px-1">{f.name}</span>
+                          </div>
+                        )}
+                        <button 
+                          type="button" 
+                          onClick={() => removeFile(index)}
+                          className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition z-10"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
                 <div className="flex gap-2">
                   <label className="flex-1 flex items-center justify-center cursor-pointer py-2 px-3 rounded-xl font-bold text-sm bg-[#62D4CA]/20 text-[#2E1C40] hover:bg-[#62D4CA]/40 dark:text-white dark:hover:bg-[#62D4CA]/40 transition-colors">
-                    <input type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
+                    <input type="file" accept="image/*" capture="environment" multiple onChange={handleFileChange} className="hidden" />
                     <Camera className="w-4 h-4 mr-2" /> Take Photo
                   </label>
                   <label className="flex-1 flex items-center justify-center cursor-pointer py-2 px-3 rounded-xl font-bold text-sm bg-[#2E1C40]/10 text-[#2E1C40] hover:bg-[#2E1C40]/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 transition-colors">
-                    <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                    <input type="file" accept="image/*,application/pdf,.doc,.docx" multiple onChange={handleFileChange} className="hidden" />
                     <Upload className="w-4 h-4 mr-2" /> Upload
                   </label>
                 </div>
@@ -441,12 +476,18 @@ export function Homework() {
               )}
               
               {/* Media Preview in Card */}
-              {(hw.photoUrl || hw.voiceUrl) && (
+              {(hw.photoUrls?.length > 0 || hw.photoUrl || hw.voiceUrl || hw.link) && (
                 <div className="mb-4 space-y-2 bg-[#F2FCFA]/50 dark:bg-[#131E3A]/50 p-3 rounded-xl border border-[#E5D9C4]/40 dark:border-[#4C677C]/30">
-                  {hw.photoUrl && (
+                  {hw.link && (
+                    <a href={hw.link} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-[#62D4CA] hover:underline font-medium mb-2 w-fit">
+                      <LinkIcon className="w-4 h-4 mr-2" />
+                      External Link Attached
+                    </a>
+                  )}
+                  {(hw.photoUrls?.length > 0 ? hw.photoUrls : hw.photoUrl ? [hw.photoUrl] : []).length > 0 && (
                     <div className="flex items-center text-sm text-[#4C677C] dark:text-[#E5D9C4] font-medium mb-1">
-                      <ImageIcon className="w-4 h-4 mr-2 text-[#62D4CA]" />
-                      Attached Photo
+                      <FileText className="w-4 h-4 mr-2 text-[#62D4CA]" />
+                      Attached Files ({hw.photoUrls?.length || 1})
                     </div>
                   )}
                   {hw.voiceUrl && (

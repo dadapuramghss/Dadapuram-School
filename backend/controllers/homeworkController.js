@@ -16,7 +16,7 @@ const isAuthorizedForClass = (user, standard, section, requireFullAccess = false
 // Add homework
 const addHomework = async (req, res) => {
   try {
-    const { title, description, subject, standard, section, dueDate, photoUrl, voiceUrl } = req.body;
+    const { title, description, subject, standard, section, dueDate, photoUrl, photoUrls, voiceUrl, link } = req.body;
 
     if (!isAuthorizedForClass(req.dbUser, standard, section, true)) {
       return res.status(403).json({ error: 'Not authorized for full access to this class and section' });
@@ -30,7 +30,9 @@ const addHomework = async (req, res) => {
       section,
       dueDate,
       photoUrl,
+      photoUrls,
       voiceUrl,
+      link,
       assignedBy: req.dbUser.name
     });
 

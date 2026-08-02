@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { Users, GraduationCap, ShieldAlert, Activity, Trophy } from 'lucide-react';
+import { Users, GraduationCap, ShieldAlert, Activity, Trophy, Medal } from 'lucide-react';
 import { StudentProfileModal } from '../components/ui/StudentProfileModal';
 
 export function AdminDashboard() {
@@ -71,7 +71,44 @@ export function AdminDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 mt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+            {/* Students Abstract */}
+            <div className="bg-white/[0.02] border border-white/5 shadow-sm rounded-2xl p-5">
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="p-1.5 bg-[#5D7D9A]/10 rounded-lg">
+                  <Activity className="w-4 h-4 text-[#5D7D9A]" />
+                </div>
+                <h2 className="text-lg font-bold text-white tracking-tight">Students Abstract</h2>
+              </div>
+              
+              {(!stats?.studentsAbstract || stats.studentsAbstract.length === 0) ? (
+                <div className="text-white/40 py-6 text-center font-medium">No abstract data available.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm text-white/80">
+                    <thead className="text-xs text-white/50 uppercase bg-white/5">
+                      <tr>
+                        <th className="px-4 py-3 rounded-l-lg">Class</th>
+                        <th className="px-4 py-3 text-center">Boys</th>
+                        <th className="px-4 py-3 text-center">Girls</th>
+                        <th className="px-4 py-3 text-center rounded-r-lg">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {stats.studentsAbstract.map((abs, idx) => (
+                        <tr key={idx} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
+                          <td className="px-4 py-3 font-bold text-white whitespace-nowrap">{abs._id.standard} - {abs._id.section}</td>
+                          <td className="px-4 py-3 text-center text-[#5D7D9A] font-semibold">{abs.maleStudents}</td>
+                          <td className="px-4 py-3 text-center text-[#FA7848] font-semibold">{abs.femaleStudents}</td>
+                          <td className="px-4 py-3 text-center font-bold text-[#F9CB84]">{abs.totalStudents}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
             {/* Top 3 Students (School-Wide) */}
             <div className="bg-white/[0.02] border border-white/5 shadow-sm rounded-2xl p-5">
               <div className="flex items-center gap-2.5 mb-5">
@@ -107,6 +144,44 @@ export function AdminDashboard() {
                       <div className="text-right">
                         <p className="text-2xl font-extrabold text-[#F9CB84]">{student.totalMarks}</p>
                         <p className="text-[9px] text-white/40 uppercase tracking-widest font-semibold mt-0.5">Total Marks</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 mt-4">
+            {/* Classwise First Marks */}
+            <div className="bg-white/[0.02] border border-white/5 shadow-sm rounded-2xl p-5">
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="p-1.5 bg-[#FA7848]/10 rounded-lg">
+                  <Medal className="w-4 h-4 text-[#FA7848]" />
+                </div>
+                <h2 className="text-lg font-bold text-white tracking-tight">Classwise First Marks</h2>
+              </div>
+              
+              {(!stats?.classwiseFirstMarks || stats.classwiseFirstMarks.length === 0) ? (
+                <div className="text-white/40 py-6 text-center font-medium">No exam data available.</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {stats.classwiseFirstMarks.map((fm, idx) => (
+                    <div key={idx} className="p-4 bg-white/[0.03] rounded-xl border border-white/5 hover:bg-white/[0.05] transition-colors flex flex-col justify-between">
+                      <div className="flex justify-between items-start mb-3">
+                        <span className="text-[10px] uppercase font-bold tracking-widest text-[#5D7D9A] bg-[#5D7D9A]/10 px-2 py-1 rounded-md">
+                          {fm._id.standard} - {fm._id.section}
+                        </span>
+                        <span className="text-[10px] uppercase font-bold tracking-widest text-white/50 bg-white/5 px-2 py-1 rounded-md">
+                          {fm._id.termName}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold text-white truncate">{fm.topStudent}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Trophy className="w-3.5 h-3.5 text-[#F9CB84]" />
+                          <span className="text-sm font-semibold text-[#F9CB84]">{fm.topScore} marks</span>
+                        </div>
                       </div>
                     </div>
                   ))}

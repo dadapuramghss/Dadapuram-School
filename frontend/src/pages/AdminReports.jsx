@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { FileText, Download, X, Eye, Grid, BookOpen, CheckCircle, XCircle, GraduationCap } from 'lucide-react';
+import { FileText, Download, X, Eye, Grid, BookOpen, CheckCircle, XCircle, GraduationCap, Printer } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export function AdminReports() {
@@ -137,6 +137,62 @@ export function AdminReports() {
     XLSX.writeFile(workbook, `Matrix_Report_${rowLabel}_vs_${colLabel}.xlsx`);
   };
 
+  const handlePrintMatrix = (rowValues, colValues, matrixData, rowLabel, colLabel) => {
+    const printWindow = window.open('', '_blank');
+    
+    let tableHtml = `
+      <html>
+      <head>
+        <title>Matrix Report - ${rowLabel} vs ${colLabel}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h2 { text-align: center; margin-bottom: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+          th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+          th { background-color: #f5f5f5; font-weight: bold; }
+          .left-align { text-align: left; font-weight: bold; }
+          .grand-total { font-weight: bold; background-color: #f0f0f0; }
+        </style>
+      </head>
+      <body>
+        <h2>${rowLabel} vs ${colLabel} Breakdown</h2>
+        <table>
+          <thead>
+            <tr>
+              <th class="left-align">${rowLabel} \\ ${colLabel}</th>
+              ${colValues.map(c => `<th>${c}</th>`).join('')}
+              <th>TOTAL</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowValues.map(r => `
+              <tr>
+                <td class="left-align">${r}</td>
+                ${colValues.map(c => `<td>${matrixData[r]?.[c] || 0}</td>`).join('')}
+                <td style="font-weight:bold;">${matrixData[r]?.total || 0}</td>
+              </tr>
+            `).join('')}
+            <tr class="grand-total">
+              <td class="left-align">GRAND TOTAL</td>
+              ${colValues.map(c => `<td>${matrixData.colTotals[c] || 0}</td>`).join('')}
+              <td>${matrixData.grandTotal || 0}</td>
+            </tr>
+          </tbody>
+        </table>
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() { window.close(); }, 500);
+          }
+        </script>
+      </body>
+      </html>
+    `;
+    
+    printWindow.document.write(tableHtml);
+    printWindow.document.close();
+  };
+
   const renderMatrixReport = () => {
     if (loading) return <div className="text-white/40 text-center py-10 font-medium">Loading report data...</div>;
     if (!allStudents.length) return <div className="text-white/40 text-center py-10 font-medium">No student data available for reports.</div>;
@@ -218,21 +274,21 @@ export function AdminReports() {
             <table className="w-full text-center border-collapse">
               <thead>
                 <tr className="bg-white/[0.02] border-b border-white/5 text-[11px] uppercase tracking-wider text-white/50 font-bold">
-                  <th className="p-4 text-left border-r border-white/5 bg-white/5">{rowLabel} \ {colLabel}</th>
+                  <th className="px-3 py-2 text-left border-r border-white/5 bg-white/5">{rowLabel} \ {colLabel}</th>
                   {colValues.map(c => (
-                    <th key={c} className="p-4 bg-white/[0.01]">{c}</th>
+                    <th key={c} className="px-3 py-2 bg-white/[0.01]">{c}</th>
                   ))}
-                  <th className="p-4 text-white/80 bg-white/5 border-l border-white/5">TOTAL</th>
+                  <th className="px-3 py-2 text-white/80 bg-white/5 border-l border-white/5">TOTAL</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-sm">
                 {rowValues.map(r => (
                   <tr key={r} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="p-4 text-left font-bold text-[#EBD8BE] border-r border-white/5 bg-white/[0.01]">{r}</td>
+                    <td className="px-3 py-2 text-left font-bold text-[#EBD8BE] border-r border-white/5 bg-white/[0.01]">{r}</td>
                     {colValues.map(c => {
                       const count = matrixData[r]?.[c] || 0;
                       return (
-                        <td key={c} className="p-4 text-white/70">
+                        <td key={c} className="px-3 py-2 text-white/70">
                           {count > 0 ? (
                             <button 
                               onClick={() => {
@@ -249,7 +305,7 @@ export function AdminReports() {
                         </td>
                       );
                     })}
-                    <td className="p-4 font-bold text-[#F9CB84] bg-white/[0.03] border-l border-white/5">
+                    <td className="px-3 py-2 font-bold text-[#F9CB84] bg-white/[0.03] border-l border-white/5">
                       {matrixData[r]?.total > 0 ? (
                         <button 
                           onClick={() => {
@@ -267,11 +323,11 @@ export function AdminReports() {
                   </tr>
                 ))}
                 <tr className="bg-white/[0.03] font-bold text-white border-t-2 border-white/10">
-                  <td className="p-4 text-left border-r border-white/5 text-[#EBD8BE]">GRAND TOTAL</td>
+                  <td className="px-3 py-2 text-left border-r border-white/5 text-[#EBD8BE]">GRAND TOTAL</td>
                   {colValues.map(c => {
                     const count = matrixData.colTotals[c] || 0;
                     return (
-                      <td key={c} className="p-4 text-[#62D4CA]">
+                      <td key={c} className="px-3 py-2 text-[#62D4CA]">
                         {count > 0 ? (
                           <button 
                             onClick={() => {
@@ -288,7 +344,7 @@ export function AdminReports() {
                       </td>
                     );
                   })}
-                  <td className="p-4 text-white bg-[#F9CB84]/15 border-l border-white/5">
+                  <td className="px-3 py-2 text-white bg-[#F9CB84]/15 border-l border-white/5">
                     {matrixData.grandTotal > 0 ? (
                       <button 
                         onClick={() => {
@@ -325,6 +381,13 @@ export function AdminReports() {
             >
               <Download className="w-4.5 h-4.5" />
               Download Excel
+            </button>
+            <button 
+              onClick={() => handlePrintMatrix(rowValues, colValues, matrixData, rowLabel, colLabel)}
+              className="flex items-center justify-center gap-2 bg-[#EBD8BE]/10 hover:bg-[#EBD8BE]/20 text-[#EBD8BE] border border-[#EBD8BE]/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
+            >
+              <Printer className="w-4.5 h-4.5" />
+              Print
             </button>
           </div>
         </div>

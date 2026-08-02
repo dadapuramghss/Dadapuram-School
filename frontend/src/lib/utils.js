@@ -5,6 +5,15 @@ export function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
+export const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
 export const compressImage = (file, maxSizeMB = 1) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

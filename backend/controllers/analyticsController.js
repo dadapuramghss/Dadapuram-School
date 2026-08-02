@@ -137,6 +137,52 @@ const getDashboardStats = async (req, res) => {
       }
     ]);
 
+    // Students Abstract Pipeline (Total, Male, Female by class/section)
+    const studentsAbstract = await Student.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: { standard: "$standard", section: "$section" },
+          totalStudents: { $sum: 1 },
+          maleStudents: { $sum: { $cond: [{ $eq: ["$gender", "Male"] }, 1, 0] } },
+          femaleStudents: { $sum: { $cond: [{ $eq: ["$gender", "Female"] }, 1, 0] } }
+        }
+      },
+      { $sort: { "_id.standard": 1, "_id.section": 1 } }
+    ]);
+
+    // Classwise First Mark Pipeline (Highest total score by term, per class/section)
+    const classwiseFirstMarks = await Student.aggregate([
+      { $match: query },
+      { $unwind: { path: "$terms", preserveNullAndEmptyArrays: false } },
+      { $unwind: { path: "$terms.marks", preserveNullAndEmptyArrays: false } },
+      {
+        $group: {
+          _id: {
+            studentId: "$_id",
+            standard: "$standard",
+            section: "$section",
+            termName: "$terms.termName",
+            name: "$name"
+          },
+          totalScore: { $sum: "$terms.marks.score" }
+        }
+      },
+      { $sort: { totalScore: -1 } },
+      {
+        $group: {
+          _id: {
+            standard: "$_id.standard",
+            section: "$_id.section",
+            termName: "$_id.termName"
+          },
+          topStudent: { $first: "$_id.name" },
+          topScore: { $first: "$totalScore" }
+        }
+      },
+      { $sort: { "_id.standard": 1, "_id.section": 1, "_id.termName": 1 } }
+    ]);
+
     res.status(200).json({
       success: true,
       data: {
@@ -144,7 +190,9 @@ const getDashboardStats = async (req, res) => {
         maleStudents,
         femaleStudents,
         totalTeachers,
-        topStudents
+        topStudents,
+        studentsAbstract,
+        classwiseFirstMarks
       }
     });
 

@@ -35,8 +35,16 @@ const homeworkSchema = new mongoose.Schema({
     type: String, // Will store base64 or cloudinary URL
     default: null
   },
+  photoUrls: {
+    type: [String],
+    default: []
+  },
   voiceUrl: {
     type: String, // Will store base64 audio
+    default: null
+  },
+  link: {
+    type: String,
     default: null
   }
 }, { timestamps: true });

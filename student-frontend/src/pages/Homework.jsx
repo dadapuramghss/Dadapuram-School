@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
-import { BookOpen, Calendar, AlertCircle, Mic, Image as ImageIcon, X } from 'lucide-react';
+import { BookOpen, Calendar, AlertCircle, Mic, Image as ImageIcon, X, FileText, Download, Link as LinkIcon } from 'lucide-react';
 
 export default function Homework() {
   const { student } = useOutletContext();
@@ -107,34 +107,69 @@ export default function Homework() {
                   )}
                   
                   {/* Media Attachments Section */}
-                  {(hw.photoUrl || hw.voiceUrl) && (
+                  {(hw.photoUrls?.length > 0 || hw.photoUrl || hw.voiceUrl || hw.link) && (
                     <div className="mb-6 space-y-3 bg-gray-50 rounded-xl p-4 border border-gray-100">
                       <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Attachments</h4>
                       
-                      {hw.photoUrl && (
-                        <div className="flex flex-col">
-                          <span className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                            <ImageIcon className="w-4 h-4 mr-2 text-indigo-500" /> Photo attached
-                          </span>
-                          <button 
-                            onClick={() => setExpandedImage(hw.photoUrl)}
-                            className="relative rounded-lg overflow-hidden border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-fit"
+                      {hw.link && (
+                        <div className="flex flex-col mb-3">
+                          <a 
+                            href={hw.link} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 p-3 rounded-xl transition-colors border border-indigo-100 w-fit"
                           >
-                            <img 
-                              src={hw.photoUrl} 
-                              alt="Homework attachment" 
-                              className="h-24 w-auto object-cover hover:opacity-90 transition-opacity"
-                            />
-                            <div className="absolute inset-0 bg-black/0 hover:bg-black/10 flex items-center justify-center transition-colors">
-                              <span className="bg-black/60 text-white text-[10px] px-2 py-1 rounded-full opacity-0 hover:opacity-100 transition-opacity">
-                                Click to expand
-                              </span>
-                            </div>
-                          </button>
+                            <LinkIcon className="w-4 h-4 mr-2" /> 
+                            Open External Link
+                          </a>
                         </div>
                       )}
                       
-                      {hw.photoUrl && hw.voiceUrl && <hr className="border-gray-200" />}
+                      {hw.link && (hw.photoUrls?.length > 0 || hw.photoUrl || hw.voiceUrl) && <hr className="border-gray-200 mb-3" />}
+                      
+                      {(hw.photoUrls?.length > 0 ? hw.photoUrls : hw.photoUrl ? [hw.photoUrl] : []).length > 0 && (
+                        <div className="flex flex-col">
+                          <span className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                            <FileText className="w-4 h-4 mr-2 text-indigo-500" /> Attached Files ({ (hw.photoUrls?.length > 0 ? hw.photoUrls : hw.photoUrl ? [hw.photoUrl] : []).length })
+                          </span>
+                          <div className="flex flex-wrap gap-3">
+                            {(hw.photoUrls?.length > 0 ? hw.photoUrls : hw.photoUrl ? [hw.photoUrl] : []).map((url, index) => {
+                              const isImage = url.startsWith('data:image/');
+                              return isImage ? (
+                                <button 
+                                  key={index}
+                                  onClick={() => setExpandedImage(url)}
+                                  className="relative rounded-lg overflow-hidden border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-fit shrink-0"
+                                >
+                                  <img 
+                                    src={url} 
+                                    alt={`Homework attachment ${index + 1}`} 
+                                    className="h-24 w-auto object-cover hover:opacity-90 transition-opacity"
+                                  />
+                                  <div className="absolute inset-0 bg-black/0 hover:bg-black/10 flex items-center justify-center transition-colors">
+                                    <span className="bg-black/60 text-white text-[10px] px-2 py-1 rounded-full opacity-0 hover:opacity-100 transition-opacity">
+                                      Click to expand
+                                    </span>
+                                  </div>
+                                </button>
+                              ) : (
+                                <a 
+                                  key={index}
+                                  href={url}
+                                  download={`Attachment-${index + 1}`}
+                                  className="flex flex-col items-center justify-center h-24 w-24 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 shrink-0"
+                                >
+                                  <FileText className="w-8 h-8 text-indigo-400 mb-1" />
+                                  <span className="text-[10px] text-gray-600 px-1 truncate w-full text-center">Document {index + 1}</span>
+                                  <span className="text-[9px] text-indigo-600 flex items-center mt-1"><Download className="w-3 h-3 mr-1" /> Download</span>
+                                </a>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {(hw.photoUrls?.length > 0 || hw.photoUrl) && hw.voiceUrl && <hr className="border-gray-200" />}
                       
                       {hw.voiceUrl && (
                         <div className="flex flex-col">

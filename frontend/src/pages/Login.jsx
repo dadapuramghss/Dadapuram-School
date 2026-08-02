@@ -12,7 +12,7 @@ export function Login() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [resetting, setResetting] = useState(false);
-  const [selectedRole, setSelectedRole] = useState('teacher');
+  const [selectedRole, setSelectedRole] = useState('admin');
   const navigate = useNavigate();
   const { login, loginWithGoogle, logout, resetPassword } = useAuth();
 
@@ -151,17 +151,6 @@ export function Login() {
           <button
             type="button"
             className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${
-              selectedRole === 'teacher' 
-                ? 'bg-[#2E4657] text-[#F2F2F2] shadow-lg shadow-[#080808]/50' 
-                : 'text-[#CDD3C6]/70 hover:text-[#F2F2F2]'
-            }`}
-            onClick={() => setSelectedRole('teacher')}
-          >
-            Teacher
-          </button>
-          <button
-            type="button"
-            className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${
               selectedRole === 'admin' 
                 ? 'bg-[#885D40] text-[#EFE6D5] shadow-lg shadow-[#080808]/50' 
                 : 'text-[#CDD3C6]/70 hover:text-[#F2F2F2]'
@@ -169,6 +158,17 @@ export function Login() {
             onClick={() => setSelectedRole('admin')}
           >
             Admin
+          </button>
+          <button
+            type="button"
+            className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${
+              selectedRole === 'teacher' 
+                ? 'bg-[#2E4657] text-[#F2F2F2] shadow-lg shadow-[#080808]/50' 
+                : 'text-[#CDD3C6]/70 hover:text-[#F2F2F2]'
+            }`}
+            onClick={() => setSelectedRole('teacher')}
+          >
+            Teacher
           </button>
         </div>
 

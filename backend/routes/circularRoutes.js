@@ -6,7 +6,7 @@ const { verifyToken } = require('../middleware/auth');
 // Add a circular (Admin only, but we'll check role if possible)
 router.post('/', verifyToken, async (req, res) => {
   try {
-    const { title, description, fileUrl, fileType, fileName } = req.body;
+    const { title, description, fileUrl, fileType, fileName, audience } = req.body;
     
     // In a real app, verify req.dbUser.role === 'admin'
     // For now, allow anyone who reaches this via the Admin UI
@@ -14,6 +14,7 @@ router.post('/', verifyToken, async (req, res) => {
     const newCircular = new Circular({
       title,
       description,
+      audience: audience || 'All',
       fileUrl,
       fileType,
       fileName,
@@ -31,7 +32,13 @@ router.post('/', verifyToken, async (req, res) => {
 // Get all active circulars
 router.get('/', verifyToken, async (req, res) => {
   try {
-    const circulars = await Circular.find().sort({ createdAt: -1 });
+    let query = {};
+    if (req.dbUser && req.dbUser.role === 'student') {
+      query.audience = { $in: ['All', 'Student'] };
+    } else if (req.dbUser && req.dbUser.role === 'teacher') {
+      query.audience = { $in: ['All', 'Teacher'] };
+    }
+    const circulars = await Circular.find(query).sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: circulars });
   } catch (error) {
     console.error('Error fetching circulars:', error);

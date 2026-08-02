@@ -16,7 +16,8 @@ export function Circulars() {
 
   const [newCircular, setNewCircular] = useState({
     title: '',
-    description: ''
+    description: '',
+    audience: 'All'
   });
   
   const [file, setFile] = useState(null);
@@ -47,7 +48,7 @@ export function Circulars() {
   };
 
   const resetForm = () => {
-    setNewCircular({ title: '', description: '' });
+    setNewCircular({ title: '', description: '', audience: 'All' });
     setFile(null);
     setPreviewUrl(null);
     setIsAdding(false);
@@ -156,6 +157,19 @@ export function Circulars() {
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-bold text-[#4C677C] dark:text-[#E5D9C4] mb-1">Target Audience</label>
+              <select 
+                value={newCircular.audience}
+                onChange={e => setNewCircular({...newCircular, audience: e.target.value})}
+                className="glass-input w-full dark:text-white bg-white/50 dark:bg-black/20 border border-[#E5D9C4] dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none"
+              >
+                <option value="All" className="dark:bg-[#1A1A24]">All (Teachers & Students)</option>
+                <option value="Teacher" className="dark:bg-[#1A1A24]">Teachers Only</option>
+                <option value="Student" className="dark:bg-[#1A1A24]">Students Only</option>
+              </select>
+            </div>
+
             <div className="pt-4 border-t border-[#E5D9C4]/40 dark:border-[#4C677C]/30">
               <label className="block text-sm font-bold text-[#4C677C] dark:text-[#E5D9C4] mb-2">Attach File (Optional)</label>
               {file && (
@@ -222,10 +236,21 @@ export function Circulars() {
               <div className="absolute top-0 left-0 w-1 h-full bg-orange-500"></div>
               
               <div className="flex justify-between items-start mb-2">
-                <span className="text-xs font-bold text-orange-600 bg-orange-100 dark:bg-orange-500/20 dark:text-orange-400 px-2 py-1 rounded-md flex items-center">
-                  <Calendar className="w-3 h-3 mr-1" />
-                  {new Date(circular.createdAt).toLocaleDateString()}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-orange-600 bg-orange-100 dark:bg-orange-500/20 dark:text-orange-400 px-2 py-1 rounded-md flex items-center">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    {new Date(circular.createdAt).toLocaleDateString()}
+                  </span>
+                  {circular.audience && circular.audience !== 'All' && (
+                    <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-md ${
+                      circular.audience === 'Teacher' 
+                        ? 'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400' 
+                        : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'
+                    }`}>
+                      {circular.audience}s Only
+                    </span>
+                  )}
+                </div>
                 {isAdmin && (
                   <button 
                     onClick={() => handleDelete(circular._id)}

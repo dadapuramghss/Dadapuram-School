@@ -11,6 +11,11 @@ const circularSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  audience: {
+    type: String,
+    enum: ['All', 'Teacher', 'Student'],
+    default: 'All'
+  },
   fileUrl: {
     type: String, // Base64 for images/docs
     default: null
