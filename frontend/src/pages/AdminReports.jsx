@@ -365,6 +365,13 @@ export function AdminReports() {
           </div>
           
           <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-white/5">
+            <button
+              onClick={() => window.print()}
+              className="flex items-center justify-center gap-2 bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 text-[#8B5CF6] border border-[#8B5CF6]/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm print:hidden"
+            >
+              <Printer className="w-4.5 h-4.5" />
+              Print
+            </button>
             <button 
               onClick={() => {
                 setSelectedMatrixGroup("Custom Matrix Report");
@@ -666,6 +673,13 @@ export function AdminReports() {
               </h3>
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+              <button
+                onClick={() => window.print()}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 text-[#8B5CF6] border border-[#8B5CF6]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors print:hidden"
+              >
+                <Printer className="w-4 h-4" />
+                Print
+              </button>
               <button 
                 onClick={() => {
                   setSelectedMatrixGroup(`All Classes & Sections (Total)`);
