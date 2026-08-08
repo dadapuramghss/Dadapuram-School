@@ -10,7 +10,7 @@ export function AdminReports() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('student');
   const [selectedStudentDetails, setSelectedStudentDetails] = useState(null);
-  
+
   // Matrix specific state
   const [selectedMatrixGroup, setSelectedMatrixGroup] = useState(null);
   const [selectedMatrixStudents, setSelectedMatrixStudents] = useState([]);
@@ -19,7 +19,7 @@ export function AdminReports() {
   const [matrixRow, setMatrixRow] = useState(['standard']);
   const [matrixCol, setMatrixCol] = useState(['gender']);
   const [showGlobalPreview, setShowGlobalPreview] = useState(false);
-  
+
   // Reset preview when dimensions change
   useEffect(() => {
     setSelectedMatrixGroup(null);
@@ -27,7 +27,7 @@ export function AdminReports() {
     setShowGlobalPreview(false);
     setPreviewExamContext(null);
   }, [matrixRow, matrixCol]);
-  
+
   const matrixDimensions = [
     { id: 'standard', label: 'Class' },
     { id: 'section', label: 'Section' },
@@ -100,13 +100,13 @@ export function AdminReports() {
 
   const handleDownloadExcel = (groupKey, studentsToDownload) => {
     if (!studentsToDownload || studentsToDownload.length === 0) return;
-    
+
     const excelData = studentsToDownload.map(mapStudentToExcelRow);
 
     const worksheet = XLSX.utils.json_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
-    
+
     XLSX.writeFile(workbook, `${groupKey.replace(/[^a-zA-Z0-9]/g, '_')}_students_report.xlsx`);
   };
 
@@ -139,7 +139,7 @@ export function AdminReports() {
 
   const handlePrintMatrix = (rowValues, colValues, matrixData, rowLabel, colLabel) => {
     const printWindow = window.open('', '_blank');
-    
+
     let tableHtml = `
       <html>
       <head>
@@ -188,7 +188,7 @@ export function AdminReports() {
       </body>
       </html>
     `;
-    
+
     printWindow.document.write(tableHtml);
     printWindow.document.close();
   };
@@ -197,11 +197,11 @@ export function AdminReports() {
     if (loading) return <div className="text-white/40 text-center py-10 font-medium">Loading report data...</div>;
     if (!allStudents.length) return <div className="text-white/40 text-center py-10 font-medium">No student data available for reports.</div>;
 
-    const matrixData = { 
-      grandTotal: 0, 
-      colTotals: {}, 
-      colStudents: {}, 
-      grandTotalStudents: [] 
+    const matrixData = {
+      grandTotal: 0,
+      colTotals: {},
+      colStudents: {},
+      grandTotalStudents: []
     };
     const rowSet = new Set();
     const colSet = new Set();
@@ -218,17 +218,17 @@ export function AdminReports() {
       if (!matrixData[rVal].students[cVal]) {
         matrixData[rVal].students[cVal] = [];
       }
-      
+
       // Store counts
       matrixData[rVal][cVal] = (matrixData[rVal][cVal] || 0) + 1;
       matrixData[rVal].total += 1;
       matrixData.colTotals[cVal] = (matrixData.colTotals[cVal] || 0) + 1;
       matrixData.grandTotal += 1;
-      
+
       // Store actual student objects for preview
       matrixData[rVal].students[cVal].push(student);
       matrixData[rVal].totalStudents.push(student);
-      
+
       if (!matrixData.colStudents[cVal]) {
         matrixData.colStudents[cVal] = [];
       }
@@ -290,7 +290,7 @@ export function AdminReports() {
                       return (
                         <td key={c} className="px-3 py-2 text-white/70">
                           {count > 0 ? (
-                            <button 
+                            <button
                               onClick={() => {
                                 setSelectedMatrixGroup(`${r} / ${c}`);
                                 setSelectedMatrixStudents(matrixData[r].students[c]);
@@ -307,7 +307,7 @@ export function AdminReports() {
                     })}
                     <td className="px-3 py-2 font-bold text-[#F9CB84] bg-white/[0.03] border-l border-white/5">
                       {matrixData[r]?.total > 0 ? (
-                        <button 
+                        <button
                           onClick={() => {
                             setSelectedMatrixGroup(`${r} (Total)`);
                             setSelectedMatrixStudents(matrixData[r].totalStudents);
@@ -329,7 +329,7 @@ export function AdminReports() {
                     return (
                       <td key={c} className="px-3 py-2 text-[#62D4CA]">
                         {count > 0 ? (
-                          <button 
+                          <button
                             onClick={() => {
                               setSelectedMatrixGroup(`${c} (Total)`);
                               setSelectedMatrixStudents(matrixData.colStudents[c]);
@@ -346,7 +346,7 @@ export function AdminReports() {
                   })}
                   <td className="px-3 py-2 text-white bg-[#F9CB84]/15 border-l border-white/5">
                     {matrixData.grandTotal > 0 ? (
-                      <button 
+                      <button
                         onClick={() => {
                           setSelectedMatrixGroup(`Grand Total`);
                           setSelectedMatrixStudents(matrixData.grandTotalStudents);
@@ -363,9 +363,9 @@ export function AdminReports() {
               </tbody>
             </table>
           </div>
-          
+
           <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-white/5">
-            <button 
+            <button
               onClick={() => {
                 setSelectedMatrixGroup("Custom Matrix Report");
                 setSelectedMatrixStudents(matrixData.grandTotalStudents);
@@ -375,14 +375,14 @@ export function AdminReports() {
               <Eye className="w-4.5 h-4.5" />
               Preview
             </button>
-            <button 
+            <button
               onClick={() => handleDownloadMatrixExcel(matrixData, rowValues, colValues, rowLabel, colLabel)}
               className="flex items-center justify-center gap-2 bg-[#F9CB84]/10 hover:bg-[#F9CB84]/20 text-[#F9CB84] border border-[#F9CB84]/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
             >
               <Download className="w-4.5 h-4.5" />
               Download Excel
             </button>
-            <button 
+            <button
               onClick={() => handlePrintMatrix(rowValues, colValues, matrixData, rowLabel, colLabel)}
               className="flex items-center justify-center gap-2 bg-[#EBD8BE]/10 hover:bg-[#EBD8BE]/20 text-[#EBD8BE] border border-[#EBD8BE]/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
             >
@@ -421,21 +421,21 @@ export function AdminReports() {
   };
 
   const handleDownloadHomeworkExcel = (matrix, classes) => {
-    const group1 = classes.filter(c => ['6','7','8','9','10'].includes(String(c.standard)));
-    const group2 = classes.filter(c => ['11','12'].includes(String(c.standard)));
-    const groupOther = classes.filter(c => !['6','7','8','9','10','11','12'].includes(String(c.standard)));
-    
+    const group1 = classes.filter(c => ['6', '7', '8', '9', '10'].includes(String(c.standard)));
+    const group2 = classes.filter(c => ['11', '12'].includes(String(c.standard)));
+    const groupOther = classes.filter(c => !['6', '7', '8', '9', '10', '11', '12'].includes(String(c.standard)));
+
     const aoa = [];
-    
+
     const addGroupToAoA = (groupClasses) => {
       if (groupClasses.length === 0) return;
-      
+
       const uniqueSubjects = Array.from(new Set(groupClasses.flatMap(c => c.subjects || [])));
       const groupSubjects = sortSubjects(uniqueSubjects);
-      
+
       const headerRow = ['Class & Section', ...groupSubjects];
       aoa.push(headerRow);
-      
+
       groupClasses.forEach(c => {
         const row = [`${c.standard} - ${c.section}`];
         groupSubjects.forEach(sub => {
@@ -453,7 +453,7 @@ export function AdminReports() {
     addGroupToAoA(group1);
     addGroupToAoA(group2);
     addGroupToAoA(groupOther);
-    
+
     const worksheet = XLSX.utils.aoa_to_sheet(aoa);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Homework Report");
@@ -462,7 +462,7 @@ export function AdminReports() {
 
   const renderHomeworkReport = () => {
     if (loading) return <div className="text-white/40 text-center py-10 font-medium">Loading report data...</div>;
-    
+
     // Sort classes
     const sortedClasses = [...classConfigsData].sort((a, b) => {
       const numA = parseInt(a.standard);
@@ -481,28 +481,28 @@ export function AdminReports() {
 
     const renderHomeworkMatrix = (title, classesGroup, showDownload = false) => {
       if (classesGroup.length === 0) return null;
-      
+
       const uniqueSubjects = Array.from(new Set(classesGroup.flatMap(c => c.subjects || [])));
       const subjects = sortSubjects(uniqueSubjects);
-      
+
       return (
         <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-xl mb-6 last:mb-0">
           <div className="p-4 md:p-5 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.02]">
-             <div className="flex items-center gap-3">
-               <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                 <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
-                 {title}
-               </h3>
-             </div>
-             {showDownload && (
-               <button 
-                 onClick={() => handleDownloadHomeworkExcel(hwMap, sortedClasses)}
-                 className="flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
-               >
-                 <Download className="w-4 h-4" />
-                 Download Excel
-               </button>
-             )}
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
+                {title}
+              </h3>
+            </div>
+            {showDownload && (
+              <button
+                onClick={() => handleDownloadHomeworkExcel(hwMap, sortedClasses)}
+                className="flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Download Excel
+              </button>
+            )}
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-center border-collapse">
@@ -523,21 +523,21 @@ export function AdminReports() {
                     <tr key={key} className="hover:bg-white/[0.02] transition-colors">
                       <td className="p-4 text-left font-bold text-[#EBD8BE] border-r border-white/5 bg-[#0B132B] whitespace-nowrap sticky left-0 z-10">{c.standard} - {c.section}</td>
                       {subjects.map(sub => {
-                         if (!c.subjects?.includes(sub)) {
-                            return <td key={sub} className="p-4 bg-white/[0.02]"></td>;
-                         }
-                         const hasHw = hwMap[key]?.[sub];
-                         return (
-                            <td key={sub} className="p-4">
-                              <div className="flex justify-center">
-                                {hasHw ? (
-                                  <CheckCircle className="w-5 h-5 text-green-500" />
-                                ) : (
-                                  <XCircle className="w-5 h-5 text-red-500/80" />
-                                )}
-                              </div>
-                            </td>
-                         );
+                        if (!c.subjects?.includes(sub)) {
+                          return <td key={sub} className="p-4 bg-white/[0.02]"></td>;
+                        }
+                        const hasHw = hwMap[key]?.[sub];
+                        return (
+                          <td key={sub} className="p-4">
+                            <div className="flex justify-center">
+                              {hasHw ? (
+                                <CheckCircle className="w-5 h-5 text-green-500" />
+                              ) : (
+                                <XCircle className="w-5 h-5 text-red-500/80" />
+                              )}
+                            </div>
+                          </td>
+                        );
                       })}
                     </tr>
                   );
@@ -549,9 +549,9 @@ export function AdminReports() {
       );
     };
 
-    const group1 = sortedClasses.filter(c => ['6','7','8','9','10'].includes(String(c.standard)));
-    const group2 = sortedClasses.filter(c => ['11','12'].includes(String(c.standard)));
-    const groupOther = sortedClasses.filter(c => !['6','7','8','9','10','11','12'].includes(String(c.standard)));
+    const group1 = sortedClasses.filter(c => ['6', '7', '8', '9', '10'].includes(String(c.standard)));
+    const group2 = sortedClasses.filter(c => ['11', '12'].includes(String(c.standard)));
+    const groupOther = sortedClasses.filter(c => !['6', '7', '8', '9', '10', '11', '12'].includes(String(c.standard)));
     const allSubjects = Array.from(new Set(sortedClasses.flatMap(c => c.subjects || []))).sort();
 
     return (
@@ -572,7 +572,7 @@ export function AdminReports() {
   };
 
   const EXAMS = ['First Midterm', 'Quarterly', 'Second Midterm', 'Half-Yearly', 'Third Midterm', 'Annual'];
-  
+
   const handleDownloadGradeBookExcel = (abstractData, standards) => {
     const excelData = [];
     standards.forEach(std => {
@@ -590,7 +590,7 @@ export function AdminReports() {
       });
       excelData.push(row);
     });
-    
+
     const worksheet = XLSX.utils.json_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Grade Book Report");
@@ -602,30 +602,30 @@ export function AdminReports() {
 
     const abstractData = {};
     const stdSet = new Set();
-    
+
     allStudents.forEach(student => {
       const std = student.standard;
       const sec = student.section;
       if (!std || !sec) return;
       const clsSec = `${std} - ${sec}`;
       stdSet.add(clsSec);
-      
+
       if (!abstractData[clsSec]) abstractData[clsSec] = {};
-      
+
       if (student.terms && Array.isArray(student.terms)) {
         student.terms.forEach(term => {
           if (!term.termName || !term.marks || term.marks.length === 0) return;
-          
+
           if (!abstractData[clsSec][term.termName]) {
-            abstractData[clsSec][term.termName] = { 
+            abstractData[clsSec][term.termName] = {
               total: 0, pass: 0, fail: 0,
               totalStudents: [], passStudents: [], failStudents: []
             };
           }
-          
+
           abstractData[clsSec][term.termName].total += 1;
           abstractData[clsSec][term.termName].totalStudents.push(student);
-          
+
           const passedAll = term.marks.every(m => m.score >= 35);
           if (passedAll) {
             abstractData[clsSec][term.termName].pass += 1;
@@ -644,7 +644,7 @@ export function AdminReports() {
       if (!isNaN(numA) && !isNaN(numB) && numA !== numB) return numA - numB;
       return a.localeCompare(b);
     });
-    
+
     // Calculate percentages
     standards.forEach(std => {
       EXAMS.forEach(exam => {
@@ -673,15 +673,15 @@ export function AdminReports() {
                 <Printer className="w-4 h-4" />
                 Print
               </button>
-              <button 
+              <button
                 onClick={() => {
                   setSelectedMatrixGroup(`All Classes & Sections (Total)`);
                   const allStatsStudents = [];
                   standards.forEach(std => {
                     EXAMS.forEach(exam => {
-                       if (abstractData[std]?.[exam]?.totalStudents) {
-                         allStatsStudents.push(...abstractData[std][exam].totalStudents);
-                       }
+                      if (abstractData[std]?.[exam]?.totalStudents) {
+                        allStatsStudents.push(...abstractData[std][exam].totalStudents);
+                      }
                     });
                   });
                   const uniqueStudents = Array.from(new Set(allStatsStudents.map(s => s._id)))
@@ -694,7 +694,7 @@ export function AdminReports() {
                 <Eye className="w-4 h-4" />
                 Preview
               </button>
-              <button 
+              <button
                 onClick={() => handleDownloadGradeBookExcel(abstractData, standards)}
                 className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#EBD8BE]/10 hover:bg-[#EBD8BE]/20 text-[#EBD8BE] border border-[#EBD8BE]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
               >
@@ -743,7 +743,7 @@ export function AdminReports() {
                         <React.Fragment key={`${std}-${exam}`}>
                           <td className="p-3 border-r border-white/5 font-semibold text-white/80">
                             {stats.total > 0 ? (
-                              <button 
+                              <button
                                 onClick={() => {
                                   setSelectedMatrixGroup(`Class ${std} - ${exam} (Total)`);
                                   setSelectedMatrixStudents(stats.totalStudents);
@@ -757,7 +757,7 @@ export function AdminReports() {
                           </td>
                           <td className="p-3 border-r border-white/5 font-bold text-green-400">
                             {stats.pass > 0 ? (
-                              <button 
+                              <button
                                 onClick={() => {
                                   setSelectedMatrixGroup(`Class ${std} - ${exam} (Pass)`);
                                   setSelectedMatrixStudents(stats.passStudents);
@@ -771,7 +771,7 @@ export function AdminReports() {
                           </td>
                           <td className="p-3 border-r border-white/5 font-bold text-red-400">
                             {stats.fail > 0 ? (
-                              <button 
+                              <button
                                 onClick={() => {
                                   setSelectedMatrixGroup(`Class ${std} - ${exam} (Fail)`);
                                   setSelectedMatrixStudents(stats.failStudents);
@@ -818,16 +818,16 @@ export function AdminReports() {
                     {selectedMatrixStudents.length} Total
                   </span>
                 </div>
-                
+
                 <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <button 
+                  <button
                     onClick={() => handleDownloadExcel(selectedMatrixGroup, selectedMatrixStudents)}
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
                   >
                     <Download className="w-4 h-4" />
                     Download Excel
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       setSelectedMatrixGroup(null);
                       setSelectedMatrixStudents([]);
@@ -863,11 +863,11 @@ export function AdminReports() {
                       const classA = parseInt(a.standard) || 0;
                       const classB = parseInt(b.standard) || 0;
                       if (classA !== classB) return classA - classB;
-                      
+
                       const sectionA = (a.section || '').toLowerCase();
                       const sectionB = (b.section || '').toLowerCase();
                       if (sectionA !== sectionB) return sectionA.localeCompare(sectionB);
-                      
+
                       const genderA = (a.gender || '').toLowerCase();
                       const genderB = (b.gender || '').toLowerCase();
                       if (genderA !== genderB) {
@@ -875,7 +875,7 @@ export function AdminReports() {
                         if (genderB === 'male') return 1;
                         return genderA.localeCompare(genderB);
                       }
-                      
+
                       const nameA = (a.name || '').toLowerCase();
                       const nameB = (b.name || '').toLowerCase();
                       return nameA.localeCompare(nameB);
@@ -898,10 +898,10 @@ export function AdminReports() {
                                   return true;
                                 })
                                 .map((m, i) => (
-                                 <span key={i} className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${m.score >= 35 ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                                   {String(m.subject).substring(0,3)}: {m.score}
-                                 </span>
-                              ))}
+                                  <span key={i} className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${m.score >= 35 ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                                    {String(m.subject).substring(0, 3)}: {m.score}
+                                  </span>
+                                ))}
                             </div>
                           </td>
                         ) : (
@@ -909,14 +909,14 @@ export function AdminReports() {
                             <td className="p-4 text-sm text-white/70">{student.gender || 'N/A'}</td>
                             <td className="p-4 text-sm text-white/70">{student.community || 'N/A'}</td>
                             <td className="p-4 text-right flex items-center justify-end gap-2">
-                              <button 
+                              <button
                                 onClick={() => setSelectedStudentDetails(student)}
                                 className="p-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] rounded-xl transition-colors"
                                 title="View Student Details"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleDownloadSingleStudent(student)}
                                 className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl transition-colors"
                                 title="Download Student Record"
@@ -956,27 +956,24 @@ export function AdminReports() {
       <div className="flex overflow-x-auto bg-[#131E3A]/50 border border-white/5 rounded-2xl p-2 gap-2 hide-scrollbar">
         <button
           onClick={() => setActiveTab('student')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${
-            activeTab === 'student' ? 'bg-[#F9CB84] text-[#0B132B] shadow-md' : 'text-white/60 hover:bg-white/5 hover:text-white'
-          }`}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === 'student' ? 'bg-[#F9CB84] text-[#0B132B] shadow-md' : 'text-white/60 hover:bg-white/5 hover:text-white'
+            }`}
         >
           <Grid className="w-5 h-5" />
           Student Report
         </button>
         <button
           onClick={() => setActiveTab('homework')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${
-            activeTab === 'homework' ? 'bg-[#62D4CA] text-[#0B132B] shadow-md' : 'text-white/60 hover:bg-white/5 hover:text-white'
-          }`}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === 'homework' ? 'bg-[#62D4CA] text-[#0B132B] shadow-md' : 'text-white/60 hover:bg-white/5 hover:text-white'
+            }`}
         >
           <BookOpen className="w-5 h-5" />
           Student Homework Report
         </button>
         <button
           onClick={() => setActiveTab('gradebook')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${
-            activeTab === 'gradebook' ? 'bg-[#EBD8BE] text-[#0B132B] shadow-md' : 'text-white/60 hover:bg-white/5 hover:text-white'
-          }`}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === 'gradebook' ? 'bg-[#EBD8BE] text-[#0B132B] shadow-md' : 'text-white/60 hover:bg-white/5 hover:text-white'
+            }`}
         >
           <GraduationCap className="w-5 h-5" />
           Student Grade Book Report
@@ -989,185 +986,183 @@ export function AdminReports() {
           <div className="bg-[#131E3A]/50 border border-white/5 shadow-xl rounded-3xl p-6 md:p-8 backdrop-blur-sm">
 
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-          {/* Row Selection */}
-          <div className="bg-[#0B132B] p-5 rounded-2xl border border-white/5 shadow-inner">
-            <h3 className="text-xs text-[#EBD8BE] uppercase font-bold tracking-widest mb-4 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#EBD8BE]"></span>
-              Select Row Dimension
-            </h3>
-            <div className="flex flex-wrap gap-3">
-              {matrixDimensions.map(dim => {
-                const isSelected = matrixRow.includes(dim.id);
-                const isDisabled = matrixCol.includes(dim.id);
-                return (
-                  <label key={`row-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
-                    isSelected ? 'bg-[#F9CB84]/20 border-[#F9CB84] text-[#F9CB84] shadow-[0_0_10px_rgba(249,203,132,0.2)]' : 
-                    isDisabled ? 'bg-white/5 border-white/5 text-white/20 cursor-not-allowed' : 
-                    'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
-                  }`}>
-                    <input 
-                      type="checkbox" 
-                      name="matrixRow" 
-                      value={dim.id} 
-                      checked={isSelected} 
-                      disabled={isDisabled}
-                      onChange={() => toggleDimension('row', dim.id)}
-                      className="hidden" 
-                    />
-                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-[#F9CB84] bg-[#F9CB84]/20' : 'border-white/30'}`}>
-                      {isSelected && <div className="w-2 h-2 rounded-sm bg-[#F9CB84]" />}
-                    </div>
-                    <span className="text-sm font-medium">{dim.label}</span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-          
-          {/* Column Selection */}
-          <div className="bg-[#0B132B] p-5 rounded-2xl border border-white/5 shadow-inner">
-            <h3 className="text-xs text-[#62D4CA] uppercase font-bold tracking-widest mb-4 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#62D4CA]"></span>
-              Select Column Dimension
-            </h3>
-            <div className="flex flex-wrap gap-3">
-              {matrixDimensions.map(dim => {
-                const isSelected = matrixCol.includes(dim.id);
-                const isDisabled = matrixRow.includes(dim.id);
-                return (
-                  <label key={`col-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
-                    isSelected ? 'bg-[#62D4CA]/20 border-[#62D4CA] text-[#62D4CA] shadow-[0_0_10px_rgba(98,212,202,0.2)]' : 
-                    isDisabled ? 'bg-white/5 border-white/5 text-white/20 cursor-not-allowed' : 
-                    'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
-                  }`}>
-                    <input 
-                      type="checkbox" 
-                      name="matrixCol" 
-                      value={dim.id} 
-                      checked={isSelected} 
-                      disabled={isDisabled}
-                      onChange={() => toggleDimension('col', dim.id)}
-                      className="hidden" 
-                    />
-                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-[#62D4CA] bg-[#62D4CA]/20' : 'border-white/30'}`}>
-                      {isSelected && <div className="w-2 h-2 rounded-sm bg-[#62D4CA]" />}
-                    </div>
-                    <span className="text-sm font-medium">{dim.label}</span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {renderMatrixReport()}
-      </div>
-
-      {/* Student Details Modal */}
-      {selectedStudentDetails && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#0B132B] border border-white/10 shadow-2xl rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/[0.02]">
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
-                Student Details
-              </h3>
-              <button 
-                onClick={() => setSelectedStudentDetails(null)}
-                className="p-2 hover:bg-white/10 rounded-xl text-white/50 hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
-                {/* Personal Info */}
-                <div className="space-y-4">
-                  <h4 className="text-[#62D4CA] text-xs font-bold uppercase tracking-widest border-b border-white/5 pb-2">Personal Information</h4>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Full Name</p>
-                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.name || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Tamil Name</p>
-                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.tamilName || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Gender</p>
-                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.gender || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Date of Birth</p>
-                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.dob || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Father's Name</p>
-                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.fatherName || 'N/A'}</p>
-                    </div>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+              {/* Row Selection */}
+              <div className="bg-[#0B132B] p-5 rounded-2xl border border-white/5 shadow-inner">
+                <h3 className="text-xs text-[#EBD8BE] uppercase font-bold tracking-widest mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#EBD8BE]"></span>
+                  Select Row Dimension
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {matrixDimensions.map(dim => {
+                    const isSelected = matrixRow.includes(dim.id);
+                    const isDisabled = matrixCol.includes(dim.id);
+                    return (
+                      <label key={`row-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${isSelected ? 'bg-[#F9CB84]/20 border-[#F9CB84] text-[#F9CB84] shadow-[0_0_10px_rgba(249,203,132,0.2)]' :
+                        isDisabled ? 'bg-white/5 border-white/5 text-white/20 cursor-not-allowed' :
+                          'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                        }`}>
+                        <input
+                          type="checkbox"
+                          name="matrixRow"
+                          value={dim.id}
+                          checked={isSelected}
+                          disabled={isDisabled}
+                          onChange={() => toggleDimension('row', dim.id)}
+                          className="hidden"
+                        />
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-[#F9CB84] bg-[#F9CB84]/20' : 'border-white/30'}`}>
+                          {isSelected && <div className="w-2 h-2 rounded-sm bg-[#F9CB84]" />}
+                        </div>
+                        <span className="text-sm font-medium">{dim.label}</span>
+                      </label>
+                    );
+                  })}
                 </div>
+              </div>
 
-                {/* Academic Info */}
-                <div className="space-y-4">
-                  <h4 className="text-[#F9CB84] text-xs font-bold uppercase tracking-widest border-b border-white/5 pb-2">Academic Information</h4>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">EMIS Number</p>
-                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.emisNumber || selectedStudentDetails.rollNumber || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Admission Number</p>
-                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.admissionNumber || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Class & Section</p>
-                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.standard} - {selectedStudentDetails.section}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Medium</p>
-                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.medium || 'N/A'}</p>
-                    </div>
-                  </div>
+              {/* Column Selection */}
+              <div className="bg-[#0B132B] p-5 rounded-2xl border border-white/5 shadow-inner">
+                <h3 className="text-xs text-[#62D4CA] uppercase font-bold tracking-widest mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#62D4CA]"></span>
+                  Select Column Dimension
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {matrixDimensions.map(dim => {
+                    const isSelected = matrixCol.includes(dim.id);
+                    const isDisabled = matrixRow.includes(dim.id);
+                    return (
+                      <label key={`col-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${isSelected ? 'bg-[#62D4CA]/20 border-[#62D4CA] text-[#62D4CA] shadow-[0_0_10px_rgba(98,212,202,0.2)]' :
+                        isDisabled ? 'bg-white/5 border-white/5 text-white/20 cursor-not-allowed' :
+                          'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                        }`}>
+                        <input
+                          type="checkbox"
+                          name="matrixCol"
+                          value={dim.id}
+                          checked={isSelected}
+                          disabled={isDisabled}
+                          onChange={() => toggleDimension('col', dim.id)}
+                          className="hidden"
+                        />
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-[#62D4CA] bg-[#62D4CA]/20' : 'border-white/30'}`}>
+                          {isSelected && <div className="w-2 h-2 rounded-sm bg-[#62D4CA]" />}
+                        </div>
+                        <span className="text-sm font-medium">{dim.label}</span>
+                      </label>
+                    );
+                  })}
                 </div>
-
-                {/* Additional Info */}
-                <div className="space-y-4 md:col-span-2">
-                  <h4 className="text-[#EBD8BE] text-xs font-bold uppercase tracking-widest border-b border-white/5 pb-2">Contact & Background</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Mobile Number</p>
-                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.mobileNumber || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Religion / Community</p>
-                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.religion || 'N/A'} / {selectedStudentDetails.community || 'N/A'}</p>
-                    </div>
-                    <div className="md:col-span-2">
-                      <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Address</p>
-                      <p className="text-sm font-semibold text-white">{selectedStudentDetails.address || 'N/A'}</p>
-                    </div>
-                  </div>
-                </div>
-
               </div>
             </div>
-            
-            <div className="p-4 border-t border-white/10 bg-white/[0.02] flex justify-end">
-              <button 
-                onClick={() => setSelectedStudentDetails(null)}
-                className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-bold transition-colors"
-              >
-                Close
-              </button>
-            </div>
+
+            {renderMatrixReport()}
           </div>
-        </div>
-      )}
-      </>
+
+          {/* Student Details Modal */}
+          {selectedStudentDetails && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+              <div className="bg-[#0B132B] border border-white/10 shadow-2xl rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/[0.02]">
+                  <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
+                    Student Details
+                  </h3>
+                  <button
+                    onClick={() => setSelectedStudentDetails(null)}
+                    className="p-2 hover:bg-white/10 rounded-xl text-white/50 hover:text-white transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    {/* Personal Info */}
+                    <div className="space-y-4">
+                      <h4 className="text-[#62D4CA] text-xs font-bold uppercase tracking-widest border-b border-white/5 pb-2">Personal Information</h4>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Full Name</p>
+                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.name || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Tamil Name</p>
+                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.tamilName || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Gender</p>
+                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.gender || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Date of Birth</p>
+                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.dob || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Father's Name</p>
+                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.fatherName || 'N/A'}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Academic Info */}
+                    <div className="space-y-4">
+                      <h4 className="text-[#F9CB84] text-xs font-bold uppercase tracking-widest border-b border-white/5 pb-2">Academic Information</h4>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">EMIS Number</p>
+                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.emisNumber || selectedStudentDetails.rollNumber || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Admission Number</p>
+                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.admissionNumber || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Class & Section</p>
+                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.standard} - {selectedStudentDetails.section}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Medium</p>
+                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.medium || 'N/A'}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Additional Info */}
+                    <div className="space-y-4 md:col-span-2">
+                      <h4 className="text-[#EBD8BE] text-xs font-bold uppercase tracking-widest border-b border-white/5 pb-2">Contact & Background</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Mobile Number</p>
+                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.mobileNumber || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Religion / Community</p>
+                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.religion || 'N/A'} / {selectedStudentDetails.community || 'N/A'}</p>
+                        </div>
+                        <div className="md:col-span-2">
+                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Address</p>
+                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.address || 'N/A'}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <div className="p-4 border-t border-white/10 bg-white/[0.02] flex justify-end">
+                  <button
+                    onClick={() => setSelectedStudentDetails(null)}
+                    className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-bold transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {activeTab === 'homework' && renderHomeworkReport()}
