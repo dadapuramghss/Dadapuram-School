@@ -829,6 +829,62 @@ export function AdminReports() {
                   </button>
                   <button
                     onClick={() => {
+                      const printWindow = window.open('', '_blank');
+                      const tableHtml = `
+                        <html>
+                        <head>
+                          <title>Print - ${selectedMatrixGroup} Students</title>
+                          <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            h2 { text-align: center; margin-bottom: 20px; }
+                            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                            th, td { border: 1px solid #ccc; padding: 10px; text-left: left; }
+                            th { background-color: #f5f5f5; font-weight: bold; }
+                          </style>
+                        </head>
+                        <body>
+                          <h2>${selectedMatrixGroup} Students (${selectedMatrixStudents.length} Total)</h2>
+                          <table>
+                            <thead>
+                              <tr>
+                                <th>EMIS Number</th>
+                                <th>Name</th>
+                                <th>Class & Section</th>
+                                <th>Gender</th>
+                                <th>Community</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              ${selectedMatrixStudents.map(s => `
+                                <tr>
+                                  <td>${s.emisNumber || s.rollNumber || 'N/A'}</td>
+                                  <td>${s.name}</td>
+                                  <td>${s.standard} - ${s.section}</td>
+                                  <td>${s.gender || 'N/A'}</td>
+                                  <td>${s.community || 'N/A'}</td>
+                                </tr>
+                              `).join('')}
+                            </tbody>
+                          </table>
+                          <script>
+                            window.onload = function() {
+                              window.print();
+                              setTimeout(function() { window.close(); }, 500);
+                            }
+                          </script>
+                        </body>
+                        </html>
+                      `;
+                      printWindow.document.write(tableHtml);
+                      printWindow.document.close();
+                    }}
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#EBD8BE]/10 hover:bg-[#EBD8BE]/20 text-[#EBD8BE] border border-[#EBD8BE]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+                  >
+                    <Printer className="w-4 h-4" />
+                    Print
+                  </button>
+                  <button
+                    onClick={() => {
                       setSelectedMatrixGroup(null);
                       setSelectedMatrixStudents([]);
                       setPreviewExamContext(null);
