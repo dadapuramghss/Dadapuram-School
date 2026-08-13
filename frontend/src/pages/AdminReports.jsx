@@ -366,6 +366,13 @@ export function AdminReports() {
 
           <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-white/5">
             <button
+              onClick={() => handlePrintMatrix(rowValues, colValues, matrixData, rowLabel, colLabel)}
+              className="flex items-center justify-center gap-2 bg-[#EBD8BE]/10 hover:bg-[#EBD8BE]/20 text-[#EBD8BE] border border-[#EBD8BE]/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
+            >
+              <Printer className="w-4.5 h-4.5" />
+              Print
+            </button>
+            <button
               onClick={() => {
                 setSelectedMatrixGroup("Custom Matrix Report");
                 setSelectedMatrixStudents(matrixData.grandTotalStudents);
@@ -381,13 +388,6 @@ export function AdminReports() {
             >
               <Download className="w-4.5 h-4.5" />
               Download Excel
-            </button>
-            <button
-              onClick={() => handlePrintMatrix(rowValues, colValues, matrixData, rowLabel, colLabel)}
-              className="flex items-center justify-center gap-2 bg-[#EBD8BE]/10 hover:bg-[#EBD8BE]/20 text-[#EBD8BE] border border-[#EBD8BE]/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
-            >
-              <Printer className="w-4.5 h-4.5" />
-              Print
             </button>
           </div>
         </div>
