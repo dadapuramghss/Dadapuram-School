@@ -238,7 +238,7 @@ export function Students() {
   return (
     <div className="space-y-6 relative">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-[#2E1C40] dark:text-white font-black drop-shadow-sm  ">
+        <h1 className="text-3xl font-bold text-[#2E1C40] dark:text-gray-900 font-black drop-shadow-sm  ">
           Student Management
         </h1>
       </div>
@@ -250,7 +250,7 @@ export function Students() {
           <select 
             value={listStandard}
             onChange={(e) => setListStandard(e.target.value)}
-            className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+            className="glass-input w-full dark:!text-gray-900 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
           >
             <option value="All">All Standards</option>
             {availableStandards.map(std => (
@@ -264,7 +264,7 @@ export function Students() {
           <select 
             value={listSection}
             onChange={(e) => setListSection(e.target.value)}
-            className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+            className="glass-input w-full dark:!text-gray-900 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
           >
             <option value="All">All Sections</option>
             {availableListSections.map(sec => (
@@ -277,7 +277,7 @@ export function Students() {
       {/* STUDENT LIST */}
       <GlassCard className="  ">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h2 className="text-xl font-bold text-[#2E1C40] dark:text-white">
+          <h2 className="text-xl font-bold text-[#2E1C40] dark:text-gray-900">
             {listStandard === 'All' ? 'All Students' : `Students in ${listStandard}${listSection !== 'All' ? '-' + listSection : ''}`}
           </h2>
           <div className="flex items-center gap-3">
@@ -306,7 +306,7 @@ export function Students() {
         ) : (
           <div className="overflow-x-auto max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
             <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-[#F2FCFA] dark:bg-[#0B132B] sticky top-0 backdrop-blur-md">
+              <thead className="bg-[#F2FCFA] dark:bg-white sticky top-0 backdrop-blur-md">
                 <tr className="border-b border-[#E5D9C4] dark:border-[#4C677C]/30 text-[#2E1C40] dark:text-[#E5D9C4] uppercase text-xs tracking-wider">
                   {hasFullAccess && (
                     <th className="p-3 rounded-tl-lg w-12 text-center">
@@ -314,7 +314,7 @@ export function Students() {
                         type="checkbox" 
                         checked={selectedStudents.length === studentsList.length && studentsList.length > 0}
                         onChange={handleSelectAll}
-                        className="rounded border-[#E5D9C4] text-[#62D4CA] focus:ring-[#62D4CA] cursor-pointer"
+                        className="rounded border-[#E5D9C4] text-adminSidebar focus:ring-[#62D4CA] cursor-pointer"
                       />
                     </th>
                   )}
@@ -333,19 +333,19 @@ export function Students() {
                           type="checkbox" 
                           checked={selectedStudents.includes(s._id)}
                           onChange={() => handleSelectStudent(s._id)}
-                          className="rounded border-[#E5D9C4] text-[#62D4CA] focus:ring-[#62D4CA] cursor-pointer"
+                          className="rounded border-[#E5D9C4] text-adminSidebar focus:ring-[#62D4CA] cursor-pointer"
                         />
                       </td>
                     )}
                     <td className="p-3 text-[#4C677C] dark:text-gray-300">{s.emisNumber || s.rollNumber || 'N/A'}</td>
-                    <td className="p-3 font-medium text-[#2E1C40] dark:text-white">{s.name}</td>
+                    <td className="p-3 font-medium text-[#2E1C40] dark:text-gray-900">{s.name}</td>
                     <td className="p-3 text-[#4C677C] dark:text-gray-300">{s.medium}</td>
                     {hasFullAccess && (
                       <td className="p-3 text-right">
                         <div className="flex justify-end gap-2">
                           <button 
                             onClick={() => handleEdit(s)}
-                            className="p-2 text-[#62D4CA] hover:bg-[#62D4CA]/20 rounded-md transition-colors"
+                            className="p-2 text-adminSidebar hover:bg-adminSidebar/20 rounded-md transition-colors"
                             title="Edit"
                           >
                             <Pencil className="w-4 h-4" />
@@ -373,11 +373,11 @@ export function Students() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
           <div className="relative w-full max-w-2xl my-auto">
             <GlassCard className="w-full max-h-[90vh] overflow-y-auto custom-scrollbar  ">
-              <div className="flex justify-between items-center mb-6 sticky top-0 bg-white dark:bg-[#0B132B] backdrop-blur-md py-4 border-b border-[#E5D9C4] dark:border-[#4C677C]/30 z-10 -mx-6 px-6 -mt-6">
-                <h2 className="text-xl font-bold text-[#2E1C40] dark:text-white">
+              <div className="flex justify-between items-center mb-6 sticky top-0 bg-white dark:bg-white backdrop-blur-md py-4 border-b border-[#E5D9C4] dark:border-[#4C677C]/30 z-10 -mx-6 px-6 -mt-6">
+                <h2 className="text-xl font-bold text-[#2E1C40] dark:text-gray-900">
                   {editingId ? 'Edit Student' : 'Add New Student'}
                 </h2>
-                <button onClick={closeForm} className="p-2 text-[#4C677C]/60 hover:text-[#2E1C40] dark:text-gray-400 dark:hover:text-white transition-colors rounded-full hover:bg-[#E5D9C4] dark:hover:bg-[#2E1C40]/50">
+                <button onClick={closeForm} className="p-2 text-[#4C677C]/60 hover:text-[#2E1C40] dark:text-gray-400 dark:hover:text-gray-900 transition-colors rounded-full hover:bg-[#E5D9C4] dark:hover:bg-[#2E1C40]/50">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -395,7 +395,7 @@ export function Students() {
                     <select 
                       value={formData.standard}
                       onChange={(e) => setFormData({...formData, standard: e.target.value})}
-                      className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+                      className="glass-input w-full dark:!text-gray-900 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
                       disabled={availableStandards.length === 0}
                     >
                       {availableStandards.map(std => (
@@ -409,7 +409,7 @@ export function Students() {
                     <select 
                       value={formData.section}
                       onChange={(e) => setFormData({...formData, section: e.target.value})}
-                      className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+                      className="glass-input w-full dark:!text-gray-900 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
                       disabled={availableFormSections.length === 0}
                     >
                       {availableFormSections.map(sec => (
@@ -423,7 +423,7 @@ export function Students() {
                     <select 
                       value={formData.medium}
                       onChange={(e) => setFormData({...formData, medium: e.target.value})}
-                      className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+                      className="glass-input w-full dark:!text-gray-900 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
                     >
                       <option value="TAMIL">TAMIL</option>
                       <option value="ENGLISH">ENGLISH</option>
@@ -437,7 +437,7 @@ export function Students() {
                     <select 
                       value={formData.gender}
                       onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                      className="glass-input w-full dark:!text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+                      className="glass-input w-full dark:!text-gray-900 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
                     >
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
@@ -572,7 +572,7 @@ export function Students() {
                     </div>
                   )}
                   <div className="flex gap-3">
-                    <label className="flex-1 text-center cursor-pointer py-3 px-4 rounded-xl font-bold text-sm bg-[#62D4CA]/20 text-[#2E1C40] hover:bg-[#62D4CA]/40 dark:text-white dark:hover:bg-[#62D4CA]/40 transition-colors">
+                    <label className="flex-1 text-center cursor-pointer py-3 px-4 rounded-xl font-bold text-sm bg-adminSidebar/20 text-[#2E1C40] hover:bg-adminSidebar text-white/40 dark:text-gray-900 dark:hover:bg-adminSidebar text-white/40 transition-colors">
                       <input 
                         type="file" 
                         accept="image/*"
@@ -582,7 +582,7 @@ export function Students() {
                       />
                       Take Photo
                     </label>
-                    <label className="flex-1 text-center cursor-pointer py-3 px-4 rounded-xl font-bold text-sm bg-[#2E1C40]/10 text-[#2E1C40] hover:bg-[#2E1C40]/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 transition-colors">
+                    <label className="flex-1 text-center cursor-pointer py-3 px-4 rounded-xl font-bold text-sm bg-[#2E1C40]/10 text-[#2E1C40] hover:bg-[#2E1C40]/20 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white/20 transition-colors">
                       <input 
                         type="file" 
                         accept="image/*"
@@ -598,7 +598,7 @@ export function Students() {
                   <button 
                     type="button" 
                     onClick={closeForm}
-                    className="flex-1 py-3 px-4 rounded-lg font-medium text-[#4C677C] bg-[#F2FCFA] hover:bg-[#E5D9C4] dark:bg-[#131E3A] dark:text-[#E5D9C4] dark:hover:bg-[#2E4657] transition-colors"
+                    className="flex-1 py-3 px-4 rounded-lg font-medium text-[#4C677C] bg-[#F2FCFA] hover:bg-[#E5D9C4] dark:bg-white dark:text-[#E5D9C4] dark:hover:bg-[#2E4657] transition-colors"
                   >
                     Cancel
                   </button>

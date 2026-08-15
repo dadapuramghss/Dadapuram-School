@@ -175,11 +175,11 @@ export function DataSync() {
     <div className="p-6 md:p-10 max-w-7xl mx-auto animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
-            <Database className="w-8 h-8 text-[#62D4CA]" />
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+            <Database className="w-8 h-8 text-adminSidebar" />
             Data Synchronization
           </h1>
-          <p className="text-[#4C677C] dark:text-[#EBD8BE]/60 text-lg">
+          <p className="text-[#4C677C] dark:text-gray-500 text-lg">
             Bulk import and export student records using CSV files.
           </p>
         </div>
@@ -202,15 +202,15 @@ export function DataSync() {
             <h3 className="text-lg font-bold">Import Completed Successfully</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-            <div className="bg-black/20 p-4 rounded-xl border border-white/5">
+            <div className="bg-gray-900/10 p-4 rounded-xl border border-gray-200">
               <p className="text-sm text-gray-400">New Students Added</p>
-              <p className="text-3xl font-bold text-white">{importResults.added}</p>
+              <p className="text-3xl font-bold text-gray-900">{importResults.added}</p>
             </div>
-            <div className="bg-black/20 p-4 rounded-xl border border-white/5">
+            <div className="bg-gray-900/10 p-4 rounded-xl border border-gray-200">
               <p className="text-sm text-gray-400">Existing Students Updated</p>
-              <p className="text-3xl font-bold text-white">{importResults.updated}</p>
+              <p className="text-3xl font-bold text-gray-900">{importResults.updated}</p>
             </div>
-            <div className="bg-black/20 p-4 rounded-xl border border-white/5">
+            <div className="bg-gray-900/10 p-4 rounded-xl border border-gray-200">
               <p className="text-sm text-gray-400">Errors Encountered</p>
               <p className="text-3xl font-bold text-red-400">{importResults.errors?.length || 0}</p>
             </div>
@@ -238,7 +238,7 @@ export function DataSync() {
             <Download className="w-10 h-10 text-blue-400" />
           </div>
           
-          <h2 className="text-2xl font-bold text-white mb-3">Export Students</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Export Students</h2>
           <p className="text-gray-400 mb-8 max-w-sm">
             Download a complete backup of all student records in Excel format.
           </p>
@@ -246,7 +246,7 @@ export function DataSync() {
           <button 
             onClick={handleExport}
             disabled={exporting}
-            className="glass-button-primary bg-blue-600 hover:bg-blue-700 text-white w-full max-w-xs flex items-center justify-center gap-2 py-3 relative z-10"
+            className="glass-button-primary bg-blue-600 hover:bg-blue-700 text-gray-900 w-full max-w-xs flex items-center justify-center gap-2 py-3 relative z-10"
           >
             {exporting ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -261,11 +261,11 @@ export function DataSync() {
         <div className="glass-card p-8 flex flex-col items-center text-center justify-center relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-[#62D4CA]/5 to-[#F9CB84]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           
-          <div className="w-20 h-20 bg-[#62D4CA]/10 rounded-2xl flex items-center justify-center mb-6 border border-[#62D4CA]/20 shadow-[0_0_30px_rgba(98,212,202,0.1)] group-hover:shadow-[0_0_50px_rgba(98,212,202,0.2)] transition-shadow">
-            <Upload className="w-10 h-10 text-[#62D4CA]" />
+          <div className="w-20 h-20 bg-adminSidebar/10 rounded-2xl flex items-center justify-center mb-6 border border-adminSidebar/20 shadow-[0_0_30px_rgba(98,212,202,0.1)] group-hover:shadow-[0_0_50px_rgba(98,212,202,0.2)] transition-shadow">
+            <Upload className="w-10 h-10 text-adminSidebar" />
           </div>
           
-          <h2 className="text-2xl font-bold text-white mb-3">Import Students</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Import Students</h2>
           <p className="text-gray-400 mb-6 max-w-sm">
             Upload a CSV file to add new students or update existing ones. Use the template format for best results.
           </p>
@@ -289,7 +289,7 @@ export function DataSync() {
             
             <button 
               onClick={downloadTemplate}
-              className="text-sm text-[#4C677C] hover:text-[#EBD8BE] underline transition-colors"
+              className="text-sm text-[#4C677C] hover:text-gray-700 underline transition-colors"
             >
               Download CSV Template
             </button>
@@ -299,18 +299,18 @@ export function DataSync() {
       
       {/* Import Guide */}
       <div className="mt-8 glass-card p-6 md:p-8">
-        <h3 className="text-xl font-bold text-white mb-4">How Import Works</h3>
+        <h3 className="text-xl font-bold text-gray-900 mb-4">How Import Works</h3>
         <ul className="space-y-3 text-gray-400">
           <li className="flex items-start gap-3">
-            <div className="w-6 h-6 shrink-0 rounded-full bg-white/5 flex items-center justify-center text-sm font-bold mt-0.5">1</div>
+            <div className="w-6 h-6 shrink-0 rounded-full bg-gray-50 flex items-center justify-center text-sm font-bold mt-0.5">1</div>
             <p><strong>Upsert Logic:</strong> If a student with the same EMIS Number, Standard, and Section already exists, their information will be updated. If not, a new student will be created.</p>
           </li>
           <li className="flex items-start gap-3">
-            <div className="w-6 h-6 shrink-0 rounded-full bg-white/5 flex items-center justify-center text-sm font-bold mt-0.5">2</div>
+            <div className="w-6 h-6 shrink-0 rounded-full bg-gray-50 flex items-center justify-center text-sm font-bold mt-0.5">2</div>
             <p><strong>Required Fields:</strong> EMIS Number, Name, Standard, Section, and Medium are strictly required. Rows missing these will be skipped.</p>
           </li>
           <li className="flex items-start gap-3">
-            <div className="w-6 h-6 shrink-0 rounded-full bg-white/5 flex items-center justify-center text-sm font-bold mt-0.5">3</div>
+            <div className="w-6 h-6 shrink-0 rounded-full bg-gray-50 flex items-center justify-center text-sm font-bold mt-0.5">3</div>
             <p><strong>Gradebook Marks:</strong> Exam marks cannot be imported via this tool. Marks must be entered via the Gradebook interface.</p>
           </li>
         </ul>

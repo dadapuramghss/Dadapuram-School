@@ -26,11 +26,11 @@ export function PendingApproval() {
           </svg>
         </div>
         
-        <h1 className="text-3xl font-bold mb-4 text-white">Pending Approval</h1>
+        <h1 className="text-3xl font-bold mb-4 text-gray-900">Pending Approval</h1>
         
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-8 text-left">
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-8 text-left">
           <p className="text-gray-300 mb-4">
-            Hello <strong className="text-white">{dbUser?.name || 'User'}</strong>,
+            Hello <strong className="text-gray-900">{dbUser?.name || 'User'}</strong>,
           </p>
           <p className="text-gray-400 leading-relaxed">
             Your account has been successfully created but is currently <strong className="text-yellow-400">awaiting admin approval</strong>. 

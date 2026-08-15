@@ -32,14 +32,14 @@ export function Dashboard() {
   return (
     <div className="space-y-6 pb-10">
       {/* Premium Vibrant Hero Header */}
-      <div className="relative overflow-hidden rounded-2xl p-6 md:p-8 shadow-lg border border-[#E5D9C4]/20 dark:border-white/5 flex flex-col items-center text-center justify-center isolate bg-gradient-to-br from-[#1A2942] to-[#0F172A] dark:from-[#131E3A] dark:to-[#0B132B]">
+      <div className="relative overflow-hidden rounded-2xl p-6 md:p-8 shadow-lg border border-[#E5D9C4]/20 dark:border-gray-200 flex flex-col items-center text-center justify-center isolate bg-gradient-to-br from-[#1A2942] to-[#0F172A] dark:from-[#131E3A] dark:to-[#0B132B]">
         {/* Decorative background elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#732A26]/40 rounded-full blur-3xl -z-10"></div>
         <div className="absolute bottom-0 right-32 w-64 h-64 bg-[#4C677C]/40 rounded-full blur-3xl -z-10"></div>
-        <div className="absolute top-1/2 right-16 w-32 h-32 bg-[#62D4CA]/20 rounded-full blur-2xl -z-10"></div>
+        <div className="absolute top-1/2 right-16 w-32 h-32 bg-adminSidebar/20 rounded-full blur-2xl -z-10"></div>
         
         <div className="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full bg-[#D8FDF6]/10 border border-[#D8FDF6]/20 text-[#D8FDF6] font-medium text-[10px] tracking-wide">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#62D4CA] animate-pulse"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-adminSidebar text-white animate-pulse"></span>
           Teacher Dashboard
         </div>
         <h1 className="text-2xl md:text-3xl font-extrabold text-[#E5D9C4] tracking-tight drop-shadow-sm">
@@ -53,7 +53,7 @@ export function Dashboard() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-[#D8FDF6] flex items-center gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-              <div className="p-3 bg-[#62D4CA]/15 text-[#62D4CA] rounded-xl shrink-0">
+              <div className="p-3 bg-adminSidebar text-white/15 text-adminSidebar rounded-xl shrink-0">
                 <Users className="w-6 h-6" />
               </div>
               <div>
@@ -90,18 +90,18 @@ export function Dashboard() {
                 <div className="p-2 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-lg">
                   <Megaphone className="w-5 h-5" />
                 </div>
-                <h2 className="text-xl font-extrabold text-[#2E1C40] dark:text-white tracking-tight">Recent Announcements</h2>
+                <h2 className="text-xl font-extrabold text-[#2E1C40] dark:text-gray-900 tracking-tight">Recent Announcements</h2>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {circulars.map(circular => (
-                  <div key={circular._id} className="bg-white/80 dark:bg-[#131E3A]/80 backdrop-blur-sm p-4 rounded-xl border border-orange-200/50 dark:border-orange-900/30 shadow-sm flex flex-col">
-                    <h3 className="font-bold text-[#2E1C40] dark:text-white mb-1 line-clamp-1">{circular.title}</h3>
+                  <div key={circular._id} className="bg-white/80 dark:bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-orange-200/50 dark:border-orange-900/30 shadow-sm flex flex-col">
+                    <h3 className="font-bold text-[#2E1C40] dark:text-gray-900 mb-1 line-clamp-1">{circular.title}</h3>
                     <p className="text-sm text-[#4C677C] dark:text-gray-300 mb-3 line-clamp-2">{circular.description}</p>
                     
                     {circular.fileUrl && circular.fileType === 'image' && (
                       <div 
-                        className="mb-3 h-24 rounded-lg overflow-hidden border border-orange-100 dark:border-white/5 cursor-pointer"
+                        className="mb-3 h-24 rounded-lg overflow-hidden border border-orange-100 dark:border-gray-200 cursor-pointer"
                         onClick={() => setPreviewFile(circular)}
                       >
                         <img src={circular.fileUrl} alt="Attachment" className="w-full h-full object-cover hover:scale-105 transition-transform" />
@@ -117,7 +117,7 @@ export function Dashboard() {
                           <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-[#2E1C40] dark:text-white truncate">
+                          <p className="text-xs font-bold text-[#2E1C40] dark:text-gray-900 truncate">
                             {circular.fileName || "View Document"}
                           </p>
                         </div>
@@ -153,13 +153,13 @@ export function Dashboard() {
                     onClick={() => setSelectedStudentId(student._id)}
                     className={`relative flex flex-col items-center p-6 rounded-3xl border cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
                     isFirst ? 'bg-[#FDF9F7] border-[#AE634A]/20' : 
-                    isSecond ? 'bg-[#F2FCFA] border-[#62D4CA]/30' : 
+                    isSecond ? 'bg-[#F2FCFA] border-adminSidebar/30' : 
                     'bg-[#FCF9F9] border-[#732A26]/20'
                   }`}>
                     {/* Rank Badge */}
                     <div className={`absolute -top-4 w-10 h-10 flex items-center justify-center rounded-xl font-black text-lg shadow-md border-2 border-white ${
                       isFirst ? 'bg-[#AE634A] text-[#E5D9C4]' : 
-                      isSecond ? 'bg-[#62D4CA] text-[#2E1C40]' : 
+                      isSecond ? 'bg-adminSidebar text-white text-[#2E1C40]' : 
                       'bg-[#732A26] text-[#E5D9C4]'
                     }`}>
                       {idx + 1}
@@ -167,7 +167,7 @@ export function Dashboard() {
 
                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mt-3 ${
                       isFirst ? 'bg-[#AE634A]/10 text-[#AE634A]' : 
-                      isSecond ? 'bg-[#62D4CA]/15 text-[#62D4CA]' : 
+                      isSecond ? 'bg-adminSidebar text-white/15 text-adminSidebar' : 
                       'bg-[#732A26]/10 text-[#732A26]'
                     }`}>
                       <span className="text-2xl font-black">{student.name.charAt(0)}</span>
@@ -185,7 +185,7 @@ export function Dashboard() {
                         isFirst ? 'text-[#AE634A]/70' : isSecond ? 'text-[#4C677C]/70' : 'text-[#732A26]/70'
                       }`}>Total Score</span>
                       <span className={`text-2xl font-black ${
-                        isFirst ? 'text-[#AE634A]' : isSecond ? 'text-[#62D4CA]' : 'text-[#732A26]'
+                        isFirst ? 'text-[#AE634A]' : isSecond ? 'text-adminSidebar' : 'text-[#732A26]'
                       }`}>
                         {student.totalMarks}
                       </span>

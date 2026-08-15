@@ -120,7 +120,7 @@ export function Certificates() {
                     <select
                       value={certificateType}
                       onChange={(e) => setCertificateType(e.target.value)}
-                      className="glass-input w-full font-bold text-[#2E1C40] dark:!text-white bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-indigo-400 disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+                      className="glass-input w-full font-bold text-[#2E1C40] dark:!text-gray-900 bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-indigo-400 disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
                     >
                       <option value="">Select Certificate Type</option>
                       <option value="STUDY">Study Certificate</option>
@@ -135,7 +135,7 @@ export function Certificates() {
                       name="language"
                       value={filters.language}
                       onChange={handleFilterChange}
-                      className="glass-input w-full font-bold text-[#2E1C40] dark:!text-white bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-indigo-400 disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+                      className="glass-input w-full font-bold text-[#2E1C40] dark:!text-gray-900 bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-indigo-400 disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
                     >
                       <option value="">Select Language</option>
                       <option value="TAMIL">tamil</option>
@@ -150,7 +150,7 @@ export function Certificates() {
                       name="standard"
                       value={filters.standard}
                       onChange={handleFilterChange}
-                      className="glass-input w-full font-bold text-[#2E1C40] dark:!text-white bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-indigo-400 disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+                      className="glass-input w-full font-bold text-[#2E1C40] dark:!text-gray-900 bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-indigo-400 disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
                     >
                       <option value="">Select Class</option>
                       {availableStandards.map(c => (
@@ -167,7 +167,7 @@ export function Certificates() {
                       value={filters.section}
                       onChange={handleFilterChange}
                       disabled={!filters.standard}
-                      className="glass-input w-full font-bold text-[#2E1C40] dark:!text-white bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-indigo-400 disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+                      className="glass-input w-full font-bold text-[#2E1C40] dark:!text-gray-900 bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-indigo-400 disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
                     >
                       <option value="">Select Section</option>
                       {availableSections.map(s => (
@@ -184,7 +184,7 @@ export function Certificates() {
                       value={filters.studentId}
                       onChange={handleFilterChange}
                       disabled={!filters.section}
-                      className="glass-input w-full font-bold text-[#2E1C40] dark:!text-white bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-indigo-400 disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+                      className="glass-input w-full font-bold text-[#2E1C40] dark:!text-gray-900 bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-indigo-400 disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
                     >
                       <option value="">Select Student</option>
                       {students.map(s => (
@@ -196,7 +196,7 @@ export function Certificates() {
                 <tr>
                   <th className="py-3 font-bold text-[#4C677C] dark:text-[#E5D9C4] ">EMIS Number</th>
                   <td className="py-3">
-                    <div className="w-full bg-[#D8FDF6]/40 border border-[#E5D9C4] dark:border-[#4C677C]/30 dark:bg-[#121212] rounded-xl px-4 py-3 text-[#2E1C40] dark:text-white font-bold">
+                    <div className="w-full bg-[#D8FDF6]/40 border border-[#E5D9C4] dark:border-[#4C677C]/30 dark:bg-[#121212] rounded-xl px-4 py-3 text-[#2E1C40] dark:text-gray-900 font-bold">
                       {selectedStudent ? selectedStudent.emisNumber : '-'}
                     </div>
                   </td>
@@ -219,21 +219,21 @@ export function Certificates() {
       </div>
 
       <GlassCard className="p-6">
-        <h2 className="text-xl font-bold mb-4 bg-[#D8FDF6]/40 dark:bg-[#0B132B] text-[#2E1C40] dark:text-white p-3 rounded-xl">Student Summary</h2>
+        <h2 className="text-xl font-bold mb-4 bg-[#D8FDF6]/40 dark:bg-white text-[#2E1C40] dark:text-gray-900 p-3 rounded-xl">Student Summary</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-[#2E1C40]  ">
             <tbody>
               <tr className="border-b border-indigo-50 dark:border-[#4C677C]/30">
                 <th className="py-3 font-bold text-[#4C677C] dark:text-[#E5D9C4]  w-1/4">DOB:</th>
-                <td className="py-3 font-bold text-indigo-950 dark:text-white">{selectedStudent?.dob || '-'}</td>
+                <td className="py-3 font-bold text-indigo-950 dark:text-gray-900">{selectedStudent?.dob || '-'}</td>
               </tr>
               <tr className="border-b border-indigo-50 dark:border-[#4C677C]/30">
                 <th className="py-3 font-bold text-[#4C677C] dark:text-[#E5D9C4] ">Father's Name:</th>
-                <td className="py-3 font-bold text-indigo-950 dark:text-white">{selectedStudent?.fatherName || '-'}</td>
+                <td className="py-3 font-bold text-indigo-950 dark:text-gray-900">{selectedStudent?.fatherName || '-'}</td>
               </tr>
               <tr>
                 <th className="py-3 font-bold text-[#4C677C] dark:text-[#E5D9C4] ">Address:</th>
-                <td className="py-3 font-bold text-indigo-950 dark:text-white">{selectedStudent?.address || '-'}</td>
+                <td className="py-3 font-bold text-indigo-950 dark:text-gray-900">{selectedStudent?.address || '-'}</td>
               </tr>
             </tbody>
           </table>

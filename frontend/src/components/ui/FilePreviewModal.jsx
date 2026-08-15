@@ -128,29 +128,29 @@ export function FilePreviewModal({ isOpen, onClose, fileUrl, fileType, fileName 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-[#1A1A24] w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl border border-white/10 flex flex-col overflow-hidden relative">
+      <div className="bg-[#1A1A24] w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden relative">
         
         {/* Header */}
-        <div className="flex justify-between items-center p-4 border-b border-white/10 bg-black/20 shrink-0">
+        <div className="flex justify-between items-center p-4 border-b border-gray-200 bg-gray-900/10 shrink-0">
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="p-2 bg-orange-500/10 rounded-lg shrink-0">
               <FileText className="w-5 h-5 text-orange-500" />
             </div>
-            <h3 className="text-white font-bold truncate text-lg">
+            <h3 className="text-gray-900 font-bold truncate text-lg">
               {fileName || 'File Preview'}
             </h3>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button 
               onClick={handleDownload}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-gray-900 font-bold rounded-lg transition-colors"
             >
               <Download className="w-4 h-4" />
               <span className="hidden sm:inline">Download</span>
             </button>
             <button 
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors ml-2"
+              className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors ml-2"
             >
               <X className="w-6 h-6" />
             </button>
@@ -170,18 +170,18 @@ export function FilePreviewModal({ isOpen, onClose, fileUrl, fileType, fileName 
               <MobilePDFViewer url={blobUrl || fileUrl} />
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center text-center max-w-md mx-auto p-8 bg-white/5 rounded-2xl border border-white/10">
+            <div className="flex flex-col items-center justify-center text-center max-w-md mx-auto p-8 bg-gray-50 rounded-2xl border border-gray-200">
               <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center mb-6">
                 <FileText className="w-10 h-10 text-orange-500" />
               </div>
-              <h4 className="text-xl font-bold text-white mb-2">No Preview Available</h4>
+              <h4 className="text-xl font-bold text-gray-900 mb-2">No Preview Available</h4>
               <p className="text-gray-400 mb-8">
                 This document type ({fileName?.split('.').pop()?.toUpperCase() || 'File'}) cannot be previewed directly in the browser. 
                 Please download it to view its contents.
               </p>
               <button 
                 onClick={handleDownload}
-                className="flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:shadow-[0_0_25px_rgba(249,115,22,0.5)] hover:-translate-y-1"
+                className="flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-gray-900 font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:shadow-[0_0_25px_rgba(249,115,22,0.5)] hover:-translate-y-1"
               >
                 <Download className="w-5 h-5" />
                 Download File

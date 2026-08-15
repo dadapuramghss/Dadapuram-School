@@ -118,12 +118,12 @@ export function Circulars() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <h1 className="text-2xl md:text-3xl font-black text-[#2E1C40] dark:text-white drop-shadow-sm flex items-start md:items-center">
+        <h1 className="text-2xl md:text-3xl font-black text-[#2E1C40] dark:text-gray-900 drop-shadow-sm flex items-start md:items-center">
           <Megaphone className="w-8 h-8 mr-3 text-orange-500 shrink-0 mt-1 md:mt-0" />
           <span>Circulars & Announcements</span>
         </h1>
         {isAdmin && !isAdding && (
-          <NeonButton onClick={() => setIsAdding(true)} className="bg-orange-500 text-white flex items-center border-orange-400 self-start md:self-auto shrink-0">
+          <NeonButton onClick={() => setIsAdding(true)} className="bg-orange-500 text-gray-900 flex items-center border-orange-400 self-start md:self-auto shrink-0">
             <Plus className="w-5 h-5 mr-2" />
             Add Circular
           </NeonButton>
@@ -132,7 +132,7 @@ export function Circulars() {
 
       {isAdding && (
         <GlassCard className="border border-orange-500/50 shadow-[0_0_15px_rgba(249,115,22,0.2)]">
-          <h2 className="text-xl font-bold text-[#2E1C40] dark:text-white mb-4">Post New Circular</h2>
+          <h2 className="text-xl font-bold text-[#2E1C40] dark:text-gray-900 mb-4">Post New Circular</h2>
           <form onSubmit={handleAddSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-bold text-[#4C677C] dark:text-[#E5D9C4] mb-1">Title</label>
@@ -141,7 +141,7 @@ export function Circulars() {
                 required
                 value={newCircular.title}
                 onChange={e => setNewCircular({...newCircular, title: e.target.value})}
-                className="glass-input w-full dark:text-white"
+                className="glass-input w-full dark:text-gray-900"
                 placeholder="e.g. Annual Sports Day Announcement"
               />
             </div>
@@ -152,7 +152,7 @@ export function Circulars() {
                 required
                 value={newCircular.description}
                 onChange={e => setNewCircular({...newCircular, description: e.target.value})}
-                className="glass-input w-full dark:text-white h-32"
+                className="glass-input w-full dark:text-gray-900 h-32"
                 placeholder="Details of the announcement..."
               />
             </div>
@@ -162,7 +162,7 @@ export function Circulars() {
               <select 
                 value={newCircular.audience}
                 onChange={e => setNewCircular({...newCircular, audience: e.target.value})}
-                className="glass-input w-full dark:text-white bg-white/50 dark:bg-black/20 border border-[#E5D9C4] dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none"
+                className="glass-input w-full dark:text-gray-900 bg-gray-500 dark:bg-gray-900/10 border border-[#E5D9C4] dark:border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none"
               >
                 <option value="All" className="dark:bg-[#1A1A24]">All (Teachers & Students)</option>
                 <option value="Teacher" className="dark:bg-[#1A1A24]">Teachers Only</option>
@@ -173,21 +173,21 @@ export function Circulars() {
             <div className="pt-4 border-t border-[#E5D9C4]/40 dark:border-[#4C677C]/30">
               <label className="block text-sm font-bold text-[#4C677C] dark:text-[#E5D9C4] mb-2">Attach File (Optional)</label>
               {file && (
-                <div className="relative mb-3 inline-block bg-white/50 dark:bg-black/20 p-3 rounded-lg border border-[#E5D9C4] dark:border-white/10">
+                <div className="relative mb-3 inline-block bg-gray-500 dark:bg-gray-900/10 p-3 rounded-lg border border-[#E5D9C4] dark:border-gray-200">
                   <div className="flex items-center gap-2 pr-6">
                     {file.type.startsWith('image/') ? (
-                      <ImageIcon className="w-5 h-5 text-[#62D4CA]" />
+                      <ImageIcon className="w-5 h-5 text-adminSidebar" />
                     ) : (
                       <FileText className="w-5 h-5 text-orange-500" />
                     )}
-                    <span className="text-sm font-medium text-[#2E1C40] dark:text-white truncate max-w-[200px]">
+                    <span className="text-sm font-medium text-[#2E1C40] dark:text-gray-900 truncate max-w-[200px]">
                       {file.name}
                     </span>
                   </div>
                   <button 
                     type="button" 
                     onClick={() => { setFile(null); setPreviewUrl(null); }}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition"
+                    className="absolute -top-2 -right-2 bg-red-500 text-gray-900 rounded-full p-1 shadow-md hover:bg-red-600 transition"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
@@ -198,7 +198,7 @@ export function Circulars() {
                   <input type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
                   <Camera className="w-4 h-4 mr-2" /> Take Photo
                 </label>
-                <label className="flex-1 flex items-center justify-center cursor-pointer py-2 px-4 rounded-xl font-bold text-sm bg-[#2E1C40]/5 text-[#2E1C40] hover:bg-[#2E1C40]/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 transition-colors border border-[#4C677C]/20">
+                <label className="flex-1 flex items-center justify-center cursor-pointer py-2 px-4 rounded-xl font-bold text-sm bg-[#2E1C40]/5 text-[#2E1C40] hover:bg-[#2E1C40]/10 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-100 transition-colors border border-[#4C677C]/20">
                   <input type="file" accept="*/*" onChange={handleFileChange} className="hidden" />
                   <Upload className="w-4 h-4 mr-2" /> Upload File
                 </label>
@@ -214,7 +214,7 @@ export function Circulars() {
               >
                 Cancel
               </button>
-              <NeonButton type="submit" disabled={loading} className="bg-orange-500 text-white border-orange-400">
+              <NeonButton type="submit" disabled={loading} className="bg-orange-500 text-gray-900 border-orange-400">
                 {loading ? 'Posting...' : 'Post Circular'}
               </NeonButton>
             </div>
@@ -254,7 +254,7 @@ export function Circulars() {
                 {isAdmin && (
                   <button 
                     onClick={() => handleDelete(circular._id)}
-                    className="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 bg-white/80 dark:bg-black/50 p-1 rounded-md"
+                    className="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 bg-white/80 dark:bg-gray-900/50 p-1 rounded-md"
                     title="Delete Circular"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -262,7 +262,7 @@ export function Circulars() {
                 )}
               </div>
               
-              <h3 className="text-xl font-bold text-[#2E1C40] dark:text-white mb-2">{circular.title}</h3>
+              <h3 className="text-xl font-bold text-[#2E1C40] dark:text-gray-900 mb-2">{circular.title}</h3>
               <p className="text-[#4C677C] dark:text-gray-300 text-sm mb-4 flex-1 whitespace-pre-wrap">
                 {circular.description}
               </p>
@@ -285,7 +285,7 @@ export function Circulars() {
                     <FileText className="w-5 h-5 text-orange-500" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-[#2E1C40] dark:text-white truncate">
+                    <p className="text-sm font-bold text-[#2E1C40] dark:text-gray-900 truncate">
                       {circular.fileName || "View Attachment"}
                     </p>
                     <p className="text-xs text-[#4C677C] dark:text-gray-400">

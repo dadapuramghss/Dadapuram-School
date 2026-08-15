@@ -239,12 +239,12 @@ export function Homework() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <h1 className="text-2xl md:text-3xl font-black text-[#2E1C40] dark:text-white drop-shadow-sm flex items-start md:items-center">
-          <BookOpen className="w-8 h-8 mr-3 text-[#62D4CA] shrink-0 mt-1 md:mt-0" />
+        <h1 className="text-2xl md:text-3xl font-black text-[#2E1C40] dark:text-gray-900 drop-shadow-sm flex items-start md:items-center">
+          <BookOpen className="w-8 h-8 mr-3 text-adminSidebar shrink-0 mt-1 md:mt-0" />
           <span>Homework Management</span>
         </h1>
         {hasFullAccess && !isAdding && (
-          <NeonButton onClick={() => setIsAdding(true)} className="bg-[#62D4CA] text-[#2E1C40] flex items-center self-start md:self-auto shrink-0">
+          <NeonButton onClick={() => setIsAdding(true)} className="bg-adminSidebar text-white text-[#2E1C40] flex items-center self-start md:self-auto shrink-0">
             <Plus className="w-5 h-5 mr-2" />
             Add Homework
           </NeonButton>
@@ -261,7 +261,7 @@ export function Homework() {
                 setSelectedClass(e.target.value);
                 if (e.target.value === 'All') setSelectedSection('All');
               }}
-              className="glass-input w-full font-bold text-[#2E1C40] dark:!text-white bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-[#62D4CA] [&>option]:bg-white dark:[&>option]:bg-[#131E3A]"
+              className="glass-input w-full font-bold text-[#2E1C40] dark:!text-gray-900 bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-[#62D4CA] [&>option]:bg-white dark:[&>option]:bg-white"
             >
               <option value="All">Select Class</option>
               {availableStandards.map(std => (
@@ -274,7 +274,7 @@ export function Homework() {
             <select 
               value={selectedSection} 
               onChange={e => setSelectedSection(e.target.value)}
-              className="glass-input w-full font-bold text-[#2E1C40] dark:!text-white bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-[#62D4CA] [&>option]:bg-white dark:[&>option]:bg-[#131E3A]"
+              className="glass-input w-full font-bold text-[#2E1C40] dark:!text-gray-900 bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-[#62D4CA] [&>option]:bg-white dark:[&>option]:bg-white"
               disabled={selectedClass === 'All'}
             >
               <option value="All">Select Section</option>
@@ -287,8 +287,8 @@ export function Homework() {
       </GlassCard>
 
       {isAdding && (
-        <GlassCard className="border border-[#62D4CA] shadow-[0_0_15px_rgba(98,212,202,0.3)]">
-          <h2 className="text-xl font-bold text-[#2E1C40] dark:text-white mb-4">Assign New Homework</h2>
+        <GlassCard className="border border-adminSidebar shadow-[0_0_15px_rgba(98,212,202,0.3)]">
+          <h2 className="text-xl font-bold text-[#2E1C40] dark:text-gray-900 mb-4">Assign New Homework</h2>
           <form onSubmit={handleAddSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -298,7 +298,7 @@ export function Homework() {
                   required
                   value={newHomework.title}
                   onChange={e => setNewHomework({...newHomework, title: e.target.value})}
-                  className="glass-input w-full dark:text-white"
+                  className="glass-input w-full dark:text-gray-900"
                   placeholder="e.g. Chapter 4 Exercise"
                 />
               </div>
@@ -308,7 +308,7 @@ export function Homework() {
                   required
                   value={newHomework.subject}
                   onChange={e => setNewHomework({...newHomework, subject: e.target.value})}
-                  className="glass-input w-full dark:text-white [&>option]:bg-white dark:[&>option]:bg-[#131E3A]"
+                  className="glass-input w-full dark:text-gray-900 [&>option]:bg-white dark:[&>option]:bg-white"
                 >
                   {currentSubjects.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
@@ -318,7 +318,7 @@ export function Homework() {
                 <textarea 
                   value={newHomework.description}
                   onChange={e => setNewHomework({...newHomework, description: e.target.value})}
-                  className="glass-input w-full dark:text-white h-24"
+                  className="glass-input w-full dark:text-gray-900 h-24"
                   placeholder="Instructions for the students..."
                 />
               </div>
@@ -329,7 +329,7 @@ export function Homework() {
                   required
                   value={newHomework.dueDate}
                   onChange={e => setNewHomework({...newHomework, dueDate: e.target.value})}
-                  className="glass-input w-full dark:text-white"
+                  className="glass-input w-full dark:text-gray-900"
                 />
               </div>
               <div className="md:col-span-2">
@@ -338,7 +338,7 @@ export function Homework() {
                   type="url"
                   value={newHomework.link || ''}
                   onChange={e => setNewHomework({...newHomework, link: e.target.value})}
-                  className="glass-input w-full dark:text-white"
+                  className="glass-input w-full dark:text-gray-900"
                   placeholder="https://example.com"
                 />
               </div>
@@ -351,19 +351,19 @@ export function Homework() {
                 {files.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-2">
                     {files.map((f, index) => (
-                      <div key={index} className="relative inline-flex items-center justify-center w-24 h-24 rounded-lg border border-[#E5D9C4] shadow-sm overflow-hidden bg-white dark:bg-[#131E3A]">
+                      <div key={index} className="relative inline-flex items-center justify-center w-24 h-24 rounded-lg border border-[#E5D9C4] shadow-sm overflow-hidden bg-white dark:bg-white">
                         {f.type.startsWith('image/') ? (
                           <img src={previewUrls[index]} alt={`Preview ${index}`} className="h-full w-full object-cover" />
                         ) : (
                           <div className="flex flex-col items-center justify-center p-2 text-center h-full w-full">
-                            <FileText className="w-8 h-8 text-[#62D4CA] mb-1" />
+                            <FileText className="w-8 h-8 text-adminSidebar mb-1" />
                             <span className="text-[10px] text-[#4C677C] dark:text-[#E5D9C4] truncate w-full px-1">{f.name}</span>
                           </div>
                         )}
                         <button 
                           type="button" 
                           onClick={() => removeFile(index)}
-                          className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition z-10"
+                          className="absolute -top-1 -right-1 bg-red-500 text-gray-900 rounded-full p-1 shadow-md hover:bg-red-600 transition z-10"
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -372,11 +372,11 @@ export function Homework() {
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <label className="flex-1 flex items-center justify-center cursor-pointer py-2 px-3 rounded-xl font-bold text-sm bg-[#62D4CA]/20 text-[#2E1C40] hover:bg-[#62D4CA]/40 dark:text-white dark:hover:bg-[#62D4CA]/40 transition-colors">
+                  <label className="flex-1 flex items-center justify-center cursor-pointer py-2 px-3 rounded-xl font-bold text-sm bg-adminSidebar/20 text-[#2E1C40] hover:bg-adminSidebar text-white/40 dark:text-gray-900 dark:hover:bg-adminSidebar text-white/40 transition-colors">
                     <input type="file" accept="image/*" capture="environment" multiple onChange={handleFileChange} className="hidden" />
                     <Camera className="w-4 h-4 mr-2" /> Take Photo
                   </label>
-                  <label className="flex-1 flex items-center justify-center cursor-pointer py-2 px-3 rounded-xl font-bold text-sm bg-[#2E1C40]/10 text-[#2E1C40] hover:bg-[#2E1C40]/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 transition-colors">
+                  <label className="flex-1 flex items-center justify-center cursor-pointer py-2 px-3 rounded-xl font-bold text-sm bg-[#2E1C40]/10 text-[#2E1C40] hover:bg-[#2E1C40]/20 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white/20 transition-colors">
                     <input type="file" accept="image/*,application/pdf,.doc,.docx" multiple onChange={handleFileChange} className="hidden" />
                     <Upload className="w-4 h-4 mr-2" /> Upload
                   </label>
@@ -413,7 +413,7 @@ export function Homework() {
                   <button 
                     type="button"
                     onClick={stopRecording}
-                    className="w-full flex items-center justify-center py-2 px-3 rounded-xl font-bold text-sm bg-red-500 text-white shadow-lg animate-pulse hover:bg-red-600 transition-colors"
+                    className="w-full flex items-center justify-center py-2 px-3 rounded-xl font-bold text-sm bg-red-500 text-gray-900 shadow-lg animate-pulse hover:bg-red-600 transition-colors"
                   >
                     <Square className="w-4 h-4 mr-2 fill-current" /> Stop Recording (Max 60s)
                   </button>
@@ -430,7 +430,7 @@ export function Homework() {
               >
                 Cancel
               </button>
-              <NeonButton type="submit" disabled={loading} className="bg-[#62D4CA] text-[#2E1C40]">
+              <NeonButton type="submit" disabled={loading} className="bg-adminSidebar text-white text-[#2E1C40]">
                 {loading ? 'Assigning...' : 'Assign Homework'}
               </NeonButton>
             </div>
@@ -453,22 +453,22 @@ export function Homework() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {homeworkList.map(hw => (
             <GlassCard key={hw._id} className="flex flex-col relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-1 h-full bg-[#62D4CA]"></div>
+              <div className="absolute top-0 left-0 w-1 h-full bg-adminSidebar text-white"></div>
               <div className="flex justify-between items-start mb-2">
-                <span className="bg-[#62D4CA]/20 text-[#2E1C40] dark:text-[#62D4CA] px-3 py-1 rounded-full text-xs font-bold">
+                <span className="bg-adminSidebar/20 text-[#2E1C40] dark:text-adminSidebar px-3 py-1 rounded-full text-xs font-bold">
                   {hw.subject}
                 </span>
                 {hasFullAccess && (
                   <button 
                     onClick={() => handleDelete(hw._id)}
-                    className="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 bg-white/80 dark:bg-black/50 p-1 rounded-md"
+                    className="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 bg-white/80 dark:bg-gray-900/50 p-1 rounded-md"
                     title="Delete Homework"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 )}
               </div>
-              <h3 className="text-xl font-bold text-[#2E1C40] dark:text-white mb-2">{hw.title}</h3>
+              <h3 className="text-xl font-bold text-[#2E1C40] dark:text-gray-900 mb-2">{hw.title}</h3>
               {hw.description && (
                 <p className="text-[#4C677C] dark:text-gray-300 text-sm mb-4 flex-1">
                   {hw.description}
@@ -477,16 +477,16 @@ export function Homework() {
               
               {/* Media Preview in Card */}
               {(hw.photoUrls?.length > 0 || hw.photoUrl || hw.voiceUrl || hw.link) && (
-                <div className="mb-4 space-y-2 bg-[#F2FCFA]/50 dark:bg-[#131E3A]/50 p-3 rounded-xl border border-[#E5D9C4]/40 dark:border-[#4C677C]/30">
+                <div className="mb-4 space-y-2 bg-[#F2FCFA]/50 dark:bg-gray-500 p-3 rounded-xl border border-[#E5D9C4]/40 dark:border-[#4C677C]/30">
                   {hw.link && (
-                    <a href={hw.link} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-[#62D4CA] hover:underline font-medium mb-2 w-fit">
+                    <a href={hw.link} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-adminSidebar hover:underline font-medium mb-2 w-fit">
                       <LinkIcon className="w-4 h-4 mr-2" />
                       External Link Attached
                     </a>
                   )}
                   {(hw.photoUrls?.length > 0 ? hw.photoUrls : hw.photoUrl ? [hw.photoUrl] : []).length > 0 && (
                     <div className="flex items-center text-sm text-[#4C677C] dark:text-[#E5D9C4] font-medium mb-1">
-                      <FileText className="w-4 h-4 mr-2 text-[#62D4CA]" />
+                      <FileText className="w-4 h-4 mr-2 text-adminSidebar" />
                       Attached Files ({hw.photoUrls?.length || 1})
                     </div>
                   )}

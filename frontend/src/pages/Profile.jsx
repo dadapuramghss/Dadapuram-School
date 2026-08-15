@@ -52,16 +52,16 @@ export function Profile() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Profile Details Form */}
-        <GlassCard className="p-6 md:p-8 relative overflow-hidden group bg-white border-[#E5D9C4] dark:border-white/10 dark:bg-[#0B132B]/60 shadow-xl dark:shadow-2xl">
+        <GlassCard className="p-6 md:p-8 relative overflow-hidden group bg-white border-[#E5D9C4] dark:border-gray-200 dark:bg-white/60 shadow-xl dark:shadow-2xl">
           {/* Subtle background glow */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#62D4CA]/5 rounded-full blur-3xl -z-10 group-hover:bg-[#62D4CA]/10 transition-all duration-700"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-adminSidebar text-white/5 rounded-full blur-3xl -z-10 group-hover:bg-adminSidebar/10 transition-all duration-700"></div>
 
           <div className="flex items-center gap-5 mb-8">
-            <div className="p-4 bg-gradient-to-br from-[#62D4CA]/20 to-[#62D4CA]/5 border border-[#62D4CA]/30 shadow-[0_0_20px_rgba(98,212,202,0.15)] rounded-2xl">
-              <User className="w-7 h-7 text-[#62D4CA]" />
+            <div className="p-4 bg-gradient-to-br from-[#62D4CA]/20 to-[#62D4CA]/5 border border-adminSidebar/30 shadow-[0_0_20px_rgba(98,212,202,0.15)] rounded-2xl">
+              <User className="w-7 h-7 text-adminSidebar" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-[#2E1C40] dark:text-white tracking-tight">Account Details</h2>
+              <h2 className="text-2xl font-bold text-[#2E1C40] dark:text-gray-900 tracking-tight">Account Details</h2>
               <p className="text-sm text-[#4C677C] dark:text-gray-400 mt-1">Personal information & settings</p>
             </div>
           </div>
@@ -69,7 +69,7 @@ export function Profile() {
           <form onSubmit={handleSave} className="space-y-6">
             <div>
               <label className="block text-xs font-bold text-[#4C677C] dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                <User className="w-4 h-4 text-[#62D4CA]" />
+                <User className="w-4 h-4 text-adminSidebar" />
                 Display Name
               </label>
               <input 
@@ -77,10 +77,10 @@ export function Profile() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={!isEditing}
-                className={`w-full px-5 py-4 rounded-xl font-bold text-[#2E1C40] dark:text-white transition-all outline-none 
+                className={`w-full px-5 py-4 rounded-xl font-bold text-[#2E1C40] dark:text-gray-900 transition-all outline-none 
                   ${!isEditing 
-                    ? 'bg-[#F2FCFA] border border-[#E5D9C4] dark:bg-white/5 dark:border-white/5 opacity-80 cursor-not-allowed text-[#4C677C] dark:text-gray-300' 
-                    : 'bg-white border border-[#E5D9C4] dark:bg-white/10 dark:border-[#62D4CA]/50 focus:border-[#62D4CA] focus:ring-4 focus:ring-[#62D4CA]/10 shadow-sm dark:shadow-[0_0_15px_rgba(98,212,202,0.1)]'
+                    ? 'bg-[#F2FCFA] border border-[#E5D9C4] dark:bg-gray-50 dark:border-gray-200 opacity-80 cursor-not-allowed text-[#4C677C] dark:text-gray-300' 
+                    : 'bg-white border border-[#E5D9C4] dark:bg-gray-100 dark:border-adminSidebar/50 focus:border-adminSidebar focus:ring-4 focus:ring-[#62D4CA]/10 shadow-sm dark:shadow-[0_0_15px_rgba(98,212,202,0.1)]'
                   }`}
                 placeholder="Enter your name"
                 required
@@ -95,7 +95,7 @@ export function Profile() {
               <input 
                 type="email" 
                 value={dbUser.email}
-                className="w-full px-5 py-4 rounded-xl font-bold text-[#4C677C] dark:text-gray-400 bg-[#F2FCFA] dark:bg-black/20 border border-[#E5D9C4] dark:border-white/5 cursor-not-allowed"
+                className="w-full px-5 py-4 rounded-xl font-bold text-[#4C677C] dark:text-gray-400 bg-[#F2FCFA] dark:bg-gray-900/10 border border-[#E5D9C4] dark:border-gray-200 cursor-not-allowed"
                 disabled
               />
               <p className="text-xs text-[#4C677C]/80 dark:text-gray-500 mt-2.5 font-medium flex items-center gap-1.5">
@@ -136,12 +136,12 @@ export function Profile() {
               </div>
             )}
 
-            <div className="pt-8 mt-4 border-t border-[#E5D9C4] dark:border-white/10 flex flex-wrap gap-4">
+            <div className="pt-8 mt-4 border-t border-[#E5D9C4] dark:border-gray-200 flex flex-wrap gap-4">
               {!isEditing ? (
                 <button 
                   type="button" 
                   onClick={(e) => { e.preventDefault(); setIsEditing(true); }}
-                  className="px-8 py-3.5 rounded-xl font-bold text-[#0B132B] bg-[#62D4CA] hover:bg-[#4ebab0] hover:shadow-[0_0_25px_rgba(98,212,202,0.4)] transition-all duration-300 flex items-center gap-2 transform hover:-translate-y-0.5"
+                  className="px-8 py-3.5 rounded-xl font-bold text-[#0B132B] bg-adminSidebar text-white hover:bg-[#4ebab0] hover:shadow-[0_0_25px_rgba(98,212,202,0.4)] transition-all duration-300 flex items-center gap-2 transform hover:-translate-y-0.5"
                 >
                   <User className="w-5 h-5" />
                   Edit Profile
@@ -151,14 +151,14 @@ export function Profile() {
                   <button 
                     type="submit" 
                     disabled={isSaving || !name.trim()}
-                    className="px-8 py-3.5 rounded-xl font-bold text-[#0B132B] bg-[#62D4CA] hover:bg-[#4ebab0] hover:shadow-[0_0_25px_rgba(98,212,202,0.4)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transform hover:-translate-y-0.5 flex items-center gap-2"
+                    className="px-8 py-3.5 rounded-xl font-bold text-[#0B132B] bg-adminSidebar text-white hover:bg-[#4ebab0] hover:shadow-[0_0_25px_rgba(98,212,202,0.4)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transform hover:-translate-y-0.5 flex items-center gap-2"
                   >
                     {isSaving ? 'Saving...' : 'Save Changes'}
                   </button>
                   <button 
                     type="button" 
                     onClick={() => { setIsEditing(false); setName(dbUser.name || ''); setMessage({text: '', type: ''}); }}
-                    className="px-8 py-3.5 rounded-xl font-bold text-[#4C677C] bg-white border border-[#E5D9C4] hover:bg-[#F2FCFA] hover:text-[#2E1C40] dark:text-gray-300 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10 dark:hover:text-white transition-all duration-300"
+                    className="px-8 py-3.5 rounded-xl font-bold text-[#4C677C] bg-white border border-[#E5D9C4] hover:bg-[#F2FCFA] hover:text-[#2E1C40] dark:text-gray-300 dark:bg-gray-50 dark:border-gray-200 dark:hover:bg-gray-100 dark:hover:text-gray-900 transition-all duration-300"
                   >
                     Cancel
                   </button>
@@ -169,7 +169,7 @@ export function Profile() {
         </GlassCard>
 
         {/* Assigned Classes */}
-        <GlassCard className="p-6 md:p-8 h-fit relative overflow-hidden group bg-white border-[#E5D9C4] dark:border-white/10 dark:bg-[#0B132B]/60 shadow-xl dark:shadow-2xl">
+        <GlassCard className="p-6 md:p-8 h-fit relative overflow-hidden group bg-white border-[#E5D9C4] dark:border-gray-200 dark:bg-white/60 shadow-xl dark:shadow-2xl">
           {/* Subtle background glow */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#FA7848]/5 rounded-full blur-3xl -z-10 group-hover:bg-[#FA7848]/10 transition-all duration-700"></div>
 
@@ -178,17 +178,17 @@ export function Profile() {
               <BookOpen className="w-7 h-7 text-[#FA7848]" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-[#2E1C40] dark:text-white tracking-tight">Assigned Classes</h2>
+              <h2 className="text-2xl font-bold text-[#2E1C40] dark:text-gray-900 tracking-tight">Assigned Classes</h2>
               <p className="text-sm text-[#4C677C] dark:text-gray-400 mt-1">Your teaching responsibilities</p>
             </div>
           </div>
 
           {dbUser.role === 'admin' ? (
-            <div className="bg-gradient-to-r from-[#62D4CA]/10 to-transparent border-l-4 border-[#62D4CA] p-6 rounded-r-2xl">
+            <div className="bg-gradient-to-r from-[#62D4CA]/10 to-transparent border-l-4 border-adminSidebar p-6 rounded-r-2xl">
               <div className="flex items-start gap-4">
-                <Shield className="w-6 h-6 text-[#62D4CA] mt-0.5 flex-shrink-0 drop-shadow-[0_0_8px_rgba(98,212,202,0.5)]" />
+                <Shield className="w-6 h-6 text-adminSidebar mt-0.5 flex-shrink-0 drop-shadow-[0_0_8px_rgba(98,212,202,0.5)]" />
                 <div>
-                  <h3 className="font-bold text-[#2E1C40] dark:text-white text-lg mb-2">Full Administrator Access</h3>
+                  <h3 className="font-bold text-[#2E1C40] dark:text-gray-900 text-lg mb-2">Full Administrator Access</h3>
                   <p className="text-[#4C677C] dark:text-gray-300 leading-relaxed">
                     As an Admin, you have unrestricted access to all classes, sections, and records within the institution.
                   </p>
@@ -199,13 +199,13 @@ export function Profile() {
             <div className="space-y-4">
               {dbUser.assignedClasses && dbUser.assignedClasses.length > 0 ? (
                 dbUser.assignedClasses.map((ac, idx) => (
-                  <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-[#F2FCFA] dark:bg-white/5 border border-[#E5D9C4] dark:border-white/10 hover:bg-[#E5F9F6] dark:hover:bg-white/10 hover:border-[#62D4CA]/30 dark:hover:border-white/20 rounded-2xl transition-all duration-300 gap-4 group/item">
+                  <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-[#F2FCFA] dark:bg-gray-50 border border-[#E5D9C4] dark:border-gray-200 hover:bg-[#E5F9F6] dark:hover:bg-gray-100 hover:border-adminSidebar/30 dark:hover:border-white/20 rounded-2xl transition-all duration-300 gap-4 group/item">
                     <div className="flex items-center gap-5">
-                      <div className="w-12 h-12 rounded-xl bg-[#62D4CA]/10 border border-[#62D4CA]/20 flex items-center justify-center text-[#62D4CA] font-black text-lg group-hover/item:scale-105 transition-transform">
+                      <div className="w-12 h-12 rounded-xl bg-adminSidebar/10 border border-adminSidebar/20 flex items-center justify-center text-adminSidebar font-black text-lg group-hover/item:scale-105 transition-transform">
                         {ac.standard}
                       </div>
                       <div>
-                        <div className="font-bold text-[#2E1C40] dark:text-white text-lg">Standard {ac.standard}</div>
+                        <div className="font-bold text-[#2E1C40] dark:text-gray-900 text-lg">Standard {ac.standard}</div>
                         <div className="text-[#4C677C] dark:text-gray-400 font-medium">Section {ac.section}</div>
                       </div>
                     </div>
@@ -223,8 +223,8 @@ export function Profile() {
                   </div>
                 ))
               ) : (
-                <div className="text-center p-10 bg-[#F2FCFA] dark:bg-white/5 rounded-3xl border border-[#E5D9C4] dark:border-white/10 border-dashed">
-                  <div className="w-16 h-16 bg-white dark:bg-white/5 shadow-sm dark:shadow-none rounded-2xl flex items-center justify-center mx-auto mb-4 border border-[#E5D9C4] dark:border-transparent">
+                <div className="text-center p-10 bg-[#F2FCFA] dark:bg-gray-50 rounded-3xl border border-[#E5D9C4] dark:border-gray-200 border-dashed">
+                  <div className="w-16 h-16 bg-white dark:bg-gray-50 shadow-sm dark:shadow-none rounded-2xl flex items-center justify-center mx-auto mb-4 border border-[#E5D9C4] dark:border-transparent">
                     <BookOpen className="w-8 h-8 text-[#4C677C] dark:text-gray-500" />
                   </div>
                   <p className="text-[#2E1C40] dark:text-gray-300 font-bold text-lg mb-2">No classes assigned</p>

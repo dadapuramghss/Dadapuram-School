@@ -31,13 +31,13 @@ export function StudentProfileModal({ studentId, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-md bg-white dark:bg-[#0B0F19] rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-white/10 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-md bg-white dark:bg-[#0B0F19] rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-gray-200 animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header Background */}
         <div className="h-32 bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-800">
           <button 
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition-colors backdrop-blur-md"
+            className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 text-gray-900 rounded-full transition-colors backdrop-blur-md"
           >
             <X className="w-5 h-5" />
           </button>
@@ -51,7 +51,7 @@ export function StudentProfileModal({ studentId, onClose }) {
         ) : error ? (
           <div className="p-8 text-center">
             <p className="text-red-500">{error}</p>
-            <button onClick={onClose} className="mt-4 px-4 py-2 bg-slate-100 dark:bg-white/5 rounded-lg text-slate-700 dark:text-slate-300">Close</button>
+            <button onClick={onClose} className="mt-4 px-4 py-2 bg-slate-100 dark:bg-gray-50 rounded-lg text-slate-700 dark:text-slate-300">Close</button>
           </div>
         ) : student ? (
           <div className="px-6 pb-6">
@@ -68,7 +68,7 @@ export function StudentProfileModal({ studentId, onClose }) {
 
             {/* Basic Info */}
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">{student.name}</h2>
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-gray-900 mb-1">{student.name}</h2>
               {student.tamilName && <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">{student.tamilName}</p>}
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-sm font-semibold">
                 <BookOpen className="w-4 h-4" />
@@ -78,35 +78,35 @@ export function StudentProfileModal({ studentId, onClose }) {
 
             {/* Details Grid */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-xl">
+              <div className="bg-slate-50 dark:bg-gray-50 p-3 rounded-xl">
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider font-semibold">EMIS Number</p>
-                <p className="font-medium text-slate-800 dark:text-white">{student.emisNumber || 'N/A'}</p>
+                <p className="font-medium text-slate-800 dark:text-gray-900">{student.emisNumber || 'N/A'}</p>
               </div>
-              <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-xl">
+              <div className="bg-slate-50 dark:bg-gray-50 p-3 rounded-xl">
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider font-semibold">Medium</p>
-                <p className="font-medium text-slate-800 dark:text-white">{student.medium || 'N/A'}</p>
+                <p className="font-medium text-slate-800 dark:text-gray-900">{student.medium || 'N/A'}</p>
               </div>
-              <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-xl">
+              <div className="bg-slate-50 dark:bg-gray-50 p-3 rounded-xl">
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider font-semibold">Father's Name</p>
-                <p className="font-medium text-slate-800 dark:text-white">{student.fatherName || 'N/A'}</p>
+                <p className="font-medium text-slate-800 dark:text-gray-900">{student.fatherName || 'N/A'}</p>
               </div>
-              <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-xl">
+              <div className="bg-slate-50 dark:bg-gray-50 p-3 rounded-xl">
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider font-semibold">Gender</p>
-                <p className="font-medium text-slate-800 dark:text-white">{student.gender || 'N/A'}</p>
+                <p className="font-medium text-slate-800 dark:text-gray-900">{student.gender || 'N/A'}</p>
               </div>
-              <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-xl col-span-2 flex gap-3 items-center">
+              <div className="bg-slate-50 dark:bg-gray-50 p-3 rounded-xl col-span-2 flex gap-3 items-center">
                 <Calendar className="w-5 h-5 text-slate-400 flex-shrink-0" />
                 <div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Date of Birth</p>
-                  <p className="font-medium text-slate-800 dark:text-white">{student.dob ? new Date(student.dob).toLocaleDateString() : 'N/A'}</p>
+                  <p className="font-medium text-slate-800 dark:text-gray-900">{student.dob ? new Date(student.dob).toLocaleDateString() : 'N/A'}</p>
                 </div>
               </div>
               {student.address && (
-                <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-xl col-span-2 flex gap-3 items-start">
+                <div className="bg-slate-50 dark:bg-gray-50 p-3 rounded-xl col-span-2 flex gap-3 items-start">
                   <MapPin className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Address</p>
-                    <p className="font-medium text-slate-800 dark:text-white text-sm">{student.address}</p>
+                    <p className="font-medium text-slate-800 dark:text-gray-900 text-sm">{student.address}</p>
                   </div>
                 </div>
               )}

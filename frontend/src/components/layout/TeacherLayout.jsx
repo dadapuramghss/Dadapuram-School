@@ -73,7 +73,7 @@ export function TeacherLayout() {
         <div className="flex items-center gap-2">
           <button 
             onClick={handleNotificationClick}
-            className="relative p-2 text-[#E5D9C4] hover:text-[#62D4CA] transition-colors rounded-full"
+            className="relative p-2 text-[#E5D9C4] hover:text-adminSidebar transition-colors rounded-full"
           >
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
@@ -82,7 +82,7 @@ export function TeacherLayout() {
           </button>
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 bg-[#62D4CA] text-[#2E1C40] rounded-lg"
+            className="p-2 bg-adminSidebar text-white text-[#2E1C40] rounded-lg"
           >
             {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -147,7 +147,7 @@ export function TeacherLayout() {
                     "flex items-center rounded-xl transition-all duration-300",
                     isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mb-2 mx-auto w-12",
                     isActive 
-                      ? "bg-[#62D4CA] text-[#2E1C40] shadow-md font-bold border-l-4 border-[#D8FDF6]" 
+                      ? "bg-adminSidebar text-white text-[#2E1C40] shadow-md font-bold border-l-4 border-[#D8FDF6]" 
                       : "text-[#E5D9C4]/70 hover:bg-[#4C677C]/40 hover:text-[#E5D9C4] font-medium border-l-4 border-transparent"
                   )
                 }
@@ -173,7 +173,7 @@ export function TeacherLayout() {
                 "flex items-center rounded-xl transition-all duration-300 w-full",
                 isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12",
                 isActive 
-                  ? "bg-[#62D4CA] text-[#2E1C40] shadow-md font-bold border-l-4 border-[#D8FDF6]" 
+                  ? "bg-adminSidebar text-white text-[#2E1C40] shadow-md font-bold border-l-4 border-[#D8FDF6]" 
                   : "text-[#E5D9C4]/70 hover:bg-[#4C677C]/40 hover:text-[#E5D9C4] font-medium border-l-4 border-transparent"
               )
             }
@@ -225,7 +225,7 @@ export function TeacherLayout() {
       }`}>
         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-[#F4F8F7]">
           <h2 className="text-lg font-bold text-[#2E1C40] flex items-center gap-2">
-            <Bell className="w-5 h-5 text-[#62D4CA]" />
+            <Bell className="w-5 h-5 text-adminSidebar" />
             Notifications
           </h2>
           <button 
@@ -245,7 +245,7 @@ export function TeacherLayout() {
             notifications.map(n => (
               <div key={n._id} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex gap-3">
-                  <div className="p-2 bg-[#D8FDF6] text-[#62D4CA] rounded-lg shrink-0 h-fit">
+                  <div className="p-2 bg-[#D8FDF6] text-adminSidebar rounded-lg shrink-0 h-fit">
                     <Megaphone className="w-5 h-5" />
                   </div>
                   <div>

@@ -85,26 +85,26 @@ export function AiDashboard() {
     <div className="flex flex-col h-[calc(100vh-6rem)] md:h-[calc(100vh-3rem)] w-full max-w-full overflow-hidden">
       {/* Header */}
       <div className="mb-4">
-        <h2 className="text-2xl font-bold text-[#2E1C40] dark:text-white flex items-center gap-2">
-          <Bot className="w-8 h-8 text-[#62D4CA] dark:text-[#F9CB84]" />
+        <h2 className="text-2xl font-bold text-[#2E1C40] dark:text-gray-900 flex items-center gap-2">
+          <Bot className="w-8 h-8 text-adminSidebar dark:text-adminAccent2" />
           AI Data Analyst
         </h2>
-        <p className="text-[#4C677C] dark:text-white/60">
+        <p className="text-[#4C677C] dark:text-gray-500">
           Ask questions about student performance, rankings, and analytics.
         </p>
       </div>
 
       {/* Chat Container */}
-      <div className="flex-1 bg-white dark:bg-[#131E3A] border border-[#E5D9C4] dark:border-white/5 rounded-3xl shadow-xl flex flex-col overflow-hidden">
+      <div className="flex-1 bg-white dark:bg-white border border-[#E5D9C4] dark:border-gray-200 rounded-3xl shadow-xl flex flex-col overflow-hidden">
         
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-[#F2FCFA] dark:bg-[#0B1221]">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-[#F2FCFA] dark:bg-adminBg">
           {messages.map((msg, idx) => (
             <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[90%] md:max-w-[75%] rounded-3xl p-4 shadow-sm ${
                 msg.role === 'user' 
-                  ? 'bg-[#62D4CA] dark:bg-[#F9CB84] text-[#2E1C40] dark:text-[#0B1221] font-medium rounded-br-sm' 
-                  : 'bg-white dark:bg-[#131E3A] border border-[#E5D9C4] dark:border-white/10 text-[#2E1C40] dark:text-white rounded-bl-sm'
+                  ? 'bg-adminSidebar text-white dark:bg-adminAccent2 text-white text-[#2E1C40] dark:text-[#0B1221] font-medium rounded-br-sm' 
+                  : 'bg-white dark:bg-white border border-[#E5D9C4] dark:border-gray-200 text-[#2E1C40] dark:text-gray-900 rounded-bl-sm'
               }`}>
                 <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                 {msg.role === 'assistant' && (
@@ -114,7 +114,7 @@ export function AiDashboard() {
                       className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium rounded-lg transition-colors ${
                         isSpeaking 
                           ? 'text-red-500 bg-red-50 dark:bg-red-500/20' 
-                          : 'text-[#4C677C] dark:text-white/60 hover:text-[#2E1C40] dark:hover:text-white bg-[#E5D9C4] dark:bg-white/10 hover:bg-[#D8FDF6] dark:hover:bg-white/20'
+                          : 'text-[#4C677C] dark:text-gray-500 hover:text-[#2E1C40] dark:hover:text-gray-900 bg-[#E5D9C4] dark:bg-gray-100 hover:bg-[#D8FDF6] dark:hover:bg-white/20'
                       }`}
                       title={isSpeaking ? "Stop reading" : "Read aloud"}
                     >
@@ -137,8 +137,8 @@ export function AiDashboard() {
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-white dark:bg-[#131E3A] border border-[#E5D9C4] dark:border-white/10 rounded-3xl rounded-bl-sm p-4 shadow-sm flex items-center gap-3 text-[#4C677C] dark:text-white/60">
-                <Loader2 className="w-5 h-5 animate-spin text-[#62D4CA] dark:text-[#F9CB84]" />
+              <div className="bg-white dark:bg-white border border-[#E5D9C4] dark:border-gray-200 rounded-3xl rounded-bl-sm p-4 shadow-sm flex items-center gap-3 text-[#4C677C] dark:text-gray-500">
+                <Loader2 className="w-5 h-5 animate-spin text-adminSidebar dark:text-adminAccent2" />
                 <span>Analyzing database...</span>
               </div>
             </div>
@@ -147,20 +147,20 @@ export function AiDashboard() {
         </div>
 
         {/* Input Area */}
-        <div className="p-3 md:p-4 bg-white dark:bg-[#131E3A] border-t border-[#E5D9C4] dark:border-white/5">
+        <div className="p-3 md:p-4 bg-white dark:bg-white border-t border-[#E5D9C4] dark:border-gray-200">
           <form onSubmit={handleSubmit} className="flex gap-2 md:gap-3 items-center max-w-4xl mx-auto w-full">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask anything..."
-              className="flex-1 min-w-0 bg-[#F2FCFA] dark:bg-[#0B1221] border border-[#E5D9C4] dark:border-white/10 rounded-xl md:rounded-2xl px-4 py-3 md:px-6 md:py-4 text-sm md:text-base text-[#2E1C40] dark:text-white placeholder-[#4C677C]/60 dark:placeholder-white/40 focus:outline-none focus:border-[#62D4CA] dark:focus:border-[#F9CB84] focus:ring-2 focus:ring-[#62D4CA]/20 dark:focus:ring-[#F9CB84]/20 transition-all shadow-sm"
+              className="flex-1 min-w-0 bg-[#F2FCFA] dark:bg-adminBg border border-[#E5D9C4] dark:border-gray-200 rounded-xl md:rounded-2xl px-4 py-3 md:px-6 md:py-4 text-sm md:text-base text-[#2E1C40] dark:text-gray-900 placeholder-[#4C677C]/60 dark:placeholder-white/40 focus:outline-none focus:border-adminSidebar dark:focus:border-adminAccent2 focus:ring-2 focus:ring-[#62D4CA]/20 dark:focus:ring-[#F9CB84]/20 transition-all shadow-sm"
               disabled={isLoading}
             />
             <button
               type="button"
               onClick={startListening}
-              className={`p-3 md:p-4 shrink-0 rounded-xl md:rounded-2xl transition-all shadow-sm ${isListening ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' : 'bg-[#E5D9C4] dark:bg-white/10 text-[#4C677C] dark:text-white/60 hover:text-[#2E1C40] dark:hover:text-white hover:bg-[#D8FDF6] dark:hover:bg-white/20'}`}
+              className={`p-3 md:p-4 shrink-0 rounded-xl md:rounded-2xl transition-all shadow-sm ${isListening ? 'bg-red-500 hover:bg-red-600 text-gray-900 animate-pulse' : 'bg-[#E5D9C4] dark:bg-gray-100 text-[#4C677C] dark:text-gray-500 hover:text-[#2E1C40] dark:hover:text-gray-900 hover:bg-[#D8FDF6] dark:hover:bg-white/20'}`}
               title="Speak"
             >
               {isListening ? <MicOff className="w-5 h-5 md:w-6 md:h-6" /> : <Mic className="w-5 h-5 md:w-6 md:h-6" />}
@@ -168,7 +168,7 @@ export function AiDashboard() {
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="p-3 md:p-4 shrink-0 bg-[#62D4CA] dark:bg-[#F9CB84] hover:bg-[#4C677C] dark:hover:bg-[#EBD8BE] disabled:opacity-50 disabled:cursor-not-allowed text-[#2E1C40] dark:text-[#0B1221] rounded-xl md:rounded-2xl transition-all shadow-md hover:shadow-lg"
+              className="p-3 md:p-4 shrink-0 bg-adminSidebar text-white dark:bg-adminAccent2 text-white hover:bg-[#4C677C] dark:hover:bg-adminAccent2 disabled:opacity-50 disabled:cursor-not-allowed text-[#2E1C40] dark:text-[#0B1221] rounded-xl md:rounded-2xl transition-all shadow-md hover:shadow-lg"
               title="Send Message"
             >
               <Send className="w-5 h-5 md:w-6 md:h-6" />

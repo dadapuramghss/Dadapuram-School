@@ -81,24 +81,24 @@ export function AdminClasses() {
   };
 
   if (loadingConfigs) {
-    return <div className="text-white text-center p-8">Loading configurations...</div>;
+    return <div className="text-gray-900 text-center p-8">Loading configurations...</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl sm:text-3xl font-black text-[#2E1C40] dark:text-white drop-shadow-sm flex items-center">
-          <Settings className="w-6 h-6 sm:w-8 sm:h-8 mr-3 text-[#62D4CA] shrink-0" />
+        <h1 className="text-2xl sm:text-3xl font-black text-[#2E1C40] dark:text-gray-900 drop-shadow-sm flex items-center">
+          <Settings className="w-6 h-6 sm:w-8 sm:h-8 mr-3 text-adminSidebar shrink-0" />
           <span>Class & Subject Configuration</span>
         </h1>
-        <NeonButton onClick={() => handleOpenModal()} className="bg-[#62D4CA] text-[#2E1C40] w-full sm:w-auto shrink-0 whitespace-nowrap">
+        <NeonButton onClick={() => handleOpenModal()} className="bg-adminSidebar text-white text-[#2E1C40] w-full sm:w-auto shrink-0 whitespace-nowrap">
           <Plus className="w-5 h-5 mr-2 inline" /> Add Class/Section
         </NeonButton>
       </div>
 
       <GlassCard className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[600px]">
-          <thead className="bg-[#D8FDF6]/40 dark:bg-[#0B132B] text-[#4C677C] dark:text-[#E5D9C4]">
+          <thead className="bg-[#D8FDF6]/40 dark:bg-white text-[#4C677C] dark:text-[#E5D9C4]">
             <tr className="border-b border-[#E5D9C4] dark:border-[#4C677C]/30 text-xs uppercase tracking-wider">
               <th className="p-4 font-bold text-center rounded-tl-lg">Standard</th>
               <th className="p-4 font-bold text-center">Section</th>
@@ -116,8 +116,8 @@ export function AdminClasses() {
               })
               .map((config) => (
               <tr key={config._id} className="border-b border-[#E5D9C4]/40 dark:border-[#4C677C]/30 hover:bg-[#D8FDF6]/20 dark:hover:bg-[#2E1C40]/20 transition-colors">
-                <td className="p-4 font-medium text-center text-[#2E1C40] dark:text-white">{config.standard}</td>
-                <td className="p-4 font-medium text-center text-[#2E1C40] dark:text-white">{config.section}</td>
+                <td className="p-4 font-medium text-center text-[#2E1C40] dark:text-gray-900">{config.standard}</td>
+                <td className="p-4 font-medium text-center text-[#2E1C40] dark:text-gray-900">{config.section}</td>
                 <td className="p-4 text-left text-[#4C677C] dark:text-gray-300">
                   <div className="flex flex-wrap gap-2">
                     {config.subjects.map(sub => (
@@ -152,7 +152,7 @@ export function AdminClasses() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <GlassCard className="w-full max-w-lg p-6">
-            <h2 className="text-xl font-bold text-[#2E1C40] dark:text-white mb-4">
+            <h2 className="text-xl font-bold text-[#2E1C40] dark:text-gray-900 mb-4">
               {editingConfig ? 'Edit Class Configuration' : 'Add Class & Section'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -166,7 +166,7 @@ export function AdminClasses() {
                     value={formData.standard}
                     onChange={e => setFormData({...formData, standard: e.target.value})}
                     placeholder="e.g. 11"
-                    className="glass-input w-full dark:text-white disabled:opacity-50"
+                    className="glass-input w-full dark:text-gray-900 disabled:opacity-50"
                   />
                 </div>
                 <div>
@@ -178,7 +178,7 @@ export function AdminClasses() {
                     value={formData.section}
                     onChange={e => setFormData({...formData, section: e.target.value})}
                     placeholder="e.g. A"
-                    className="glass-input w-full dark:text-white disabled:opacity-50"
+                    className="glass-input w-full dark:text-gray-900 disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -189,7 +189,7 @@ export function AdminClasses() {
                   value={formData.subjects}
                   onChange={e => setFormData({...formData, subjects: e.target.value})}
                   placeholder="Tamil, English, Maths, Science"
-                  className="glass-input w-full dark:text-white h-24"
+                  className="glass-input w-full dark:text-gray-900 h-24"
                 />
               </div>
               <div className="flex justify-end gap-3 mt-6">
@@ -200,7 +200,7 @@ export function AdminClasses() {
                 >
                   Cancel
                 </button>
-                <NeonButton type="submit" disabled={isSubmitting} className="bg-[#62D4CA] text-[#2E1C40]">
+                <NeonButton type="submit" disabled={isSubmitting} className="bg-adminSidebar text-white text-[#2E1C40]">
                   {isSubmitting ? 'Saving...' : 'Save Configuration'}
                 </NeonButton>
               </div>

@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, Bot, BookOpen, Database, Settings, PieChart } from 'lucide-react';
+import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, Bot, BookOpen, Database, Settings, PieChart, Download } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const { logout, dbUser } = useAuth();
+  const { isInstallable, installApp } = usePWAInstall();
 
   const handleNavClick = () => {
     if (window.innerWidth < 768) {
@@ -30,10 +32,10 @@ export function AdminLayout() {
   ];
 
   return (
-    <div className="dark flex h-screen overflow-hidden bg-[#0B1221] text-gray-100 font-sans relative z-10">
+    <div className="flex h-screen overflow-hidden bg-adminBg text-gray-900 font-sans relative z-10">
       
       {/* Mobile Topbar */}
-      <div className="md:hidden absolute top-0 left-0 w-full h-16 bg-[#131E3A]/90 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 z-40 shadow-sm">
+      <div className="md:hidden absolute top-0 left-0 w-full h-16 bg-adminSidebar/90 backdrop-blur-md border-b border-white/20 flex items-center justify-between px-4 z-40 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 shrink-0 flex items-center justify-center bg-white rounded-lg p-1">
             <img src="/dpm_logo.png" alt="Logo" className="w-full h-full object-contain" />
@@ -42,12 +44,23 @@ export function AdminLayout() {
             EduAdmin
           </h1>
         </div>
-        <button 
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-2 bg-white/5 text-white rounded-lg border border-white/10"
-        >
-          {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-2">
+          {isInstallable && (
+            <button 
+              onClick={installApp}
+              className="p-1.5 px-3 text-xs font-bold bg-adminAccent2 text-white rounded-lg shadow-sm flex items-center gap-1"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Install
+            </button>
+          )}
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-2 bg-white/10 text-white rounded-lg border border-white/20"
+          >
+            {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Sidebar Overlay Backdrop */}
@@ -60,7 +73,7 @@ export function AdminLayout() {
 
       {/* Sidebar */}
       <aside className={cn(
-        "bg-[#131E3A] m-4 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.3)] border border-white/5 flex flex-col justify-between transition-all duration-300 z-50 shrink-0",
+        "bg-adminSidebar m-4 rounded-2xl shadow-xl border border-white/20 flex flex-col justify-between transition-all duration-300 z-50 shrink-0",
         "fixed md:relative h-[calc(100vh-2rem)]",
         isSidebarOpen ? "translate-x-0 w-64" : "-translate-x-[150%] md:translate-x-0 w-[5.5rem]"
       )}>
@@ -78,7 +91,7 @@ export function AdminLayout() {
             )}
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="hidden md:block p-2 rounded-xl hover:bg-white/5 text-[#EBD8BE]/60 hover:text-white transition-colors"
+              className="hidden md:block p-2 rounded-xl hover:bg-white/10 text-white/70 hover:text-white transition-colors"
             >
               {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
             </button>
@@ -96,8 +109,8 @@ export function AdminLayout() {
                     "flex items-center rounded-2xl transition-all duration-300",
                     isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mb-2 mx-auto w-12",
                     isActive 
-                      ? "bg-gradient-to-r from-[#F9CB84]/10 to-transparent text-[#F9CB84] border-l-4 border-[#F9CB84] font-bold" 
-                      : "text-[#EBD8BE]/60 hover:bg-white/5 hover:text-white font-medium border-l-4 border-transparent"
+                      ? "bg-adminAccent1 text-white shadow-md font-bold" 
+                      : "text-white/70 hover:bg-white/10 hover:text-white font-medium"
                   )
                 }
                 title={!isSidebarOpen ? item.name : undefined}
@@ -122,8 +135,8 @@ export function AdminLayout() {
                 "flex items-center rounded-2xl transition-all duration-300 w-full",
                 isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12",
                 isActive 
-                  ? "bg-gradient-to-r from-[#F9CB84]/10 to-transparent text-[#F9CB84] border-l-4 border-[#F9CB84] font-bold" 
-                  : "text-[#EBD8BE]/60 hover:bg-white/5 hover:text-white font-medium border-l-4 border-transparent"
+                  ? "bg-adminAccent1 text-white shadow-md font-bold" 
+                  : "text-white/70 hover:bg-white/10 hover:text-white font-medium"
               )
             }
             title={!isSidebarOpen ? "My Profile" : undefined}
@@ -135,10 +148,28 @@ export function AdminLayout() {
               <span className="md:hidden whitespace-nowrap overflow-hidden ml-3">My Profile</span>
             )}
           </NavLink>
+          {isInstallable && (
+            <button 
+              onClick={installApp}
+              className={cn(
+                "flex items-center rounded-2xl transition-all duration-300 w-full font-bold",
+                isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12",
+                "bg-adminAccent2 text-white shadow-md"
+              )}
+              title={!isSidebarOpen ? "Install App" : undefined}
+            >
+              <Download className={cn("w-5 h-5 flex-shrink-0", !isSidebarOpen && "md:mx-auto")} />
+              {isSidebarOpen ? (
+                <span className="whitespace-nowrap overflow-hidden">Install App</span>
+              ) : (
+                <span className="md:hidden whitespace-nowrap overflow-hidden ml-3">Install App</span>
+              )}
+            </button>
+          )}
           <button 
             onClick={logout}
             className={cn(
-              "flex items-center rounded-xl text-[#EBD8BE]/60 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 w-full font-medium border-l-4 border-transparent",
+              "flex items-center rounded-xl text-white/70 hover:bg-adminAccent1 hover:text-white transition-all duration-300 w-full font-medium",
               isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12"
             )}
             title={!isSidebarOpen ? "Logout" : undefined}
@@ -154,7 +185,7 @@ export function AdminLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-4 md:pl-0 pt-20 md:pt-4 w-full bg-[#0B1221]">
+      <main className="flex-1 overflow-y-auto p-4 md:pl-0 pt-20 md:pt-4 w-full bg-adminBg">
         <div className="h-full rounded-3xl w-full max-w-full overflow-x-hidden">
           <Outlet />
         </div>

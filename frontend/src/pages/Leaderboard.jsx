@@ -63,7 +63,7 @@ export function Leaderboard() {
   const renderRankIcon = (rank) => {
     switch(rank) {
       case 1: return <Trophy className="w-8 h-8 text-[#AE634A] drop-shadow-sm" />;
-      case 2: return <Medal className="w-8 h-8 text-[#62D4CA] drop-shadow-sm" />;
+      case 2: return <Medal className="w-8 h-8 text-adminSidebar drop-shadow-sm" />;
       case 3: return <Medal className="w-8 h-8 text-[#732A26] drop-shadow-sm" />;
       default: return <div className="w-8 h-8 flex items-center justify-center font-bold text-xl text-[#4C677C]/60  ">{rank}</div>;
     }
@@ -78,7 +78,7 @@ export function Leaderboard() {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <h1 className="text-3xl font-bold text-[#2E1C40] dark:text-white drop-shadow-sm">
+        <h1 className="text-3xl font-bold text-[#2E1C40] dark:text-gray-900 drop-shadow-sm">
           {getTitle()}
         </h1>
         
@@ -89,7 +89,7 @@ export function Leaderboard() {
               setSelectedClass(e.target.value);
               setSelectedSection('All');
             }}
-            className="glass-input w-full sm:w-auto dark:!text-white dark:bg-transparent [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+            className="glass-input w-full sm:w-auto dark:!text-gray-900 dark:bg-transparent [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
           >
             <option value="All">All Standards (Whole School)</option>
             <option value="6">Standard 6</option>
@@ -103,7 +103,7 @@ export function Leaderboard() {
           <select 
             value={selectedSection} 
             onChange={e => setSelectedSection(e.target.value)}
-            className="glass-input w-full sm:w-auto dark:!text-white dark:bg-transparent [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+            className="glass-input w-full sm:w-auto dark:!text-gray-900 dark:bg-transparent [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
             disabled={selectedClass === 'All'}
           >
             <option value="All">All Sections</option>
@@ -130,7 +130,7 @@ export function Leaderboard() {
               className={cn(
                 "glass-card p-4 flex flex-row items-center gap-3 sm:gap-6 transition-all duration-300 hover:scale-[1.02] cursor-pointer",
                 student.rank === 1 ? "border-[#AE634A]/50 shadow-md bg-[#FDF9F7] dark:bg-[#AE634A]/10" : "",
-                student.rank === 2 ? "border-[#62D4CA]/50 bg-[#F2FCFA] dark:bg-[#62D4CA]/10" : "",
+                student.rank === 2 ? "border-adminSidebar/50 bg-[#F2FCFA] dark:bg-adminSidebar/10" : "",
                 student.rank === 3 ? "border-[#732A26]/50 bg-[#FCF9F9] dark:bg-[#732A26]/10" : "",
                 student.rank > 3 ? "border-[#E5D9C4] dark:border-[#4C677C]/30" : ""
               )}
@@ -146,11 +146,11 @@ export function Leaderboard() {
               />
               
               <div className="flex-1 min-w-0">
-                <h3 className="text-xl font-bold truncate text-[#2E1C40] dark:text-white">{student.name}</h3>
+                <h3 className="text-xl font-bold truncate text-[#2E1C40] dark:text-gray-900">{student.name}</h3>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[#4C677C] dark:text-gray-300 text-xs sm:text-sm mt-1">
                   <span className="whitespace-nowrap">EMIS No: {student.emisNumber}</span>
                   {(selectedClass === 'All' || selectedSection === 'All') && (
-                    <span className="bg-[#D8FDF6]/40 dark:bg-[#131E3A] text-[#2E1C40] dark:text-white px-2 py-0.5 rounded-full text-xs font-bold whitespace-nowrap inline-block">
+                    <span className="bg-[#D8FDF6]/40 dark:bg-white text-[#2E1C40] dark:text-gray-900 px-2 py-0.5 rounded-full text-xs font-bold whitespace-nowrap inline-block">
                       Std {student.standard} - {student.section}
                     </span>
                   )}
@@ -161,8 +161,8 @@ export function Leaderboard() {
                 <div className="text-xs sm:text-sm text-[#4C677C] dark:text-gray-300 mb-1 whitespace-nowrap">Total Marks</div>
                 <div className={`text-xl sm:text-2xl font-black ${
                   student.rank === 1 ? 'text-[#AE634A]' : 
-                  student.rank === 2 ? 'text-[#62D4CA]' : 
-                  student.rank === 3 ? 'text-[#732A26]' : 'text-[#2E1C40] dark:text-white'
+                  student.rank === 2 ? 'text-adminSidebar' : 
+                  student.rank === 3 ? 'text-[#732A26]' : 'text-[#2E1C40] dark:text-gray-900'
                 }`}>
                   {student.totalMarks}
                 </div>
@@ -175,13 +175,13 @@ export function Leaderboard() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
           <div className="relative w-full max-w-lg my-auto">
             <GlassCard className="w-full max-h-[90vh] overflow-y-auto custom-scrollbar">
-              <div className="flex justify-between items-center mb-6 sticky top-0 bg-white dark:bg-[#0B132B] backdrop-blur-md py-4 border-b border-[#E5D9C4] dark:border-[#4C677C]/30 z-10 -mx-6 px-6 -mt-6">
-                <h2 className="text-xl font-bold text-[#2E1C40] dark:text-white">
+              <div className="flex justify-between items-center mb-6 sticky top-0 bg-white dark:bg-white backdrop-blur-md py-4 border-b border-[#E5D9C4] dark:border-[#4C677C]/30 z-10 -mx-6 px-6 -mt-6">
+                <h2 className="text-xl font-bold text-[#2E1C40] dark:text-gray-900">
                   Student Details
                 </h2>
                 <button 
                   onClick={() => { setSelectedStudentId(null); setStudentDetails(null); }} 
-                  className="p-2 text-[#4C677C]/60 hover:text-[#2E1C40] dark:text-gray-400 dark:hover:text-white transition-colors rounded-full hover:bg-[#E5D9C4] dark:hover:bg-[#2E1C40]/50"
+                  className="p-2 text-[#4C677C]/60 hover:text-[#2E1C40] dark:text-gray-400 dark:hover:text-gray-900 transition-colors rounded-full hover:bg-[#E5D9C4] dark:hover:bg-[#2E1C40]/50"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -198,23 +198,23 @@ export function Leaderboard() {
                       className="w-20 h-20 rounded-xl object-cover border-2 border-white/20"
                     />
                     <div>
-                      <h3 className="text-2xl font-bold text-[#2E1C40] dark:text-white">{studentDetails.name}</h3>
+                      <h3 className="text-2xl font-bold text-[#2E1C40] dark:text-gray-900">{studentDetails.name}</h3>
                       <div className="text-[#4C677C] dark:text-gray-300 font-medium">EMIS No: {studentDetails.emisNumber}</div>
                       <div className="text-[#4C677C] dark:text-gray-300 font-medium">Class: Std {studentDetails.standard} - {studentDetails.section}</div>
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <h4 className="font-bold text-[#2E1C40] dark:text-white text-lg border-b border-[#E5D9C4] dark:border-[#4C677C]/30 pb-2">Academic Performance</h4>
+                    <h4 className="font-bold text-[#2E1C40] dark:text-gray-900 text-lg border-b border-[#E5D9C4] dark:border-[#4C677C]/30 pb-2">Academic Performance</h4>
                     {studentDetails.terms && studentDetails.terms.length > 0 ? (
                       studentDetails.terms.map(term => (
-                        <div key={term.termName} className="bg-white/40 dark:bg-black/20 p-4 rounded-xl border border-[#E5D9C4]/50 dark:border-[#4C677C]/30">
+                        <div key={term.termName} className="bg-white/40 dark:bg-gray-900/10 p-4 rounded-xl border border-[#E5D9C4]/50 dark:border-[#4C677C]/30">
                           <h5 className="font-bold text-[#AE634A] dark:text-[#FA7848] mb-3">{term.termName}</h5>
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             {term.marks && term.marks.map(mark => (
                               <div key={mark.subject} className="bg-white/60 dark:bg-[#121212]/60 p-2 rounded-lg border border-[#E5D9C4]/40 dark:border-[#4C677C]/20 text-center shadow-sm">
                                 <div className="text-xs text-[#4C677C] dark:text-gray-400 mb-1">{mark.subject}</div>
-                                <div className="font-bold text-[#2E1C40] dark:text-white">{mark.score}</div>
+                                <div className="font-bold text-[#2E1C40] dark:text-gray-900">{mark.score}</div>
                               </div>
                             ))}
                           </div>

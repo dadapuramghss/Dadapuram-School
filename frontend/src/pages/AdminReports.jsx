@@ -194,8 +194,8 @@ export function AdminReports() {
   };
 
   const renderMatrixReport = () => {
-    if (loading) return <div className="text-white/40 text-center py-10 font-medium">Loading report data...</div>;
-    if (!allStudents.length) return <div className="text-white/40 text-center py-10 font-medium">No student data available for reports.</div>;
+    if (loading) return <div className="text-gray-500 text-center py-10 font-medium">Loading report data...</div>;
+    if (!allStudents.length) return <div className="text-gray-500 text-center py-10 font-medium">No student data available for reports.</div>;
 
     const matrixData = {
       grandTotal: 0,
@@ -261,11 +261,11 @@ export function AdminReports() {
 
     return (
       <div className="mt-6 animate-in slide-in-from-top-4 duration-300">
-        <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-xl">
-          <div className="p-4 md:p-5 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.02]">
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-xl">
+          <div className="p-4 md:p-5 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white shadow-sm">
             <div className="flex items-center gap-3">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#F9CB84]"></span>
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-adminAccent2 text-white"></span>
                 {rowLabel} vs {colLabel} Breakdown
               </h3>
             </div>
@@ -273,29 +273,29 @@ export function AdminReports() {
           <div className="overflow-x-auto">
             <table className="w-full text-center border-collapse">
               <thead>
-                <tr className="bg-white/[0.02] border-b border-white/5 text-[11px] uppercase tracking-wider text-white/50 font-bold">
-                  <th className="px-3 py-2 text-left border-r border-white/5 bg-white/5">{rowLabel} \ {colLabel}</th>
+                <tr className="bg-white shadow-sm border-b border-gray-200 text-[11px] uppercase tracking-wider text-gray-500 font-bold">
+                  <th className="px-3 py-2 text-left border-r border-gray-200 bg-gray-50">{rowLabel} \ {colLabel}</th>
                   {colValues.map(c => (
                     <th key={c} className="px-3 py-2 bg-white/[0.01]">{c}</th>
                   ))}
-                  <th className="px-3 py-2 text-white/80 bg-white/5 border-l border-white/5">TOTAL</th>
+                  <th className="px-3 py-2 text-gray-500 bg-gray-50 border-l border-gray-200">TOTAL</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-sm">
                 {rowValues.map(r => (
-                  <tr key={r} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-3 py-2 text-left font-bold text-[#EBD8BE] border-r border-white/5 bg-white/[0.01]">{r}</td>
+                  <tr key={r} className="hover:bg-white shadow-sm transition-colors">
+                    <td className="px-3 py-2 text-left font-bold text-gray-700 border-r border-gray-200 bg-white/[0.01]">{r}</td>
                     {colValues.map(c => {
                       const count = matrixData[r]?.[c] || 0;
                       return (
-                        <td key={c} className="px-3 py-2 text-white/70">
+                        <td key={c} className="px-3 py-2 text-gray-500">
                           {count > 0 ? (
                             <button
                               onClick={() => {
                                 setSelectedMatrixGroup(`${r} / ${c}`);
                                 setSelectedMatrixStudents(matrixData[r].students[c]);
                               }}
-                              className="hover:text-[#62D4CA] underline decoration-dashed underline-offset-4 transition-colors"
+                              className="hover:text-adminSidebar underline decoration-dashed underline-offset-4 transition-colors"
                             >
                               {count}
                             </button>
@@ -305,14 +305,14 @@ export function AdminReports() {
                         </td>
                       );
                     })}
-                    <td className="px-3 py-2 font-bold text-[#F9CB84] bg-white/[0.03] border-l border-white/5">
+                    <td className="px-3 py-2 font-bold text-adminAccent2 bg-white shadow-sm border-l border-gray-200">
                       {matrixData[r]?.total > 0 ? (
                         <button
                           onClick={() => {
                             setSelectedMatrixGroup(`${r} (Total)`);
                             setSelectedMatrixStudents(matrixData[r].totalStudents);
                           }}
-                          className="hover:text-white underline decoration-dashed underline-offset-4 transition-colors"
+                          className="hover:text-gray-900 underline decoration-dashed underline-offset-4 transition-colors"
                         >
                           {matrixData[r].total}
                         </button>
@@ -322,19 +322,19 @@ export function AdminReports() {
                     </td>
                   </tr>
                 ))}
-                <tr className="bg-white/[0.03] font-bold text-white border-t-2 border-white/10">
-                  <td className="px-3 py-2 text-left border-r border-white/5 text-[#EBD8BE]">GRAND TOTAL</td>
+                <tr className="bg-white shadow-sm font-bold text-gray-900 border-t-2 border-gray-200">
+                  <td className="px-3 py-2 text-left border-r border-gray-200 text-gray-700">GRAND TOTAL</td>
                   {colValues.map(c => {
                     const count = matrixData.colTotals[c] || 0;
                     return (
-                      <td key={c} className="px-3 py-2 text-[#62D4CA]">
+                      <td key={c} className="px-3 py-2 text-adminSidebar">
                         {count > 0 ? (
                           <button
                             onClick={() => {
                               setSelectedMatrixGroup(`${c} (Total)`);
                               setSelectedMatrixStudents(matrixData.colStudents[c]);
                             }}
-                            className="hover:text-white underline decoration-dashed underline-offset-4 transition-colors"
+                            className="hover:text-gray-900 underline decoration-dashed underline-offset-4 transition-colors"
                           >
                             {count}
                           </button>
@@ -344,14 +344,14 @@ export function AdminReports() {
                       </td>
                     );
                   })}
-                  <td className="px-3 py-2 text-white bg-[#F9CB84]/15 border-l border-white/5">
+                  <td className="px-3 py-2 text-gray-900 bg-adminAccent2 text-white/15 border-l border-gray-200">
                     {matrixData.grandTotal > 0 ? (
                       <button
                         onClick={() => {
                           setSelectedMatrixGroup(`Grand Total`);
                           setSelectedMatrixStudents(matrixData.grandTotalStudents);
                         }}
-                        className="hover:text-white underline decoration-dashed underline-offset-4 transition-colors"
+                        className="hover:text-gray-900 underline decoration-dashed underline-offset-4 transition-colors"
                       >
                         {matrixData.grandTotal}
                       </button>
@@ -364,10 +364,10 @@ export function AdminReports() {
             </table>
           </div>
 
-          <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-white/5">
+          <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-200">
             <button
               onClick={() => handlePrintMatrix(rowValues, colValues, matrixData, rowLabel, colLabel)}
-              className="flex items-center justify-center gap-2 bg-[#EBD8BE]/10 hover:bg-[#EBD8BE]/20 text-[#EBD8BE] border border-[#EBD8BE]/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
+              className="flex items-center justify-center gap-2 bg-adminAccent2/10 hover:bg-adminAccent2/20 text-gray-700 border border-[#EBD8BE]/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
             >
               <Printer className="w-4.5 h-4.5" />
               Print
@@ -377,14 +377,14 @@ export function AdminReports() {
                 setSelectedMatrixGroup("Custom Matrix Report");
                 setSelectedMatrixStudents(matrixData.grandTotalStudents);
               }}
-              className="flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
+              className="flex items-center justify-center gap-2 bg-adminSidebar/10 hover:bg-adminSidebar/20 text-adminSidebar border border-adminSidebar/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
             >
               <Eye className="w-4.5 h-4.5" />
               Preview
             </button>
             <button
               onClick={() => handleDownloadMatrixExcel(matrixData, rowValues, colValues, rowLabel, colLabel)}
-              className="flex items-center justify-center gap-2 bg-[#F9CB84]/10 hover:bg-[#F9CB84]/20 text-[#F9CB84] border border-[#F9CB84]/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
+              className="flex items-center justify-center gap-2 bg-adminAccent2 text-white/10 hover:bg-adminAccent2 text-white/20 text-adminAccent2 border border-adminAccent2/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
             >
               <Download className="w-4.5 h-4.5" />
               Download Excel
@@ -461,7 +461,7 @@ export function AdminReports() {
   };
 
   const renderHomeworkReport = () => {
-    if (loading) return <div className="text-white/40 text-center py-10 font-medium">Loading report data...</div>;
+    if (loading) return <div className="text-gray-500 text-center py-10 font-medium">Loading report data...</div>;
 
     // Sort classes
     const sortedClasses = [...classConfigsData].sort((a, b) => {
@@ -486,18 +486,18 @@ export function AdminReports() {
       const subjects = sortSubjects(uniqueSubjects);
 
       return (
-        <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-xl mb-6 last:mb-0">
-          <div className="p-4 md:p-5 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.02]">
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-xl mb-6 last:mb-0">
+          <div className="p-4 md:p-5 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white shadow-sm">
             <div className="flex items-center gap-3">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-adminSidebar text-white"></span>
                 {title}
               </h3>
             </div>
             {showDownload && (
               <button
                 onClick={() => handleDownloadHomeworkExcel(hwMap, sortedClasses)}
-                className="flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+                className="flex items-center justify-center gap-2 bg-adminSidebar/10 hover:bg-adminSidebar/20 text-adminSidebar border border-adminSidebar/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
               >
                 <Download className="w-4 h-4" />
                 Download Excel
@@ -507,8 +507,8 @@ export function AdminReports() {
           <div className="overflow-x-auto">
             <table className="w-full text-center border-collapse">
               <thead>
-                <tr className="bg-white/[0.02] border-b border-white/5 text-[11px] uppercase tracking-wider text-white/50 font-bold">
-                  <th className="p-4 text-left border-r border-white/5 bg-white/5 whitespace-nowrap sticky left-0 z-10">Class & Section</th>
+                <tr className="bg-white shadow-sm border-b border-gray-200 text-[11px] uppercase tracking-wider text-gray-500 font-bold">
+                  <th className="p-4 text-left border-r border-gray-200 bg-gray-50 whitespace-nowrap sticky left-0 z-10">Class & Section</th>
                   {subjects.map(sub => (
                     <th key={sub} className="p-4 bg-white/[0.01]">
                       {sub}
@@ -520,11 +520,11 @@ export function AdminReports() {
                 {classesGroup.map(c => {
                   const key = `${c.standard}-${c.section}`;
                   return (
-                    <tr key={key} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="p-4 text-left font-bold text-[#EBD8BE] border-r border-white/5 bg-[#0B132B] whitespace-nowrap sticky left-0 z-10">{c.standard} - {c.section}</td>
+                    <tr key={key} className="hover:bg-white shadow-sm transition-colors">
+                      <td className="p-4 text-left font-bold text-gray-700 border-r border-gray-200 bg-white whitespace-nowrap sticky left-0 z-10">{c.standard} - {c.section}</td>
                       {subjects.map(sub => {
                         if (!c.subjects?.includes(sub)) {
-                          return <td key={sub} className="p-4 bg-white/[0.02]"></td>;
+                          return <td key={sub} className="p-4 bg-white shadow-sm"></td>;
                         }
                         const hasHw = hwMap[key]?.[sub];
                         return (
@@ -557,7 +557,7 @@ export function AdminReports() {
     return (
       <div className="mt-6 animate-in slide-in-from-top-4 duration-300">
         {sortedClasses.length === 0 ? (
-          <div className="bg-[#0B132B] rounded-2xl border border-white/10 p-8 text-center text-white/40 font-medium shadow-xl">
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center text-gray-500 font-medium shadow-xl">
             No class configurations found
           </div>
         ) : (
@@ -598,7 +598,7 @@ export function AdminReports() {
   };
 
   const renderGradeBookReport = () => {
-    if (loading) return <div className="text-white/40 text-center py-10 font-medium">Loading report data...</div>;
+    if (loading) return <div className="text-gray-500 text-center py-10 font-medium">Loading report data...</div>;
 
     const abstractData = {};
     const stdSet = new Set();
@@ -657,11 +657,11 @@ export function AdminReports() {
 
     return (
       <div className="mt-6 animate-in slide-in-from-top-4 duration-300">
-        <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-xl">
-          <div className="p-4 md:p-5 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.02]">
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-xl">
+          <div className="p-4 md:p-5 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white shadow-sm">
             <div className="flex items-center gap-3">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#EBD8BE]"></span>
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-adminAccent2"></span>
                 Class & Section-wise Pass/Fail Abstract
               </h3>
             </div>
@@ -689,14 +689,14 @@ export function AdminReports() {
                   setSelectedMatrixStudents(uniqueStudents);
                   setPreviewExamContext(null);
                 }}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-adminSidebar/10 hover:bg-adminSidebar/20 text-adminSidebar border border-adminSidebar/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
               >
                 <Eye className="w-4 h-4" />
                 Preview
               </button>
               <button
                 onClick={() => handleDownloadGradeBookExcel(abstractData, standards)}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#EBD8BE]/10 hover:bg-[#EBD8BE]/20 text-[#EBD8BE] border border-[#EBD8BE]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-adminAccent2/10 hover:bg-adminAccent2/20 text-gray-700 border border-[#EBD8BE]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
               >
                 <Download className="w-4 h-4" />
                 Download Excel
@@ -706,42 +706,42 @@ export function AdminReports() {
           <div className="overflow-x-auto">
             <table className="w-full text-center border-collapse">
               <thead>
-                <tr className="bg-white/[0.02] border-b border-white/5 text-[11px] uppercase tracking-wider text-white/50 font-bold">
-                  <th className="p-4 text-left border-r border-white/5 bg-white/5 whitespace-nowrap sticky left-0 z-10" rowSpan="2">Class & Sec</th>
+                <tr className="bg-white shadow-sm border-b border-gray-200 text-[11px] uppercase tracking-wider text-gray-500 font-bold">
+                  <th className="p-4 text-left border-r border-gray-200 bg-gray-50 whitespace-nowrap sticky left-0 z-10" rowSpan="2">Class & Sec</th>
                   {EXAMS.map(exam => (
-                    <th key={exam} className="p-3 border-b border-r border-white/5 bg-white/[0.01]" colSpan="4">{exam}</th>
+                    <th key={exam} className="p-3 border-b border-r border-gray-200 bg-white/[0.01]" colSpan="4">{exam}</th>
                   ))}
                 </tr>
-                <tr className="bg-white/[0.01] border-b border-white/5 text-[10px] uppercase tracking-wider text-white/40 font-bold">
+                <tr className="bg-white/[0.01] border-b border-gray-200 text-[10px] uppercase tracking-wider text-gray-500 font-bold">
                   {EXAMS.map(exam => (
                     <React.Fragment key={`${exam}-headers`}>
-                      <th className="p-3 border-r border-white/5">Total</th>
-                      <th className="p-3 border-r border-white/5 text-green-400">Pass</th>
-                      <th className="p-3 border-r border-white/5 text-red-400">Fail</th>
-                      <th className="p-3 border-r border-white/5 text-[#EBD8BE]">Pass %</th>
+                      <th className="p-3 border-r border-gray-200">Total</th>
+                      <th className="p-3 border-r border-gray-200 text-green-400">Pass</th>
+                      <th className="p-3 border-r border-gray-200 text-red-400">Fail</th>
+                      <th className="p-3 border-r border-gray-200 text-gray-700">Pass %</th>
                     </React.Fragment>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-sm">
                 {standards.map(std => (
-                  <tr key={std} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="p-4 text-left font-bold text-[#EBD8BE] border-r border-white/5 bg-[#0B132B] whitespace-nowrap sticky left-0 z-10">{std}</td>
+                  <tr key={std} className="hover:bg-white shadow-sm transition-colors">
+                    <td className="p-4 text-left font-bold text-gray-700 border-r border-gray-200 bg-white whitespace-nowrap sticky left-0 z-10">{std}</td>
                     {EXAMS.map(exam => {
                       const stats = abstractData[std]?.[exam];
                       if (!stats) {
                         return (
                           <React.Fragment key={`${std}-${exam}`}>
-                            <td className="p-3 border-r border-white/5 text-white/20">-</td>
-                            <td className="p-3 border-r border-white/5 text-white/20">-</td>
-                            <td className="p-3 border-r border-white/5 text-white/20">-</td>
-                            <td className="p-3 border-r border-white/5 text-white/20">-</td>
+                            <td className="p-3 border-r border-gray-200 text-gray-500">-</td>
+                            <td className="p-3 border-r border-gray-200 text-gray-500">-</td>
+                            <td className="p-3 border-r border-gray-200 text-gray-500">-</td>
+                            <td className="p-3 border-r border-gray-200 text-gray-500">-</td>
                           </React.Fragment>
                         );
                       }
                       return (
                         <React.Fragment key={`${std}-${exam}`}>
-                          <td className="p-3 border-r border-white/5 font-semibold text-white/80">
+                          <td className="p-3 border-r border-gray-200 font-semibold text-gray-500">
                             {stats.total > 0 ? (
                               <button
                                 onClick={() => {
@@ -749,13 +749,13 @@ export function AdminReports() {
                                   setSelectedMatrixStudents(stats.totalStudents);
                                   setPreviewExamContext(exam);
                                 }}
-                                className="hover:text-white underline decoration-dashed underline-offset-4 transition-colors"
+                                className="hover:text-gray-900 underline decoration-dashed underline-offset-4 transition-colors"
                               >
                                 {stats.total}
                               </button>
                             ) : 0}
                           </td>
-                          <td className="p-3 border-r border-white/5 font-bold text-green-400">
+                          <td className="p-3 border-r border-gray-200 font-bold text-green-400">
                             {stats.pass > 0 ? (
                               <button
                                 onClick={() => {
@@ -769,7 +769,7 @@ export function AdminReports() {
                               </button>
                             ) : 0}
                           </td>
-                          <td className="p-3 border-r border-white/5 font-bold text-red-400">
+                          <td className="p-3 border-r border-gray-200 font-bold text-red-400">
                             {stats.fail > 0 ? (
                               <button
                                 onClick={() => {
@@ -783,7 +783,7 @@ export function AdminReports() {
                               </button>
                             ) : 0}
                           </td>
-                          <td className="p-3 border-r border-white/5 font-bold text-[#EBD8BE]">{stats.passPercent}%</td>
+                          <td className="p-3 border-r border-gray-200 font-bold text-gray-700">{stats.passPercent}%</td>
                         </React.Fragment>
                       );
                     })}
@@ -791,7 +791,7 @@ export function AdminReports() {
                 ))}
                 {standards.length === 0 && (
                   <tr>
-                    <td colSpan={1 + EXAMS.length * 4} className="p-8 text-white/40 font-medium">No grade book data available</td>
+                    <td colSpan={1 + EXAMS.length * 4} className="p-8 text-gray-500 font-medium">No grade book data available</td>
                   </tr>
                 )}
               </tbody>
@@ -807,14 +807,14 @@ export function AdminReports() {
       <>
         {selectedMatrixGroup && selectedMatrixStudents.length > 0 && (
           <div className="mt-8 animate-in slide-in-from-top-4 duration-300">
-            <div className="bg-[#0B132B] rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
-              <div className="p-4 md:p-5 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.02]">
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-2xl">
+              <div className="p-4 md:p-5 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white shadow-sm">
                 <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-adminSidebar text-white"></span>
                     {selectedMatrixGroup} Students Preview
                   </h3>
-                  <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-white/70 text-xs font-bold">
+                  <span className="px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs font-bold">
                     {selectedMatrixStudents.length} Total
                   </span>
                 </div>
@@ -822,7 +822,7 @@ export function AdminReports() {
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button
                     onClick={() => handleDownloadExcel(selectedMatrixGroup, selectedMatrixStudents)}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] border border-[#62D4CA]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-adminSidebar/10 hover:bg-adminSidebar/20 text-adminSidebar border border-adminSidebar/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
                   >
                     <Download className="w-4 h-4" />
                     Download Excel
@@ -878,7 +878,7 @@ export function AdminReports() {
                       printWindow.document.write(tableHtml);
                       printWindow.document.close();
                     }}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#EBD8BE]/10 hover:bg-[#EBD8BE]/20 text-[#EBD8BE] border border-[#EBD8BE]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-adminAccent2/10 hover:bg-adminAccent2/20 text-gray-700 border border-[#EBD8BE]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
                   >
                     <Printer className="w-4 h-4" />
                     Print
@@ -889,7 +889,7 @@ export function AdminReports() {
                       setSelectedMatrixStudents([]);
                       setPreviewExamContext(null);
                     }}
-                    className="p-2 hover:bg-white/10 rounded-xl text-white/50 hover:text-white transition-colors"
+                    className="p-2 hover:bg-gray-100 rounded-xl text-gray-500 hover:text-gray-900 transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -898,8 +898,8 @@ export function AdminReports() {
 
               <div className="overflow-x-auto max-h-[500px]">
                 <table className="w-full text-left border-collapse relative">
-                  <thead className="sticky top-0 bg-[#0B132B] z-10 shadow-md">
-                    <tr className="bg-white/[0.02] border-b border-white/5 text-[10px] uppercase tracking-wider text-white/50 font-bold">
+                  <thead className="sticky top-0 bg-white z-10 shadow-md">
+                    <tr className="bg-white shadow-sm border-b border-gray-200 text-[10px] uppercase tracking-wider text-gray-500 font-bold">
                       <th className="p-4 font-semibold">EMIS Number</th>
                       <th className="p-4 font-semibold">Name</th>
                       <th className="p-4 font-semibold">Class & Section</th>
@@ -936,11 +936,11 @@ export function AdminReports() {
                       const nameB = (b.name || '').toLowerCase();
                       return nameA.localeCompare(nameB);
                     }).map((student) => (
-                      <tr key={student._id} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="p-4 text-sm text-white/70 font-medium">{student.emisNumber || student.rollNumber || 'N/A'}</td>
-                        <td className="p-4 text-sm font-bold text-[#EBD8BE]">{student.name}</td>
+                      <tr key={student._id} className="hover:bg-white shadow-sm transition-colors">
+                        <td className="p-4 text-sm text-gray-500 font-medium">{student.emisNumber || student.rollNumber || 'N/A'}</td>
+                        <td className="p-4 text-sm font-bold text-gray-700">{student.name}</td>
                         <td className="p-4">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#5D7D9A]/10 text-[#5D7D9A] border border-[#5D7D9A]/20">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-adminSidebar text-white/10 text-adminSidebar border border-[#5D7D9A]/20">
                             {student.standard} - {student.section}
                           </span>
                         </td>
@@ -962,12 +962,12 @@ export function AdminReports() {
                           </td>
                         ) : (
                           <>
-                            <td className="p-4 text-sm text-white/70">{student.gender || 'N/A'}</td>
-                            <td className="p-4 text-sm text-white/70">{student.community || 'N/A'}</td>
+                            <td className="p-4 text-sm text-gray-500">{student.gender || 'N/A'}</td>
+                            <td className="p-4 text-sm text-gray-500">{student.community || 'N/A'}</td>
                             <td className="p-4 text-right flex items-center justify-end gap-2">
                               <button
                                 onClick={() => setSelectedStudentDetails(student)}
-                                className="p-2 bg-[#62D4CA]/10 hover:bg-[#62D4CA]/20 text-[#62D4CA] rounded-xl transition-colors"
+                                className="p-2 bg-adminSidebar/10 hover:bg-adminSidebar/20 text-adminSidebar rounded-xl transition-colors"
                                 title="View Student Details"
                               >
                                 <Eye className="w-4 h-4" />
@@ -999,9 +999,9 @@ export function AdminReports() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#EBD8BE] drop-shadow-sm flex items-center gap-3">
-            <div className="p-2 bg-[#EBD8BE]/10 rounded-xl">
-              <FileText className="w-8 h-8 text-[#EBD8BE]" />
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-700 drop-shadow-sm flex items-center gap-3">
+            <div className="p-2 bg-adminAccent2/10 rounded-xl">
+              <FileText className="w-8 h-8 text-gray-700" />
             </div>
             Admin Reports
           </h1>
@@ -1009,10 +1009,10 @@ export function AdminReports() {
         </div>
       </div>
       {/* Tabs */}
-      <div className="flex overflow-x-auto bg-[#131E3A]/50 border border-white/5 rounded-2xl p-2 gap-2 hide-scrollbar">
+      <div className="flex overflow-x-auto bg-gray-500 border border-gray-200 rounded-2xl p-2 gap-2 hide-scrollbar">
         <button
           onClick={() => setActiveTab('student')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === 'student' ? 'bg-[#F9CB84] text-[#0B132B] shadow-md' : 'text-white/60 hover:bg-white/5 hover:text-white'
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === 'student' ? 'bg-adminAccent2 text-white text-[#0B132B] shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
             }`}
         >
           <Grid className="w-5 h-5" />
@@ -1020,7 +1020,7 @@ export function AdminReports() {
         </button>
         <button
           onClick={() => setActiveTab('homework')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === 'homework' ? 'bg-[#62D4CA] text-[#0B132B] shadow-md' : 'text-white/60 hover:bg-white/5 hover:text-white'
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === 'homework' ? 'bg-adminSidebar text-white text-[#0B132B] shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
             }`}
         >
           <BookOpen className="w-5 h-5" />
@@ -1028,7 +1028,7 @@ export function AdminReports() {
         </button>
         <button
           onClick={() => setActiveTab('gradebook')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === 'gradebook' ? 'bg-[#EBD8BE] text-[#0B132B] shadow-md' : 'text-white/60 hover:bg-white/5 hover:text-white'
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === 'gradebook' ? 'bg-adminAccent2 text-[#0B132B] shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
             }`}
         >
           <GraduationCap className="w-5 h-5" />
@@ -1039,14 +1039,14 @@ export function AdminReports() {
       {activeTab === 'student' && (
         <>
           {/* Custom Matrix Report Builder */}
-          <div className="bg-[#131E3A]/50 border border-white/5 shadow-xl rounded-3xl p-6 md:p-8 backdrop-blur-sm">
+          <div className="bg-gray-500 border border-gray-200 shadow-xl rounded-3xl p-6 md:p-8 backdrop-blur-sm">
 
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
               {/* Row Selection */}
-              <div className="bg-[#0B132B] p-5 rounded-2xl border border-white/5 shadow-inner">
-                <h3 className="text-xs text-[#EBD8BE] uppercase font-bold tracking-widest mb-4 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#EBD8BE]"></span>
+              <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-inner">
+                <h3 className="text-xs text-gray-700 uppercase font-bold tracking-widest mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-adminAccent2"></span>
                   Select Row Dimension
                 </h3>
                 <div className="flex flex-wrap gap-3">
@@ -1054,9 +1054,9 @@ export function AdminReports() {
                     const isSelected = matrixRow.includes(dim.id);
                     const isDisabled = matrixCol.includes(dim.id);
                     return (
-                      <label key={`row-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${isSelected ? 'bg-[#F9CB84]/20 border-[#F9CB84] text-[#F9CB84] shadow-[0_0_10px_rgba(249,203,132,0.2)]' :
-                        isDisabled ? 'bg-white/5 border-white/5 text-white/20 cursor-not-allowed' :
-                          'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                      <label key={`row-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${isSelected ? 'bg-adminAccent2 text-white/20 border-adminAccent2 text-adminAccent2 shadow-[0_0_10px_rgba(249,203,132,0.2)]' :
+                        isDisabled ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' :
+                          'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'
                         }`}>
                         <input
                           type="checkbox"
@@ -1067,8 +1067,8 @@ export function AdminReports() {
                           onChange={() => toggleDimension('row', dim.id)}
                           className="hidden"
                         />
-                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-[#F9CB84] bg-[#F9CB84]/20' : 'border-white/30'}`}>
-                          {isSelected && <div className="w-2 h-2 rounded-sm bg-[#F9CB84]" />}
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-adminAccent2 bg-adminAccent2 text-white/20' : 'border-white/30'}`}>
+                          {isSelected && <div className="w-2 h-2 rounded-sm bg-adminAccent2 text-white" />}
                         </div>
                         <span className="text-sm font-medium">{dim.label}</span>
                       </label>
@@ -1078,9 +1078,9 @@ export function AdminReports() {
               </div>
 
               {/* Column Selection */}
-              <div className="bg-[#0B132B] p-5 rounded-2xl border border-white/5 shadow-inner">
-                <h3 className="text-xs text-[#62D4CA] uppercase font-bold tracking-widest mb-4 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#62D4CA]"></span>
+              <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-inner">
+                <h3 className="text-xs text-adminSidebar uppercase font-bold tracking-widest mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-adminSidebar text-white"></span>
                   Select Column Dimension
                 </h3>
                 <div className="flex flex-wrap gap-3">
@@ -1088,9 +1088,9 @@ export function AdminReports() {
                     const isSelected = matrixCol.includes(dim.id);
                     const isDisabled = matrixRow.includes(dim.id);
                     return (
-                      <label key={`col-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${isSelected ? 'bg-[#62D4CA]/20 border-[#62D4CA] text-[#62D4CA] shadow-[0_0_10px_rgba(98,212,202,0.2)]' :
-                        isDisabled ? 'bg-white/5 border-white/5 text-white/20 cursor-not-allowed' :
-                          'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                      <label key={`col-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${isSelected ? 'bg-adminSidebar/20 border-adminSidebar text-adminSidebar shadow-sm shadow-adminSidebar/20' :
+                        isDisabled ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' :
+                          'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'
                         }`}>
                         <input
                           type="checkbox"
@@ -1101,8 +1101,8 @@ export function AdminReports() {
                           onChange={() => toggleDimension('col', dim.id)}
                           className="hidden"
                         />
-                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-[#62D4CA] bg-[#62D4CA]/20' : 'border-white/30'}`}>
-                          {isSelected && <div className="w-2 h-2 rounded-sm bg-[#62D4CA]" />}
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-adminSidebar bg-adminSidebar/20' : 'border-white/30'}`}>
+                          {isSelected && <div className="w-2 h-2 rounded-sm bg-adminSidebar text-white" />}
                         </div>
                         <span className="text-sm font-medium">{dim.label}</span>
                       </label>
@@ -1118,15 +1118,15 @@ export function AdminReports() {
           {/* Student Details Modal */}
           {selectedStudentDetails && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-              <div className="bg-[#0B132B] border border-white/10 shadow-2xl rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-                <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/[0.02]">
-                  <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#62D4CA]"></span>
+              <div className="bg-white border border-gray-200 shadow-2xl rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-white shadow-sm">
+                  <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-adminSidebar text-white"></span>
                     Student Details
                   </h3>
                   <button
                     onClick={() => setSelectedStudentDetails(null)}
-                    className="p-2 hover:bg-white/10 rounded-xl text-white/50 hover:text-white transition-colors"
+                    className="p-2 hover:bg-gray-100 rounded-xl text-gray-500 hover:text-gray-900 transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -1137,69 +1137,69 @@ export function AdminReports() {
 
                     {/* Personal Info */}
                     <div className="space-y-4">
-                      <h4 className="text-[#62D4CA] text-xs font-bold uppercase tracking-widest border-b border-white/5 pb-2">Personal Information</h4>
+                      <h4 className="text-adminSidebar text-xs font-bold uppercase tracking-widest border-b border-gray-200 pb-2">Personal Information</h4>
                       <div className="space-y-3">
                         <div>
-                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Full Name</p>
-                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.name || 'N/A'}</p>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Full Name</p>
+                          <p className="text-sm font-semibold text-gray-900">{selectedStudentDetails.name || 'N/A'}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Tamil Name</p>
-                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.tamilName || 'N/A'}</p>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Tamil Name</p>
+                          <p className="text-sm font-semibold text-gray-900">{selectedStudentDetails.tamilName || 'N/A'}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Gender</p>
-                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.gender || 'N/A'}</p>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Gender</p>
+                          <p className="text-sm font-semibold text-gray-900">{selectedStudentDetails.gender || 'N/A'}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Date of Birth</p>
-                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.dob || 'N/A'}</p>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Date of Birth</p>
+                          <p className="text-sm font-semibold text-gray-900">{selectedStudentDetails.dob || 'N/A'}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Father's Name</p>
-                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.fatherName || 'N/A'}</p>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Father's Name</p>
+                          <p className="text-sm font-semibold text-gray-900">{selectedStudentDetails.fatherName || 'N/A'}</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Academic Info */}
                     <div className="space-y-4">
-                      <h4 className="text-[#F9CB84] text-xs font-bold uppercase tracking-widest border-b border-white/5 pb-2">Academic Information</h4>
+                      <h4 className="text-adminAccent2 text-xs font-bold uppercase tracking-widest border-b border-gray-200 pb-2">Academic Information</h4>
                       <div className="space-y-3">
                         <div>
-                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">EMIS Number</p>
-                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.emisNumber || selectedStudentDetails.rollNumber || 'N/A'}</p>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">EMIS Number</p>
+                          <p className="text-sm font-semibold text-gray-900">{selectedStudentDetails.emisNumber || selectedStudentDetails.rollNumber || 'N/A'}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Admission Number</p>
-                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.admissionNumber || 'N/A'}</p>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Admission Number</p>
+                          <p className="text-sm font-semibold text-gray-900">{selectedStudentDetails.admissionNumber || 'N/A'}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Class & Section</p>
-                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.standard} - {selectedStudentDetails.section}</p>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Class & Section</p>
+                          <p className="text-sm font-semibold text-gray-900">{selectedStudentDetails.standard} - {selectedStudentDetails.section}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Medium</p>
-                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.medium || 'N/A'}</p>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Medium</p>
+                          <p className="text-sm font-semibold text-gray-900">{selectedStudentDetails.medium || 'N/A'}</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Additional Info */}
                     <div className="space-y-4 md:col-span-2">
-                      <h4 className="text-[#EBD8BE] text-xs font-bold uppercase tracking-widest border-b border-white/5 pb-2">Contact & Background</h4>
+                      <h4 className="text-gray-700 text-xs font-bold uppercase tracking-widest border-b border-gray-200 pb-2">Contact & Background</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Mobile Number</p>
-                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.mobileNumber || 'N/A'}</p>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Mobile Number</p>
+                          <p className="text-sm font-semibold text-gray-900">{selectedStudentDetails.mobileNumber || 'N/A'}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Religion / Community</p>
-                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.religion || 'N/A'} / {selectedStudentDetails.community || 'N/A'}</p>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Religion / Community</p>
+                          <p className="text-sm font-semibold text-gray-900">{selectedStudentDetails.religion || 'N/A'} / {selectedStudentDetails.community || 'N/A'}</p>
                         </div>
                         <div className="md:col-span-2">
-                          <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Address</p>
-                          <p className="text-sm font-semibold text-white">{selectedStudentDetails.address || 'N/A'}</p>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Address</p>
+                          <p className="text-sm font-semibold text-gray-900">{selectedStudentDetails.address || 'N/A'}</p>
                         </div>
                       </div>
                     </div>
@@ -1207,10 +1207,10 @@ export function AdminReports() {
                   </div>
                 </div>
 
-                <div className="p-4 border-t border-white/10 bg-white/[0.02] flex justify-end">
+                <div className="p-4 border-t border-gray-200 bg-white shadow-sm flex justify-end">
                   <button
                     onClick={() => setSelectedStudentDetails(null)}
-                    className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-bold transition-colors"
+                    className="px-6 py-2 bg-gray-100 hover:bg-white/20 text-gray-900 rounded-xl text-sm font-bold transition-colors"
                   >
                     Close
                   </button>

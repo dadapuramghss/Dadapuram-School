@@ -154,7 +154,7 @@ export function Gradebook() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-black text-[#2E1C40] dark:text-white drop-shadow-sm">
+      <h1 className="text-3xl font-black text-[#2E1C40] dark:text-gray-900 drop-shadow-sm">
         Term Gradebook
       </h1>
 
@@ -168,7 +168,7 @@ export function Gradebook() {
                 setSelectedClass(e.target.value);
                 if (e.target.value === 'All') setSelectedSection('All');
               }}
-              className="glass-input w-full font-bold text-[#2E1C40] dark:!text-white bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-[#62D4CA] disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+              className="glass-input w-full font-bold text-[#2E1C40] dark:!text-gray-900 bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-[#62D4CA] disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
             >
               <option value="All">All Standards</option>
               {availableStandards.map(std => (
@@ -181,7 +181,7 @@ export function Gradebook() {
             <select 
               value={selectedSection} 
               onChange={e => setSelectedSection(e.target.value)}
-              className="glass-input w-full font-bold text-[#2E1C40] dark:!text-white bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-[#62D4CA] disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+              className="glass-input w-full font-bold text-[#2E1C40] dark:!text-gray-900 bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-[#62D4CA] disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
               disabled={selectedClass === 'All'}
             >
               <option value="All">All Sections</option>
@@ -195,7 +195,7 @@ export function Gradebook() {
             <select 
               value={selectedTerm} 
               onChange={e => setSelectedTerm(e.target.value)}
-              className="glass-input w-full font-bold text-[#2E1C40] dark:!text-white bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-[#62D4CA] disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-[#131E3A] dark:[&>option]:text-white"
+              className="glass-input w-full font-bold text-[#2E1C40] dark:!text-gray-900 bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-[#62D4CA] disabled:opacity-50 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
             >
               <option value="All Terms">All Terms (Total Sum)</option>
               <option value="First Midterm">First Midterm</option>
@@ -218,7 +218,7 @@ export function Gradebook() {
         <form onSubmit={handleSave}>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <thead className="bg-[#D8FDF6]/40 dark:bg-[#0B132B] text-[#4C677C] dark:text-[#E5D9C4]">
+              <thead className="bg-[#D8FDF6]/40 dark:bg-white text-[#4C677C] dark:text-[#E5D9C4]">
                 <tr className="border-b border-[#E5D9C4] dark:border-[#4C677C]/30">
                   <th className="p-4 font-bold rounded-tl-lg whitespace-nowrap">EMIS No</th>
                   <th className="p-4 font-bold whitespace-nowrap">Name</th>
@@ -233,9 +233,9 @@ export function Gradebook() {
                   <tr key={student._id} className="border-b border-[#E5D9C4]/40 dark:border-[#4C677C]/30 hover:bg-[#D8FDF6]/20 dark:hover:bg-[#2E1C40]/20 transition-colors">
                     <td className="p-4 text-[#4C677C] dark:text-gray-300 font-medium whitespace-nowrap">
                       {student.emisNumber}
-                      {isReportView && <span className="ml-2 bg-[#62D4CA]/20 text-[#2E1C40] dark:text-white px-2 py-0.5 rounded-full text-xs font-bold inline-block whitespace-nowrap">Std {student.standard}-{student.section}</span>}
+                      {isReportView && <span className="ml-2 bg-adminSidebar/20 text-[#2E1C40] dark:text-gray-900 px-2 py-0.5 rounded-full text-xs font-bold inline-block whitespace-nowrap">Std {student.standard}-{student.section}</span>}
                     </td>
-                    <td className="p-4 font-bold text-[#2E1C40] dark:text-white whitespace-nowrap">{student.name}</td>
+                    <td className="p-4 font-bold text-[#2E1C40] dark:text-gray-900 whitespace-nowrap">{student.name}</td>
                     {currentSubjects.map(sub => (
                       <td key={sub} className="p-4">
                         <input 
@@ -245,7 +245,7 @@ export function Gradebook() {
                           required
                           value={marks[`${student._id}-${sub}`] !== undefined && marks[`${student._id}-${sub}`] !== '' ? marks[`${student._id}-${sub}`] : 0}
                           onChange={(e) => handleMarkChange(student._id, sub, e.target.value)}
-                          className={`glass-input w-20 text-center font-bold text-[#2E1C40] dark:text-white bg-white dark:bg-[#121212] shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/50 ${!hasFullAccess ? 'opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-800 border-none shadow-none' : ''}`}
+                          className={`glass-input w-20 text-center font-bold text-[#2E1C40] dark:text-gray-900 bg-white dark:bg-[#121212] shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/50 ${!hasFullAccess ? 'opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-800 border-none shadow-none' : ''}`}
                           disabled={!hasFullAccess}
                         />
                       </td>
@@ -261,7 +261,7 @@ export function Gradebook() {
           
           <div className="mt-6 flex justify-end">
             {hasFullAccess ? (
-              <NeonButton type="submit" className="bg-[#62D4CA] text-[#2E1C40]">Save {selectedTerm} Marks</NeonButton>
+              <NeonButton type="submit" className="bg-adminSidebar text-white text-[#2E1C40]">Save {selectedTerm} Marks</NeonButton>
             ) : (
               <p className="text-[#4C677C]/60 dark:text-gray-400 text-sm italic">
                 {isReportView ? 'Report views are read-only.' : 'You have view-only access to this class.'}
