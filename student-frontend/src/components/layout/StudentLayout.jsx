@@ -11,8 +11,10 @@ import {
   BookOpen,
   Bell,
   Megaphone,
-  Calendar
+  Calendar,
+  Download
 } from 'lucide-react';
+import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 export default function StudentLayout() {
   const [student, setStudent] = useState(null);
@@ -23,6 +25,7 @@ export default function StudentLayout() {
   const [notifications, setNotifications] = useState([]);
   const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
   const navigate = useNavigate();
+  const { isInstallable, installApp } = usePWAInstall();
 
   useEffect(() => {
     const fetchStudentData = async () => {
@@ -173,7 +176,16 @@ export default function StudentLayout() {
           </div>
 
           {/* Sidebar Footer */}
-          <div className="p-4 border-t border-gray-100">
+          <div className="p-4 border-t border-gray-100 space-y-2">
+            {isInstallable && (
+              <button
+                onClick={installApp}
+                className="flex items-center w-full px-4 py-3 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors group shadow-sm"
+              >
+                <Download className="w-5 h-5 mr-3 flex-shrink-0" />
+                Install App
+              </button>
+            )}
             <button
               onClick={handleLogout}
               className="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors group"
@@ -200,6 +212,15 @@ export default function StudentLayout() {
           </div>
 
           <div className="flex items-center gap-4 ml-auto">
+            {isInstallable && (
+              <button 
+                onClick={installApp}
+                className="lg:hidden p-1.5 px-3 text-xs font-bold bg-indigo-600 text-white rounded-lg shadow-sm flex items-center gap-1"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Install
+              </button>
+            )}
             <button 
               onClick={handleNotificationClick}
               className="relative p-2 text-gray-500 hover:text-indigo-600 transition-colors rounded-full hover:bg-indigo-50"
