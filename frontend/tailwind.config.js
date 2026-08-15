@@ -17,7 +17,11 @@ export default {
         primaryGlow: "#54C6BE", // Cyan
         secondary: "#2A2146", // Deep Dark Purple
         secondaryGlow: "#D2F6F0", // Very Light Cyan
-        neonAccent: "#54C6BE"
+        neonAccent: "#54C6BE",
+        adminBg: "#FDF1D5",
+        adminSidebar: "#0BB3CA",
+        adminAccent1: "#DD3A26",
+        adminAccent2: "#FA8D09",
       },
       boxShadow: {
         'glass': '0 4px 30px rgba(0, 0, 0, 0.1)',
