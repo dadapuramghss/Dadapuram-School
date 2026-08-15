@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { LayoutDashboard, Users, GraduationCap, LogOut, BarChart3, ShieldAlert, FileText, User, ChevronLeft, ChevronRight, Menu, X, Bot, BookOpen, Bell, Megaphone } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { api } from '../../lib/api';
+import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 export function TeacherLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
@@ -12,6 +13,7 @@ export function TeacherLayout() {
   const [notifications, setNotifications] = useState([]);
   const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
   const { logout, dbUser } = useAuth();
+  const { isInstallable, installApp } = usePWAInstall();
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -71,6 +73,15 @@ export function TeacherLayout() {
           </h1>
         </div>
         <div className="flex items-center gap-2">
+          {isInstallable && (
+            <button 
+              onClick={installApp}
+              className="p-1.5 px-3 text-xs font-bold bg-[#D8FDF6] text-[#2E1C40] rounded-lg shadow-sm flex items-center gap-1 mr-1"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Install
+            </button>
+          )}
           <button 
             onClick={handleNotificationClick}
             className="relative p-2 text-[#E5D9C4] hover:text-adminSidebar transition-colors rounded-full"
@@ -186,6 +197,24 @@ export function TeacherLayout() {
               <span className="md:hidden whitespace-nowrap overflow-hidden ml-3">My Profile</span>
             )}
           </NavLink>
+          {isInstallable && (
+            <button 
+              onClick={installApp}
+              className={cn(
+                "flex items-center rounded-xl transition-all duration-300 w-full font-bold",
+                isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12",
+                "bg-[#D8FDF6] text-[#2E1C40] shadow-md border-l-4 border-transparent"
+              )}
+              title={!isSidebarOpen ? "Install App" : undefined}
+            >
+              <Download className={cn("w-5 h-5 flex-shrink-0", !isSidebarOpen && "md:mx-auto")} />
+              {isSidebarOpen ? (
+                <span className="whitespace-nowrap overflow-hidden">Install App</span>
+              ) : (
+                <span className="md:hidden whitespace-nowrap overflow-hidden ml-3">Install App</span>
+              )}
+            </button>
+          )}
           <button 
             onClick={logout}
             className={cn(
