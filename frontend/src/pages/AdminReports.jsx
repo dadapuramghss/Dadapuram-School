@@ -364,10 +364,10 @@ export function AdminReports() {
             </table>
           </div>
 
-          <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-200">
+          <div className="flex flex-wrap sm:flex-nowrap justify-end gap-3 mt-4 pt-4 border-t border-gray-200">
             <button
               onClick={() => handlePrintMatrix(rowValues, colValues, matrixData, rowLabel, colLabel)}
-              className="flex items-center justify-center gap-2 bg-adminAccent2/10 hover:bg-adminAccent2/20 text-gray-700 border border-[#EBD8BE]/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-adminAccent2/10 hover:bg-adminAccent2/20 text-gray-700 border border-[#EBD8BE]/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm whitespace-nowrap"
             >
               <Printer className="w-4.5 h-4.5" />
               Print
@@ -377,14 +377,14 @@ export function AdminReports() {
                 setSelectedMatrixGroup("Custom Matrix Report");
                 setSelectedMatrixStudents(matrixData.grandTotalStudents);
               }}
-              className="flex items-center justify-center gap-2 bg-adminSidebar/10 hover:bg-adminSidebar/20 text-adminSidebar border border-adminSidebar/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-adminSidebar/10 hover:bg-adminSidebar/20 text-adminSidebar border border-adminSidebar/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm whitespace-nowrap"
             >
               <Eye className="w-4.5 h-4.5" />
               Preview
             </button>
             <button
               onClick={() => handleDownloadMatrixExcel(matrixData, rowValues, colValues, rowLabel, colLabel)}
-              className="flex items-center justify-center gap-2 bg-adminAccent2 text-white/10 hover:bg-adminAccent2 text-white/20 text-adminAccent2 border border-adminAccent2/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-adminAccent2 hover:bg-[#E07D08] text-white border border-adminAccent2/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm whitespace-nowrap"
             >
               <Download className="w-4.5 h-4.5" />
               Download Excel
