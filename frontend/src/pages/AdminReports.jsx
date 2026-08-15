@@ -660,15 +660,15 @@ export function AdminReports() {
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-xl">
           <div className="p-4 md:p-5 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white shadow-sm">
             <div className="flex items-center gap-3">
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-adminAccent2"></span>
-                Class & Section-wise Pass/Fail Abstract
+              <h3 className="text-lg font-bold text-gray-900 flex items-start sm:items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-adminAccent2 shrink-0 mt-2 sm:mt-0"></span>
+                <span>Class & Section-wise Pass/Fail Abstract</span>
               </h3>
             </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
               <button
                 onClick={() => window.print()}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 text-[#8B5CF6] border border-[#8B5CF6]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors print:hidden"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 text-[#8B5CF6] border border-[#8B5CF6]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors print:hidden whitespace-nowrap"
               >
                 <Printer className="w-4 h-4" />
                 Print
@@ -689,14 +689,14 @@ export function AdminReports() {
                   setSelectedMatrixStudents(uniqueStudents);
                   setPreviewExamContext(null);
                 }}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-adminSidebar/10 hover:bg-adminSidebar/20 text-adminSidebar border border-adminSidebar/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-adminSidebar/10 hover:bg-adminSidebar/20 text-adminSidebar border border-adminSidebar/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors whitespace-nowrap"
               >
                 <Eye className="w-4 h-4" />
                 Preview
               </button>
               <button
                 onClick={() => handleDownloadGradeBookExcel(abstractData, standards)}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-adminAccent2/10 hover:bg-adminAccent2/20 text-gray-700 border border-[#EBD8BE]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-adminAccent2/10 hover:bg-adminAccent2/20 text-gray-700 border border-[#EBD8BE]/30 px-4 py-2 rounded-xl text-sm font-bold transition-colors whitespace-nowrap"
               >
                 <Download className="w-4 h-4" />
                 Download Excel
