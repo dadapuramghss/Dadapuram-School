@@ -1008,28 +1008,36 @@ export function AdminReports() {
 
         </div>
       </div>
-      {/* Tabs */}
-      <div className="flex overflow-x-auto bg-gray-500 border border-gray-200 rounded-2xl p-2 gap-2 hide-scrollbar">
+      <div className="flex overflow-x-auto bg-white border border-gray-200 shadow-sm rounded-2xl p-1.5 gap-2 hide-scrollbar">
         <button
           onClick={() => setActiveTab('student')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === 'student' ? 'bg-adminAccent2 text-white text-[#0B132B] shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-            }`}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${
+            activeTab === 'student' 
+              ? 'bg-adminSidebar text-white shadow-md' 
+              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+          }`}
         >
           <Grid className="w-5 h-5" />
           Student Report
         </button>
         <button
           onClick={() => setActiveTab('homework')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === 'homework' ? 'bg-adminSidebar text-white text-[#0B132B] shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-            }`}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${
+            activeTab === 'homework' 
+              ? 'bg-adminSidebar text-white shadow-md' 
+              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+          }`}
         >
           <BookOpen className="w-5 h-5" />
           Student Homework Report
         </button>
         <button
           onClick={() => setActiveTab('gradebook')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === 'gradebook' ? 'bg-adminAccent2 text-[#0B132B] shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-            }`}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${
+            activeTab === 'gradebook' 
+              ? 'bg-adminSidebar text-white shadow-md' 
+              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+          }`}
         >
           <GraduationCap className="w-5 h-5" />
           Student Grade Book Report
@@ -1039,7 +1047,7 @@ export function AdminReports() {
       {activeTab === 'student' && (
         <>
           {/* Custom Matrix Report Builder */}
-          <div className="bg-gray-500 border border-gray-200 shadow-xl rounded-3xl p-6 md:p-8 backdrop-blur-sm">
+          <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 md:p-8">
 
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
