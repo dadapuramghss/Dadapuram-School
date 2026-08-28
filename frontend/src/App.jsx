@@ -10,6 +10,7 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { Students } from './pages/Students';
 import { Gradebook } from './pages/Gradebook';
 import { Homework } from './pages/Homework';
+import { Materials } from './pages/Materials';
 import { Circulars } from './pages/Circulars';
 import { Leaderboard } from './pages/Leaderboard';
 import { Certificates } from './pages/Certificates';
@@ -94,6 +95,7 @@ function AppRoutes() {
         <Route path="students" element={<Students />} />
         <Route path="gradebook" element={<Gradebook />} />
         <Route path="homework" element={<Homework />} />
+        <Route path="materials" element={<Materials />} />
         <Route path="circulars" element={<Circulars />} />
         <Route path="leaderboard" element={<Leaderboard />} />
         <Route path="certificates" element={<Certificates />} />

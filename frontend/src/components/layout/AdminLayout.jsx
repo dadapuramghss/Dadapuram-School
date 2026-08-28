@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, Bot, BookOpen, Database, Settings, PieChart, Download, CalendarCheck } from 'lucide-react';
+import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, Bot, BookOpen, Database, Settings, PieChart, Download, CalendarCheck, Link as LinkIcon, MessageSquare } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 
@@ -23,7 +23,8 @@ export function AdminLayout() {
     { name: 'Students', path: '/admin/students', exact: false, icon: Backpack },
     { name: 'Gradebook', path: '/admin/gradebook', exact: false, icon: GraduationCap },
     { name: 'Homework', path: '/admin/homework', exact: false, icon: BookOpen },
-    { name: 'Circulars', path: '/admin/circulars', exact: false, icon: FileText },
+    { name: 'Materials', path: '/admin/materials', exact: false, icon: LinkIcon },
+    { name: 'Circulars', path: '/admin/circulars', exact: false, icon: MessageSquare },
     { name: 'Leaderboard', path: '/admin/leaderboard', exact: false, icon: BarChart3 },
     { name: 'Certificates', path: '/admin/certificates', exact: false, icon: FileText },
     { name: 'Attendance', path: '/admin/attendance', exact: false, icon: CalendarCheck },

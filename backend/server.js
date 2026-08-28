@@ -16,6 +16,7 @@ const homeworkRoutes = require('./routes/homeworkRoutes');
 const circularRoutes = require('./routes/circularRoutes');
 const classConfigRoutes = require('./routes/classConfigRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
+const materialRoutes = require('./routes/materialRoutes');
 
 const http = require('http');
 const { Server } = require('socket.io');
@@ -56,6 +57,7 @@ app.use('/api/homework', homeworkRoutes);
 app.use('/api/circulars', circularRoutes);
 app.use('/api/classes', classConfigRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/materials', materialRoutes);
 
 // Base route
 app.get('/', (req, res) => {

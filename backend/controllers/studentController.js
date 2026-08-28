@@ -208,6 +208,72 @@ const updateStudentMarks = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// Bulk Update Marks
+const bulkUpdateMarks = async (req, res) => {
+  try {
+    const { termName, records } = req.body;
+    
+    if (!termName || !Array.isArray(records)) {
+      return res.status(400).json({ error: 'termName and records array are required' });
+    }
+
+    if (!req.dbUser) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const results = {
+      updated: 0,
+      errors: []
+    };
+
+    let validCount = 0;
+
+    for (const record of records) {
+      const { emisNumber, standard, section, marks } = record;
+      
+      if (!emisNumber || !standard || !section || !Array.isArray(marks)) {
+        results.errors.push(`Row missing required fields (EMIS: ${emisNumber || 'N/A'})`);
+        continue;
+      }
+
+      // Check authorization per student record
+      if (!isAuthorizedForClass(req.dbUser, standard, section, true)) {
+        results.errors.push(`Not authorized to update EMIS: ${emisNumber}`);
+        continue;
+      }
+
+      // Find student
+      const student = await Student.findOne({ emisNumber, standard, section });
+      if (!student) {
+        results.errors.push(`Student not found (EMIS: ${emisNumber})`);
+        continue;
+      }
+
+      // Check if term already exists
+      const termIndex = student.terms.findIndex(t => t.termName === termName);
+      if (termIndex > -1) {
+        student.terms[termIndex].marks = marks;
+      } else {
+        student.terms.push({ termName, marks });
+      }
+
+      try {
+        student.markModified('terms');
+        await student.save({ validateModifiedOnly: true });
+        results.updated++;
+      } catch (err) {
+        results.errors.push(`Failed to save EMIS: ${emisNumber} - ${err.message}`);
+      }
+    }
+
+    res.status(200).json({ success: true, data: results });
+  } catch (error) {
+    console.error('Error in bulk update marks:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // Update student
 const updateStudent = async (req, res) => {
   try {
@@ -399,6 +465,7 @@ module.exports = {
   getStudentsByClass,
   getStudentById,
   updateStudentMarks,
+  bulkUpdateMarks,
   updateStudent,
   deleteStudent,
   bulkAddStudents,

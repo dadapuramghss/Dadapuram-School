@@ -52,7 +52,7 @@ export const StudyCertificatePrint = React.forwardRef(({ student, language = 'TA
   };
 
   return (
-    <div ref={ref} className={`print-certificate p-10 bg-white text-black ${isEnglish ? 'font-sans' : 'font-serif'} hidden`}>
+    <div ref={ref} className={`print-certificate p-12 bg-white text-black ${isEnglish ? 'font-sans' : 'font-serif'} hidden`}>
       <h1 className="text-2xl font-bold text-center mb-8 uppercase">{t.title}</h1>
 
       <div className="space-y-4 max-w-3xl mx-auto text-lg">
@@ -125,7 +125,7 @@ export const StudyCertificatePrint = React.forwardRef(({ student, language = 'TA
           {t.declaration}
         </div>
 
-        <div className="flex justify-between items-end px-8 font-bold" style={{ marginTop: '120px' }}>
+        <div className="flex justify-between items-end px-8 font-bold" style={{ marginTop: '60px' }}>
           <div className="text-center">
             {t.classTeacherSign}
           </div>

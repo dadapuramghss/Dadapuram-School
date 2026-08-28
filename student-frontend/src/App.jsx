@@ -5,6 +5,7 @@ import Profile from './pages/Profile';
 import Marks from './pages/Marks';
 import Homework from './pages/Homework';
 import Attendance from './pages/Attendance';
+import Materials from './pages/Materials';
 import StudentLayout from './components/layout/StudentLayout';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
           <Route path="/marks" element={<Marks />} />
           <Route path="/homework" element={<Homework />} />
           <Route path="/attendance" element={<Attendance />} />
+          <Route path="/materials" element={<Materials />} />
         </Route>
         
         <Route path="/" element={<Navigate to="/dashboard" replace />} />

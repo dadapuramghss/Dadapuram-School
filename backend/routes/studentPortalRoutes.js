@@ -205,4 +205,22 @@ router.get('/attendance', verifyStudentToken, async (req, res) => {
   }
 });
 
+// GET /api/student-portal/materials
+router.get('/materials', verifyStudentToken, async (req, res) => {
+  try {
+    const student = req.student;
+
+    const Material = require('../models/Material');
+    const materials = await Material.find({
+      standard: student.standard,
+      section: student.section
+    }).sort({ createdAt: -1 });
+
+    res.json({ success: true, data: materials });
+  } catch (error) {
+    console.error('Error fetching student materials:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;

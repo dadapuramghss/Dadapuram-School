@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { NeonButton } from '../components/ui/NeonButton';
-import { Printer, FileOutput } from 'lucide-react';
+import { Printer, FileOutput, Share2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 import { useClassConfig } from '../context/ClassConfigContext';
@@ -96,6 +96,40 @@ export function Certificates() {
       return;
     }
     window.print();
+  };
+
+  const handleShare = async () => {
+    if (!certificateType) {
+      alert("Please select a certificate type.");
+      return;
+    }
+    if (!filters.language) {
+      alert("Please select a language.");
+      return;
+    }
+    if (!selectedStudent) {
+      alert("Please select a student first.");
+      return;
+    }
+
+    const title = certificateType === 'STUDY' ? 'Study Certificate' : 'Rank Card';
+    const text = `Check out the ${title} for ${selectedStudent.name} (${selectedStudent.standard}-${selectedStudent.section})`;
+    const url = window.location.href;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: title,
+          text: text,
+          url: url
+        });
+      } else {
+        // Fallback if Web Share API is not supported
+        alert("Web Share API is not supported in your browser.");
+      }
+    } catch (err) {
+      console.error("Error sharing:", err);
+    }
   };
 
   return (
@@ -215,6 +249,15 @@ export function Certificates() {
             <Printer className="w-6 h-6" />
             PRINT PREVIEW
           </NeonButton>
+          
+          <button
+            onClick={handleShare}
+            disabled={!selectedStudent}
+            className="w-full py-4 text-lg flex items-center justify-center gap-2 bg-[#62D4CA]/20 hover:bg-[#62D4CA]/40 text-[#2E1C40] dark:text-white border border-[#62D4CA]/50 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Share2 className="w-6 h-6" />
+            SHARE
+          </button>
         </div>
       </div>
 

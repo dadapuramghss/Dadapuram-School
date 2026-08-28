@@ -63,6 +63,11 @@ export const api = {
     body: JSON.stringify({ studentIds })
   }),
 
+  bulkUpdateMarks: (termName, records) => fetchWithAuth('/students/bulk-marks', {
+    method: 'POST',
+    body: JSON.stringify({ termName, records })
+  }),
+
   // Homework
   getHomeworkByClass: (standard, section) => fetchWithAuth(`/homework?standard=${standard}&section=${section}`),
   addHomework: (data) => fetchWithAuth('/homework', {
@@ -111,6 +116,20 @@ export const api = {
   saveAttendance: (data) => fetchWithAuth('/attendance', {
     method: 'POST',
     body: JSON.stringify(data)
+  }),
+
+  // Materials
+  addMaterial: (data) => fetchWithAuth('/materials', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+  getMaterialsByClass: (standard, section) => fetchWithAuth(`/materials?standard=${standard}&section=${section}`),
+  updateMaterial: (id, data) => fetchWithAuth(`/materials/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }),
+  deleteMaterial: (id) => fetchWithAuth(`/materials/${id}`, {
+    method: 'DELETE'
   }),
 
   // Class Configurations

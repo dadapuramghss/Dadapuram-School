@@ -13,7 +13,8 @@ import {
   Megaphone,
   Calendar,
   Download,
-  CalendarCheck
+  CalendarCheck,
+  Link as LinkIcon
 } from 'lucide-react';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 
@@ -108,6 +109,7 @@ export default function StudentLayout() {
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Attendance', path: '/attendance', icon: CalendarCheck },
     { name: 'Homework', path: '/homework', icon: BookOpen },
+    { name: 'Materials', path: '/materials', icon: LinkIcon },
     { name: 'Marks', path: '/marks', icon: Award },
     { name: 'Profile', path: '/profile', icon: User },
   ];
