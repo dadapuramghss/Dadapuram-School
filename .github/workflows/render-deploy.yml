@@ -10,5 +10,7 @@ jobs:
     name: Trigger Render Deployment
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Deploy Hook
+      - name: Trigger Teacher/Backend Deploy Hook
         run: curl -X POST "https://api.render.com/deploy/srv-d9c9g8b7uimc73d2bj5g?key=DPvmepQX4jQ"
+      - name: Trigger Student Portal Deploy Hook
+        run: curl -X POST "https://api.render.com/deploy/srv-d9d4u1navr4c738ba2mg?key=RdvUJ0cPfyc"
