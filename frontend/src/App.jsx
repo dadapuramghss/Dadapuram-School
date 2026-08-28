@@ -15,6 +15,7 @@ import { Leaderboard } from './pages/Leaderboard';
 import { Certificates } from './pages/Certificates';
 import { Profile } from './pages/Profile';
 import { AiDashboard } from './pages/AiDashboard';
+import { Attendance } from './pages/Attendance';
 
 import { Register } from './pages/Register';
 import { PendingApproval } from './pages/PendingApproval';
@@ -76,6 +77,7 @@ function AppRoutes() {
         <Route path="certificates" element={<Certificates />} />
         <Route path="profile" element={<Profile />} />
         <Route path="ai" element={<AiDashboard />} />
+        <Route path="attendance" element={<Attendance />} />
       </Route>
 
       {/* Admin Routes */}
@@ -97,6 +99,7 @@ function AppRoutes() {
         <Route path="certificates" element={<Certificates />} />
         <Route path="data-sync" element={<DataSync />} />
         <Route path="ai" element={<AiDashboard />} />
+        <Route path="attendance" element={<Attendance />} />
       </Route>
     </Routes>
   );

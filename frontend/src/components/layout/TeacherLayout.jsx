@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, GraduationCap, LogOut, BarChart3, ShieldAlert, FileText, User, ChevronLeft, ChevronRight, Menu, X, Bot, BookOpen, Bell, Megaphone } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, LogOut, BarChart3, ShieldAlert, FileText, User, ChevronLeft, ChevronRight, Menu, X, Bot, BookOpen, Bell, Megaphone, CalendarCheck } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { api } from '../../lib/api';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
@@ -56,6 +56,7 @@ export function TeacherLayout() {
     { name: 'Homework', path: '/teacher/homework', exact: false, icon: BookOpen },
     { name: 'Leaderboard', path: '/teacher/leaderboard', exact: false, icon: BarChart3 },
     { name: 'Certificates', path: '/teacher/certificates', exact: false, icon: FileText },
+    { name: 'Attendance', path: '/teacher/attendance', exact: false, icon: CalendarCheck },
     { name: 'AI Analyst', path: '/teacher/ai', exact: false, icon: Bot },
   ];
 

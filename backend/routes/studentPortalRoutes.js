@@ -168,4 +168,41 @@ router.get('/circulars', verifyStudentToken, async (req, res) => {
   }
 });
 
+// GET /api/student-portal/attendance
+router.get('/attendance', verifyStudentToken, async (req, res) => {
+  try {
+    const student = req.student;
+    const Attendance = require('../models/Attendance');
+
+    const attendances = await Attendance.find({
+      standard: student.standard,
+      section: student.section,
+      isSubmitted: true,
+      'records.student': student._id
+    }).sort({ date: -1, period: 1 });
+
+    const grouped = {};
+    attendances.forEach(att => {
+      if (!grouped[att.date]) {
+        grouped[att.date] = { 
+          date: att.date, 
+          periods: { 1: '-', 2: '-', 3: '-', 4: '-', 5: '-', 6: '-', 7: '-', 8: '-' } 
+        };
+      }
+      
+      const record = att.records.find(r => r.student.toString() === student._id.toString());
+      if (record) {
+        grouped[att.date].periods[att.period] = record.status === 'Present' ? 'P' : (record.status === 'Absent' ? 'A' : 'L');
+      }
+    });
+    
+    const result = Object.values(grouped).sort((a, b) => b.date.localeCompare(a.date));
+
+    res.json({ success: true, data: result });
+  } catch (error) {
+    console.error('Error fetching student attendance:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;

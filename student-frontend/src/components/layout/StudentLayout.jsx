@@ -12,7 +12,8 @@ import {
   Bell,
   Megaphone,
   Calendar,
-  Download
+  Download,
+  CalendarCheck
 } from 'lucide-react';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 
@@ -105,6 +106,7 @@ export default function StudentLayout() {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Attendance', path: '/attendance', icon: CalendarCheck },
     { name: 'Homework', path: '/homework', icon: BookOpen },
     { name: 'Marks', path: '/marks', icon: Award },
     { name: 'Profile', path: '/profile', icon: User },

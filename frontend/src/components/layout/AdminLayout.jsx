@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, Bot, BookOpen, Database, Settings, PieChart, Download } from 'lucide-react';
+import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, Bot, BookOpen, Database, Settings, PieChart, Download, CalendarCheck } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 
@@ -26,6 +26,7 @@ export function AdminLayout() {
     { name: 'Circulars', path: '/admin/circulars', exact: false, icon: FileText },
     { name: 'Leaderboard', path: '/admin/leaderboard', exact: false, icon: BarChart3 },
     { name: 'Certificates', path: '/admin/certificates', exact: false, icon: FileText },
+    { name: 'Attendance', path: '/admin/attendance', exact: false, icon: CalendarCheck },
     { name: 'Class Config', path: '/admin/classes', exact: false, icon: Settings },
     { name: 'Data Sync', path: '/admin/data-sync', exact: false, icon: Database },
     { name: 'AI Analyst', path: '/admin/ai', exact: false, icon: Bot },

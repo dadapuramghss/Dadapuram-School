@@ -105,6 +105,14 @@ export const api = {
   }),
   getAllUsers: () => fetchWithAuth('/auth/users'),
 
+  // Attendance
+  getAttendance: (standard, section, date, period) => fetchWithAuth(`/attendance?standard=${standard}&section=${section}&date=${date}&period=${period}`),
+  getAttendanceSummary: (standard, section, date) => fetchWithAuth(`/attendance/summary?standard=${standard}&section=${section}&date=${date}`),
+  saveAttendance: (data) => fetchWithAuth('/attendance', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+
   // Class Configurations
   getClassConfigs: () => fetchWithAuth('/classes'),
   addClassConfig: (data) => fetchWithAuth('/classes', {
