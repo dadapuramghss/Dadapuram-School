@@ -33,6 +33,16 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
     return <Navigate to="/login" replace />;
   }
 
+  // If we have a user but they haven't synced with DB yet, wait for it
+  if (currentUser && !dbUser) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#080808]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FA7848] mb-4"></div>
+        <p className="text-[#CDD3C6]">Verifying profile...</p>
+      </div>
+    );
+  }
+
   // If we have a user but they haven't synced with DB yet or are pending, show PendingApproval page
   // (unless we are just waiting for the network request to finish)
   if (dbUser && dbUser.status === 'pending') {
@@ -50,6 +60,16 @@ const RootRoute = () => {
   const { currentUser, dbUser } = useAuth();
 
   if (!currentUser) return <Navigate to="/login" replace />;
+  
+  if (currentUser && !dbUser) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#080808]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FA7848] mb-4"></div>
+        <p className="text-[#CDD3C6]">Loading dashboard...</p>
+      </div>
+    );
+  }
+
   if (dbUser?.status === 'pending') return <Navigate to="/pending-approval" replace />;
   if (dbUser?.role === 'admin') return <Navigate to="/admin" replace />;
   
