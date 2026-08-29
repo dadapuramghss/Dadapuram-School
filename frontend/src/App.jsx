@@ -74,6 +74,8 @@ function AppRoutes() {
         <Route path="students" element={<Students />} />
         <Route path="gradebook" element={<Gradebook />} />
         <Route path="homework" element={<Homework />} />
+        <Route path="materials" element={<Materials />} />
+        <Route path="circulars" element={<Circulars />} />
         <Route path="leaderboard" element={<Leaderboard />} />
         <Route path="certificates" element={<Certificates />} />
         <Route path="profile" element={<Profile />} />
