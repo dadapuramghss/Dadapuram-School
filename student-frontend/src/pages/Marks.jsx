@@ -11,7 +11,7 @@ export default function Marks() {
     const fetchConfig = async () => {
       try {
         const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-        const res = await axios.get(`${baseURL}/class-configs`);
+        const res = await axios.get(`${baseURL}/classes`);
         const configs = res.data;
         const config = configs.find(c => c.standard === student.standard && c.section === student.section);
         
