@@ -34,7 +34,7 @@ export function AdminLayout() {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-adminBg text-gray-900 font-sans relative z-10">
+    <div className="flex h-[100dvh] overflow-hidden bg-adminBg text-gray-900 font-sans relative z-10">
       
       {/* Mobile Topbar */}
       <div className="md:hidden absolute top-0 left-0 w-full h-16 bg-adminSidebar/90 backdrop-blur-md border-b border-white/20 flex items-center justify-between px-4 z-40 shadow-sm">

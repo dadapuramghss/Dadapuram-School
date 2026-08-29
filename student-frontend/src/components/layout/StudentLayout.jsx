@@ -125,7 +125,7 @@ export default function StudentLayout() {
   if (!student) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50/50 flex font-sans">
+    <div className="min-h-[100dvh] h-[100dvh] bg-gray-50/50 flex font-sans overflow-hidden">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
@@ -136,7 +136,7 @@ export default function StudentLayout() {
 
       {/* Sidebar */}
       <aside 
-        className={`fixed top-0 left-0 z-50 h-screen w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:flex-shrink-0 ${
+        className={`fixed top-0 left-0 z-50 h-[100dvh] w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:flex-shrink-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -202,7 +202,7 @@ export default function StudentLayout() {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-[100dvh] overflow-hidden">
         {/* Top Header */}
         <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 h-16 flex-shrink-0 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10">
           <div className="flex items-center">

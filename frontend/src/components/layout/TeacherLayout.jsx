@@ -62,7 +62,7 @@ export function TeacherLayout() {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F4F8F7] text-[#2E1C40] font-sans relative z-10">
+    <div className="flex h-[100dvh] overflow-hidden bg-[#F4F8F7] text-[#2E1C40] font-sans relative z-10">
       
       {/* Mobile Topbar */}
       <div className="md:hidden absolute top-0 left-0 w-full h-16 bg-[#2E1C40] border-b border-[#4C677C]/30 flex items-center justify-between px-4 z-40 shadow-md">
