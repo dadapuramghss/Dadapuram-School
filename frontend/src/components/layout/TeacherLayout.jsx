@@ -116,7 +116,7 @@ export function TeacherLayout() {
         "fixed md:relative h-[calc(100vh-2rem)]",
         isSidebarOpen ? "translate-x-0 w-64" : "-translate-x-[150%] md:translate-x-0 w-[5.5rem]"
       )}>
-        <div>
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
           <div className={cn("p-6 flex items-center h-24", isSidebarOpen ? "justify-between" : "justify-center")}>
             {isSidebarOpen && (
               <div className="flex items-center gap-3 overflow-hidden">
@@ -177,7 +177,7 @@ export function TeacherLayout() {
           </nav>
         </div>
 
-        <div className={cn("p-4 space-y-2 border-t border-[#4C677C]/30", !isSidebarOpen && "flex flex-col items-center")}>
+        <div className={cn("p-4 space-y-2 shrink-0 border-t border-[#4C677C]/30", !isSidebarOpen && "flex flex-col items-center")}>
           <NavLink
             to="/teacher/profile"
             onClick={handleNavClick}
