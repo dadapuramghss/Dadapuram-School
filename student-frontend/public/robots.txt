@@ -12,4 +12,4 @@ Allow: /materials
 Disallow: /api/
 
 # Sitemaps
-Sitemap: http://localhost:5174/sitemap.xml
+Sitemap: https://dadapuram-student-portal.onrender.com/sitemap.xml
