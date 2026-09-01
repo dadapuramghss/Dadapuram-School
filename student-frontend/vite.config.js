@@ -12,7 +12,7 @@ export default defineConfig({
       manifest: {
         name: 'Student Rise',
         short_name: 'Student Rise',
-        description: 'Student Portal for Academic Analytics',
+        description: 'Official Student Rise Portal for GHSS Dadapuram (Dhadhapuram / Dhadapuram) - DGHSS 360',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
@@ -28,6 +28,7 @@ export default defineConfig({
     })
   ],
   server: {
+    port: 5174,
     host: true,
   }
 })

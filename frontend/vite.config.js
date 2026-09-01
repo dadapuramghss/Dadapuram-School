@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'Edu Teacher / EduAdmin',
+        name: 'Edu Teacher / DGHSS 360',
         short_name: 'Edu Teacher',
-        description: 'Academic Analytics & Ranking Dashboard',
+        description: 'DGHSS 360 - Official Academic Analytics & Management Dashboard for GHSS Dadapuram (Dhadhapuram / Dhadapuram)',
         theme_color: '#111827',
         background_color: '#0a0a0f',
         display: 'standalone',
@@ -32,6 +32,7 @@ export default defineConfig({
     })
   ],
   server: {
+    port: 5173,
     host: true,
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
