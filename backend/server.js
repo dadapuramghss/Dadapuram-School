@@ -48,32 +48,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// TEMPORARY CLEANUP ROUTE (Will be removed after use)
-const Student = require('./models/Student');
-app.get('/api/cleanup-temp', async (req, res) => {
-  try {
-    const students = await Student.find({});
-    let removed = 0;
-    for (const student of students) {
-      if (!student.terms || student.terms.length === 0) continue;
-      let hasDuplicates = false;
-      const termMap = new Map();
-      for (const term of student.terms) {
-        if (termMap.has(term.termName)) hasDuplicates = true;
-        termMap.set(term.termName, term);
-      }
-      if (hasDuplicates) {
-        student.terms = Array.from(termMap.values());
-        student.markModified('terms');
-        await student.save({ validateModifiedOnly: true });
-        removed++;
-      }
-    }
-    res.json({ success: true, message: `Cleanup complete. Successfully merged/removed duplicate terms for ${removed} students.` });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
 
 // Routes
 app.use('/api/students', studentRoutes);
