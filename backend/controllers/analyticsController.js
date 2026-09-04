@@ -310,7 +310,15 @@ const getDashboardStats = async (req, res) => {
           femaleStudents: { $sum: { $cond: [{ $eq: ["$gender", "Female"] }, 1, 0] } }
         }
       },
-      { $sort: { "_id.standard": 1, "_id.section": 1 } }
+      {
+        $addFields: {
+          standardOrder: {
+            $convert: { input: "$_id.standard", to: "int", onError: 999, onNull: 999 }
+          }
+        }
+      },
+      { $sort: { standardOrder: 1, "_id.section": 1 } },
+      { $project: { standardOrder: 0 } }
     ]);
 
     // Classwise First Mark Pipeline (Highest total score by term, per class/section)
