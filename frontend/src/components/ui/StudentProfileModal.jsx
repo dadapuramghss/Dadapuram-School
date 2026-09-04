@@ -98,7 +98,7 @@ export function StudentProfileModal({ studentId, onClose }) {
                 <Calendar className="w-5 h-5 text-slate-400 flex-shrink-0" />
                 <div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Date of Birth</p>
-                  <p className="font-medium text-slate-800 dark:text-gray-900">{student.dob ? new Date(student.dob).toLocaleDateString() : 'N/A'}</p>
+                  <p className="font-medium text-slate-800 dark:text-gray-900">{student.dob ? student.dob.split('-').reverse().join('-') : 'N/A'}</p>
                 </div>
               </div>
               {student.address && (

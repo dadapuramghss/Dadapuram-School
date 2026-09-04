@@ -51,7 +51,7 @@ export const RankCardPrint = React.forwardRef(({ student, language = 'TAMIL' }, 
           </div>
           <div className="text-right">
             <p><span className="font-semibold">{t.emisNumber}:</span> {student.emisNumber || student.admissionNumber || '-'}</p>
-            <p><span className="font-semibold">{t.dob}:</span> {student.dob || '-'}</p>
+            <p><span className="font-semibold">{t.dob}:</span> {student.dob ? student.dob.split('-').reverse().join('-') : '-'}</p>
           </div>
         </div>
 

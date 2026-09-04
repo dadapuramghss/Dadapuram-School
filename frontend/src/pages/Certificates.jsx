@@ -268,7 +268,7 @@ export function Certificates() {
             <tbody>
               <tr className="border-b border-indigo-50 dark:border-[#4C677C]/30">
                 <th className="py-3 font-bold text-[#4C677C] dark:text-[#E5D9C4]  w-1/4">DOB:</th>
-                <td className="py-3 font-bold text-indigo-950 dark:text-gray-900">{selectedStudent?.dob || '-'}</td>
+                <td className="py-3 font-bold text-indigo-950 dark:text-gray-900">{selectedStudent?.dob ? selectedStudent.dob.split('-').reverse().join('-') : '-'}</td>
               </tr>
               <tr className="border-b border-indigo-50 dark:border-[#4C677C]/30">
                 <th className="py-3 font-bold text-[#4C677C] dark:text-[#E5D9C4] ">Father's Name:</th>

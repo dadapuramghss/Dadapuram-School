@@ -78,7 +78,7 @@ export function AdminReports() {
     if (!dateStr) return '';
     const d = new Date(dateStr);
     if (isNaN(d)) return dateStr;
-    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+    return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
   };
 
   const mapStudentToExcelRow = (student) => ({
@@ -1161,7 +1161,7 @@ export function AdminReports() {
                         </div>
                         <div>
                           <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Date of Birth</p>
-                          <p className="text-sm font-semibold text-gray-900">{selectedStudentDetails.dob || 'N/A'}</p>
+                          <p className="text-sm font-semibold text-gray-900">{selectedStudentDetails.dob ? selectedStudentDetails.dob.split('-').reverse().join('-') : 'N/A'}</p>
                         </div>
                         <div>
                           <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Father's Name</p>

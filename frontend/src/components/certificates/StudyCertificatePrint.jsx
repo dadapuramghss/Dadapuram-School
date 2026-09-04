@@ -83,7 +83,7 @@ export const StudyCertificatePrint = React.forwardRef(({ student, language = 'TA
 
         <div className="grid grid-cols-[300px_auto] gap-4">
           <div className="font-semibold">{t.dobLabel}</div>
-          <div>: {student.dob || '-'}</div>
+          <div>: {student.dob ? student.dob.split('-').reverse().join('-') : '-'}</div>
         </div>
 
         <div className="grid grid-cols-[300px_auto] gap-4">

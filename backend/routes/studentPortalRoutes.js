@@ -24,7 +24,7 @@ router.post('/login', async (req, res) => {
     });
 
     if (!students || students.length === 0) {
-      return res.status(404).json({ message: 'Student not found with this Mobile or EMIS number' });
+      return res.status(404).json({ message: 'Student account not found' });
     }
 
     if (students.length > 1) {
@@ -39,20 +39,13 @@ router.post('/login', async (req, res) => {
       return res.json({ requiresSelection: true, students: mappedStudents });
     }
 
-    // Only 1 student found, log them in directly
+    // Only 1 student found, require password (DOB)
     const student = students[0];
 
-    // Generate JWT
-    const token = jwt.sign(
-      { studentId: student._id },
-      JWT_SECRET,
-      { expiresIn: '7d' } // Token valid for 7 days
-    );
-
     res.json({
-      message: 'Login successful',
-      token,
-      student
+      requiresPassword: true,
+      studentId: student._id,
+      studentName: student.name
     });
   } catch (error) {
     console.error('Student login error:', error);
@@ -60,26 +53,46 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// POST /api/student-portal/login-select
-router.post('/login-select', async (req, res) => {
+// POST /api/student-portal/login-verify
+router.post('/login-verify', async (req, res) => {
   try {
-    const { identifier, mobileNumber, studentId } = req.body;
-    const loginId = identifier || mobileNumber;
+    const { studentId, password } = req.body;
     
-    if (!loginId || !studentId) {
-      return res.status(400).json({ message: 'Login ID and student ID are required' });
+    if (!studentId || !password) {
+      return res.status(400).json({ message: 'Student ID and Password are required' });
     }
 
-    const student = await Student.findOne({ 
-      _id: studentId,
-      $or: [
-        { mobileNumber: loginId },
-        { emisNumber: loginId }
-      ]
-    });
+    const student = await Student.findById(studentId);
     
     if (!student) {
-      return res.status(404).json({ message: 'Invalid selection or student not found' });
+      return res.status(404).json({ message: 'Student account not found' });
+    }
+
+    if (!student.dob) {
+      return res.status(401).json({ message: 'Invalid password' });
+    }
+
+    // Verify Password (DOB in DDMMYYYY format)
+    let dbDob = String(student.dob).trim();
+    if (dbDob.includes('T')) {
+      dbDob = dbDob.split('T')[0];
+    }
+    
+    let year, month, day;
+    if (/^\d{4}[-/]\d{2}[-/]\d{2}$/.test(dbDob)) {
+      const parts = dbDob.split(/[-/]/);
+      year = parts[0]; month = parts[1]; day = parts[2];
+    } else if (/^\d{2}[-/]\d{2}[-/]\d{4}$/.test(dbDob)) {
+      const parts = dbDob.split(/[-/]/);
+      day = parts[0]; month = parts[1]; year = parts[2];
+    } else {
+      return res.status(401).json({ message: 'Invalid password' });
+    }
+
+    const expectedPassword = `${day}${month}${year}`;
+
+    if (password !== expectedPassword) {
+      return res.status(401).json({ message: 'Invalid password' });
     }
 
     // Generate JWT
@@ -89,14 +102,18 @@ router.post('/login-select', async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    // Strip sensitive info
+    const studentData = student.toObject();
+    delete studentData.dob;
+
     res.json({
       message: 'Login successful',
       token,
-      student
+      student: studentData
     });
   } catch (error) {
-    console.error('Student login-select error:', error);
-    res.status(500).json({ message: 'Server error during login selection' });
+    console.error('Student login-verify error:', error);
+    res.status(500).json({ message: 'Server error during login verification' });
   }
 });
 

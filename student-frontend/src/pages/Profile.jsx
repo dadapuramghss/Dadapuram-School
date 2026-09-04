@@ -9,7 +9,7 @@ export default function Profile() {
     { label: "EMIS Number", value: student.emisNumber, icon: Hash },
     { label: "Admission No", value: student.admissionNumber, icon: Hash },
     { label: "Father's Name", value: student.fatherName, icon: User },
-    { label: "Date of Birth", value: student.dob, icon: Calendar },
+    { label: "Date of Birth", value: student.dob ? student.dob.split('-').reverse().join('-') : 'N/A', icon: Calendar },
     { label: "Mobile Number", value: student.mobileNumber, icon: Phone },
     { label: "Community", value: student.community, icon: Shield },
     { label: "Religion", value: student.religion, icon: Shield },
