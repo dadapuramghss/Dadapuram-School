@@ -79,14 +79,22 @@ router.post('/login-verify', async (req, res) => {
     }
     
     let year, month, day;
-    if (/^\d{4}[-/]\d{2}[-/]\d{2}$/.test(dbDob)) {
-      const parts = dbDob.split(/[-/]/);
-      year = parts[0]; month = parts[1]; day = parts[2];
-    } else if (/^\d{2}[-/]\d{2}[-/]\d{4}$/.test(dbDob)) {
-      const parts = dbDob.split(/[-/]/);
-      day = parts[0]; month = parts[1]; year = parts[2];
+    const parts = dbDob.split(/[-/]/);
+    
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        year = parts[0];
+        month = parts[1].padStart(2, '0');
+        day = parts[2].padStart(2, '0');
+      } else if (parts[2].length === 4) {
+        day = parts[0].padStart(2, '0');
+        month = parts[1].padStart(2, '0');
+        year = parts[2];
+      } else {
+        return res.status(401).json({ message: 'Invalid DB DOB Format: ' + dbDob });
+      }
     } else {
-      return res.status(401).json({ message: 'Invalid password' });
+      return res.status(401).json({ message: 'Invalid DB DOB String: ' + dbDob });
     }
 
     const expectedPassword = `${day}${month}${year}`;
