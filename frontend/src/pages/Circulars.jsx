@@ -162,7 +162,7 @@ export function Circulars() {
               <select 
                 value={newCircular.audience}
                 onChange={e => setNewCircular({...newCircular, audience: e.target.value})}
-                className="glass-input w-full dark:text-gray-900 bg-gray-500 dark:bg-gray-900/10 border border-[#E5D9C4] dark:border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none"
+                className="glass-input w-full dark:text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
               >
                 <option value="All" className="dark:bg-[#1A1A24]">All (Teachers & Students)</option>
                 <option value="Teacher" className="dark:bg-[#1A1A24]">Teachers Only</option>

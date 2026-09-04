@@ -187,7 +187,7 @@ router.get('/homework', verifyStudentToken, async (req, res) => {
 router.get('/circulars', verifyStudentToken, async (req, res) => {
   try {
     const Circular = require('../models/Circular');
-    const circulars = await Circular.find().sort({ createdAt: -1 });
+    const circulars = await Circular.find({ audience: { $in: ['All', 'Student'] } }).sort({ createdAt: -1 });
     res.json({ success: true, data: circulars });
   } catch (error) {
     console.error('Error fetching circulars:', error);
