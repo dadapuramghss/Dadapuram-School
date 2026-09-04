@@ -12,6 +12,7 @@ export function DataSync() {
   const [error, setError] = useState(null);
 
   // Marks specific state
+  const [marksMode, setMarksMode] = useState('universal'); // 'universal' or 'legacy'
   const [selectedStandard, setSelectedStandard] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedTerm, setSelectedTerm] = useState('');
@@ -367,6 +368,131 @@ export function DataSync() {
     document.body.removeChild(link);
   };
 
+  const downloadUniversalMarksTemplate = () => {
+    const templateData = [{
+      'EMIS Number': '1012345678',
+      'Student Name': 'Arun K',
+      'Standard': '10',
+      'Section': 'A',
+      'Tamil': '85',
+      'English': '90',
+      'Mathematics': '95',
+      'Science': '88',
+      'Social Science': '92'
+    }, {
+      'EMIS Number': '1012345679',
+      'Student Name': 'Priya S',
+      'Standard': '6',
+      'Section': 'B',
+      'Tamil': '80',
+      'English': '85',
+      'Mathematics': '75',
+      'Science': '82',
+      'Social Science': '78'
+    }];
+    
+    const instructionsData = [
+      { 'Instruction': '1. Enter the correct 10-15 digit EMIS Number for every student. This is REQUIRED.' },
+      { 'Instruction': '2. The EMIS Number must perfectly match the one in the database. DO NOT duplicate EMIS Numbers.' },
+      { 'Instruction': '3. Do not change the Subject column headers.' },
+      { 'Instruction': '4. You can include students from Class 6 to 10 in this ONE single file.' },
+      { 'Instruction': '5. Ensure marks are between 0 and 100.' },
+      { 'Instruction': '6. Standard and Section must exactly match the student\'s database record.' },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    const marksSheet = XLSX.utils.json_to_sheet(templateData);
+    const instructionsSheet = XLSX.utils.json_to_sheet(instructionsData);
+
+    XLSX.utils.book_append_sheet(workbook, marksSheet, "Class 6-10 Marks");
+    XLSX.utils.book_append_sheet(workbook, instructionsSheet, "Instructions");
+    XLSX.writeFile(workbook, `Class_6_to_10_Marks_Template.xlsx`);
+  };
+
+  const handleUniversalMarksUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (!selectedTerm) {
+      setError('Please select Term before importing marks.');
+      event.target.value = '';
+      return;
+    }
+
+    setImporting(true);
+    setError(null);
+    setImportResults(null);
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+          const recordsToImport = rows.map(row => {
+            const emisNumber = String(row['EMIS Number'] || row['emisnumber'] || row['emisno'] || row['EMIS'] || '').trim();
+            const standard = String(row['Standard'] || row['standard'] || row['class'] || '').trim();
+            const section = String(row['Section'] || row['section'] || '').trim().toUpperCase();
+            
+            const marks = [];
+            
+            // Standard Class 6-10 subjects
+            const validSubjects = ['Tamil', 'English', 'Mathematics', 'Science', 'Social Science'];
+            
+            validSubjects.forEach(subj => {
+              const headerKey = Object.keys(row).find(k => k.toLowerCase() === subj.toLowerCase());
+              if (headerKey && row[headerKey] !== '' && !isNaN(row[headerKey])) {
+                marks.push({
+                  subject: subj,
+                  score: Number(row[headerKey])
+                });
+              }
+            });
+
+            return { emisNumber, standard, section, marks };
+          }).filter(record => record.emisNumber);
+
+          if (recordsToImport.length === 0) {
+            setError('No valid student records found or missing EMIS Numbers in the Excel file.');
+            setImporting(false);
+            return;
+          }
+
+          const response = await api.universalBulkUpdateMarks(selectedTerm, recordsToImport);
+          if (response.success) {
+            setImportResults({
+              added: response.data.created,
+              updated: response.data.updated,
+              failed: response.data.failed,
+              errors: response.data.errors
+            });
+          } else {
+            setError('Import failed on the server.');
+          }
+        } catch (err) {
+          console.error('Import parse error:', err);
+          
+          if (err.message && err.message.includes('HTTP error') && err.validationErrors) {
+             // In case the API utility throws HTTP errors natively, we must catch its body
+          }
+          
+          setError(err.message || 'Failed to process Excel file.');
+        } finally {
+          setImporting(false);
+          event.target.value = '';
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } catch (err) {
+      setImporting(false);
+      setError(`Failed to read file: ${err.message}`);
+      event.target.value = '';
+    }
+  };
+
   return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -403,49 +529,74 @@ export function DataSync() {
         </button>
       </div>
 
-      {/* MARKS FILTERS (Only visible if Marks tab is selected) */}
+      {/* MARKS MODE SELECTOR & FILTERS */}
       {syncType === 'marks' && (
-        <div className="mb-8 p-6 glass-card border border-[#62D4CA]/30">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            Select Class & Term for Marks
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Standard</label>
-              <select
-                value={selectedStandard}
-                onChange={(e) => { setSelectedStandard(e.target.value); setSelectedSection(''); }}
-                className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#62D4CA] outline-none transition-all"
-              >
-                <option value="">Select Standard</option>
-                {standards.map(std => <option key={std} value={std}>{std}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Section</label>
-              <select
-                value={selectedSection}
-                onChange={(e) => setSelectedSection(e.target.value)}
-                disabled={!selectedStandard}
-                className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#62D4CA] outline-none transition-all disabled:opacity-50"
-              >
-                <option value="">Select Section</option>
-                {sections.map(sec => <option key={sec} value={sec}>{sec}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Term</label>
-              <select
-                value={selectedTerm}
-                onChange={(e) => setSelectedTerm(e.target.value)}
-                className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#62D4CA] outline-none transition-all"
-              >
-                <option value="">Select Term</option>
-                {terms.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
+        <>
+          <div className="flex bg-white/50 dark:bg-gray-900/50 p-1 rounded-xl w-full max-w-sm mb-4 border border-gray-200 shadow-sm backdrop-blur-xl">
+            <button
+              onClick={() => { setMarksMode('universal'); setError(null); setImportResults(null); }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                marksMode === 'universal' ? 'bg-[#2E1C40] text-white shadow-md' : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              Classes 6-10
+            </button>
+            <button
+              onClick={() => { setMarksMode('legacy'); setError(null); setImportResults(null); }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                marksMode === 'legacy' ? 'bg-[#2E1C40] text-white shadow-md' : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              Classes 11-12
+            </button>
+          </div>
+          
+          <div className="mb-8 p-6 glass-card border border-[#62D4CA]/30">
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              {marksMode === 'universal' ? 'Select Term for Classes 6-10 Import' : 'Select Class & Term for Classes 11-12 Import'}
+            </h3>
+            <div className={`grid grid-cols-1 ${marksMode === 'legacy' ? 'md:grid-cols-3' : 'md:grid-cols-1 max-w-md'} gap-6`}>
+              {marksMode === 'legacy' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Standard</label>
+                    <select
+                      value={selectedStandard}
+                      onChange={(e) => { setSelectedStandard(e.target.value); setSelectedSection(''); }}
+                      className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#62D4CA] outline-none transition-all"
+                    >
+                      <option value="">Select Standard</option>
+                      {standards.filter(std => ['XI', 'XII', '11', '12'].includes(std)).map(std => <option key={std} value={std}>{std}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Section</label>
+                    <select
+                      value={selectedSection}
+                      onChange={(e) => setSelectedSection(e.target.value)}
+                      disabled={!selectedStandard}
+                      className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#62D4CA] outline-none transition-all disabled:opacity-50"
+                    >
+                      <option value="">Select Section</option>
+                      {sections.map(sec => <option key={sec} value={sec}>{sec}</option>)}
+                    </select>
+                  </div>
+                </>
+              )}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Term</label>
+                <select
+                  value={selectedTerm}
+                  onChange={(e) => setSelectedTerm(e.target.value)}
+                  className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#62D4CA] outline-none transition-all"
+                >
+                  <option value="">Select Term</option>
+                  {terms.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {error && (
@@ -513,8 +664,8 @@ export function DataSync() {
           </p>
           
           <button 
-            onClick={syncType === 'profiles' ? handleExportProfiles : handleExportMarks}
-            disabled={exporting}
+            onClick={syncType === 'profiles' ? handleExportProfiles : (syncType === 'marks' && marksMode === 'universal' ? downloadUniversalMarksTemplate : handleExportMarks)}
+            disabled={exporting || (syncType === 'marks' && marksMode === 'universal' ? false : false)}
             className="glass-button-primary bg-blue-600 hover:bg-blue-700 text-white w-full max-w-xs flex items-center justify-center gap-2 py-3 relative z-10"
           >
             {exporting ? (
@@ -522,7 +673,7 @@ export function DataSync() {
             ) : (
               <Download className="w-5 h-5" />
             )}
-            {exporting ? 'Generating Excel...' : 'Download Excel Export'}
+            {exporting ? 'Generating Excel...' : (syncType === 'marks' && marksMode === 'universal' ? 'Download 6-10 Template' : 'Download Excel Export')}
           </button>
         </div>
 
@@ -552,21 +703,21 @@ export function DataSync() {
               ) : (
                 <FileSpreadsheet className="w-5 h-5" />
               )}
-              {importing ? 'Processing...' : 'Select CSV File'}
+              {importing ? 'Processing...' : (syncType === 'marks' && marksMode === 'universal' ? 'Select Excel File (.xlsx)' : 'Select CSV File')}
               <input 
                 type="file" 
-                accept=".csv" 
+                accept={syncType === 'marks' && marksMode === 'universal' ? '.xlsx,.xls' : '.csv'} 
                 className="hidden" 
-                onChange={syncType === 'profiles' ? handleProfileUpload : handleMarksUpload}
-                disabled={importing || (syncType === 'marks' && (!selectedStandard || !selectedSection || !selectedTerm))}
+                onChange={syncType === 'profiles' ? handleProfileUpload : (syncType === 'marks' && marksMode === 'universal' ? handleUniversalMarksUpload : handleMarksUpload)}
+                disabled={importing || (syncType === 'marks' && (marksMode === 'legacy' && (!selectedStandard || !selectedSection || !selectedTerm)))}
               />
             </label>
             
             <button 
-              onClick={syncType === 'profiles' ? downloadProfileTemplate : downloadMarksTemplate}
+              onClick={syncType === 'profiles' ? downloadProfileTemplate : (syncType === 'marks' && marksMode === 'universal' ? downloadUniversalMarksTemplate : downloadMarksTemplate)}
               className="text-sm text-[#4C677C] hover:text-gray-900 underline transition-colors"
             >
-              Download CSV Template
+              {syncType === 'marks' && marksMode === 'universal' ? 'Download Class 6-10 Excel Template' : 'Download CSV Template'}
             </button>
           </div>
         </div>
@@ -592,15 +743,15 @@ export function DataSync() {
           <ul className="space-y-3 text-[#4C677C]">
             <li className="flex items-start gap-3">
               <div className="w-6 h-6 shrink-0 rounded-full bg-[#62D4CA]/20 text-[#2E1C40] flex items-center justify-center text-sm font-bold mt-0.5">1</div>
-              <p><strong>Select Target:</strong> You must first select the Standard, Section, and Term above. The import will strictly apply to this selection.</p>
+              <p><strong>{marksMode === 'universal' ? 'Select Term:' : 'Select Target:'}</strong> {marksMode === 'universal' ? 'You must select the Term above. Classes 6-10 students will be matched using their EMIS Number.' : 'You must first select the Standard, Section, and Term above. The import will strictly apply to this selection.'}</p>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-6 h-6 shrink-0 rounded-full bg-[#62D4CA]/20 text-[#2E1C40] flex items-center justify-center text-sm font-bold mt-0.5">2</div>
-              <p><strong>Template First:</strong> Always download the CSV Template first, as it contains exactly the right columns (subjects) for the chosen Standard/Section.</p>
+              <p><strong>Template First:</strong> Always download the {marksMode === 'universal' ? 'Excel' : 'CSV'} Template first, as it contains exactly the right columns for the chosen format.</p>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-6 h-6 shrink-0 rounded-full bg-[#62D4CA]/20 text-[#2E1C40] flex items-center justify-center text-sm font-bold mt-0.5">3</div>
-              <p><strong>Match by EMIS:</strong> The system matches students by EMIS Number. Leave scores blank for students who were absent.</p>
+              <p><strong>Match by EMIS:</strong> The system strictly matches students by EMIS Number. Name, Standard, and Section are used only for validation.</p>
             </li>
           </ul>
         )}

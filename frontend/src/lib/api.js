@@ -27,7 +27,11 @@ async function fetchWithAuth(endpoint, options = {}) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    const err = new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    if (errorData.validationErrors) {
+      err.validationErrors = errorData.validationErrors;
+    }
+    throw err;
   }
 
   return response.json();
@@ -64,6 +68,11 @@ export const api = {
   }),
 
   bulkUpdateMarks: (termName, records) => fetchWithAuth('/students/bulk-marks', {
+    method: 'POST',
+    body: JSON.stringify({ termName, records })
+  }),
+
+  universalBulkUpdateMarks: (termName, records) => fetchWithAuth('/students/bulk-marks-universal', {
     method: 'POST',
     body: JSON.stringify({ termName, records })
   }),

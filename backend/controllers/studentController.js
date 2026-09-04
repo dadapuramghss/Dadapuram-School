@@ -314,6 +314,155 @@ const bulkUpdateMarks = async (req, res) => {
   }
 };
 
+// Universal Bulk Update Marks (Classes 6-10)
+const universalBulkUpdateMarks = async (req, res) => {
+  try {
+    const { termName, records } = req.body;
+    
+    if (!termName || !Array.isArray(records)) {
+      return res.status(400).json({ error: 'termName and records array are required' });
+    }
+
+    if (!req.dbUser) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Step 1: Pre-validation Data Fetching
+    const emisNumbers = records.map(r => r.emisNumber).filter(Boolean);
+    
+    // Check for duplicate EMIS within the uploaded file
+    const emisSet = new Set();
+    const duplicateEmisInFile = new Set();
+    for (const emis of emisNumbers) {
+      if (emisSet.has(emis)) duplicateEmisInFile.add(emis);
+      emisSet.add(emis);
+    }
+    
+    if (duplicateEmisInFile.size > 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        validationErrors: [`Duplicate EMIS Numbers found in the uploaded file: ${Array.from(duplicateEmisInFile).join(', ')}`]
+      });
+    }
+
+    // Fetch all relevant students by EMIS
+    const students = await Student.find({ emisNumber: { $in: emisNumbers } });
+    const studentMap = new Map();
+    students.forEach(s => studentMap.set(s.emisNumber, s));
+
+    const validationErrors = [];
+
+    // Step 2: Full Validation Loop
+    for (let i = 0; i < records.length; i++) {
+      const record = records[i];
+      const { emisNumber, standard, section, marks } = record;
+      
+      if (!emisNumber || !standard || !section || !Array.isArray(marks)) {
+        validationErrors.push(`Row ${i + 2}: Missing required fields (EMIS: ${emisNumber || 'N/A'})`);
+        continue;
+      }
+
+      const student = studentMap.get(emisNumber);
+      if (!student) {
+        validationErrors.push(`Row ${i + 2}: Student with EMIS ${emisNumber} not found in database.`);
+        continue;
+      }
+
+      // Exact match for Standard and Section
+      if (String(student.standard).trim().toUpperCase() !== String(standard).trim().toUpperCase()) {
+        validationErrors.push(`Row ${i + 2}: Class mismatch for EMIS ${emisNumber}. Excel says ${standard}, DB says ${student.standard}.`);
+      }
+      
+      if (String(student.section).trim().toUpperCase() !== String(section).trim().toUpperCase()) {
+        validationErrors.push(`Row ${i + 2}: Section mismatch for EMIS ${emisNumber}. Excel says ${section}, DB says ${student.section}.`);
+      }
+
+      // Check authorization per student record
+      if (!isAuthorizedForClass(req.dbUser, student.standard, student.section, true)) {
+        validationErrors.push(`Row ${i + 2}: Not authorized to update EMIS ${emisNumber} (${student.standard}-${student.section}).`);
+      }
+
+      // Validate Marks
+      for (const m of marks) {
+        if (typeof m.score !== 'number' || isNaN(m.score) || m.score < 0 || m.score > 100) {
+          validationErrors.push(`Row ${i + 2}: Invalid mark '${m.score}' for subject '${m.subject}' (EMIS: ${emisNumber}). Must be between 0 and 100.`);
+        }
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        validationErrors
+      });
+    }
+
+    // Step 3: Execution Loop
+    let updatedCount = 0;
+    let createdCount = 0;
+    let failedCount = 0;
+    const executionErrors = [];
+
+    for (const record of records) {
+      const { emisNumber, marks } = record;
+      const student = studentMap.get(emisNumber);
+
+      try {
+        // Atomic Upsert Logic
+        const updateResult = await Student.updateOne(
+          { _id: student._id, "terms.termName": termName },
+          { $set: { "terms.$.marks": marks } }
+        );
+
+        if (updateResult.matchedCount > 0) {
+          updatedCount++;
+        } else {
+          const pushResult = await Student.updateOne(
+            { _id: student._id, "terms.termName": { $ne: termName } },
+            { $push: { terms: { termName, marks } } }
+          );
+
+          if (pushResult.matchedCount > 0) {
+            createdCount++;
+          } else {
+            const fallbackUpdate = await Student.updateOne(
+              { _id: student._id, "terms.termName": termName },
+              { $set: { "terms.$.marks": marks } }
+            );
+            
+            if (fallbackUpdate.matchedCount > 0) {
+              updatedCount++;
+            } else {
+              failedCount++;
+              executionErrors.push(`Failed to update or create term for EMIS: ${emisNumber}`);
+            }
+          }
+        }
+      } catch (err) {
+        failedCount++;
+        executionErrors.push(`Failed to save EMIS: ${emisNumber} - ${err.message}`);
+      }
+    }
+
+    res.status(200).json({ 
+      success: true, 
+      data: {
+        total: records.length,
+        updated: updatedCount,
+        created: createdCount,
+        failed: failedCount,
+        errors: executionErrors
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in universal bulk update marks:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // Update student
 const updateStudent = async (req, res) => {
   try {
@@ -506,6 +655,7 @@ module.exports = {
   getStudentById,
   updateStudentMarks,
   bulkUpdateMarks,
+  universalBulkUpdateMarks,
   updateStudent,
   deleteStudent,
   bulkAddStudents,
