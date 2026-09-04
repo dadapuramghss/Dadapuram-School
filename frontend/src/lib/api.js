@@ -78,6 +78,14 @@ export const api = {
     method: 'DELETE'
   }),
 
+  // Notifications
+  getNotifications: () => fetchWithAuth('/notifications'),
+  markNotificationRead: (id) => fetchWithAuth(`/notifications/${id}/read`, { method: 'PUT' }),
+  
+  // Feedback
+  getFeedback: () => fetchWithAuth('/feedback'),
+  deleteFeedback: (id) => fetchWithAuth(`/feedback/${id}`, { method: 'DELETE' }),
+
   // Circulars
   getCirculars: () => fetchWithAuth('/circulars'),
   addCircular: (data) => fetchWithAuth('/circulars', {

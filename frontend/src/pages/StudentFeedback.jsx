@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Search, Filter, MessageSquare, Trash2, Mic, FileText, AlertCircle } from 'lucide-react';
-import { format } from 'date-fns';
+import { api } from '../lib/api';
 
 export default function StudentFeedback() {
   const [feedback, setFeedback] = useState([]);
@@ -17,15 +16,9 @@ export default function StudentFeedback() {
   const fetchFeedback = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      
-      const response = await axios.get(`${baseURL}/feedback`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      if (response.data.success) {
-        setFeedback(response.data.data);
+      const data = await api.getFeedback();
+      if (data.success) {
+        setFeedback(data.data);
       }
     } catch (err) {
       console.error('Error fetching feedback:', err);
@@ -39,14 +32,8 @@ export default function StudentFeedback() {
     if (!window.confirm('Are you sure you want to delete this feedback?')) return;
     
     try {
-      const token = localStorage.getItem('token');
-      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      
-      const response = await axios.delete(`${baseURL}/feedback/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      if (response.data.success) {
+      const data = await api.deleteFeedback(id);
+      if (data.success) {
         setFeedback(prev => prev.filter(item => item._id !== id));
       }
     } catch (err) {
@@ -164,9 +151,9 @@ export default function StudentFeedback() {
 
                 <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
                   <div className="space-y-1">
-                    <p>Created: {format(new Date(item.createdAt), 'MMM dd, yyyy HH:mm')}</p>
+                    <p>Created: {new Date(item.createdAt).toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })}</p>
                     <p className={isExpiringSoon(item.expiresAt) ? 'text-orange-600 font-medium' : ''}>
-                      Expires: {format(new Date(item.expiresAt), 'MMM dd, yyyy HH:mm')}
+                      Expires: {new Date(item.expiresAt).toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })}
                     </p>
                   </div>
                   <button
