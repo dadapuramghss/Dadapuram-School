@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
-import { BookOpen, Calendar, AlertCircle, Mic, Image as ImageIcon, X, FileText, Download, Link as LinkIcon } from 'lucide-react';
+import { BookOpen, Calendar, AlertCircle, Mic, Image as ImageIcon, X, FileText, Download, Link as LinkIcon, Eye } from 'lucide-react';
 
 export default function Homework() {
   const { student } = useOutletContext();
@@ -153,16 +153,20 @@ export default function Homework() {
                                   </div>
                                 </button>
                               ) : (
-                                <a 
-                                  key={index}
-                                  href={url}
-                                  download={`Attachment-${index + 1}`}
-                                  className="flex flex-col items-center justify-center h-24 w-24 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 shrink-0"
-                                >
-                                  <FileText className="w-8 h-8 text-indigo-400 mb-1" />
-                                  <span className="text-[10px] text-gray-600 px-1 truncate w-full text-center">Document {index + 1}</span>
-                                  <span className="text-[9px] text-indigo-600 flex items-center mt-1"><Download className="w-3 h-3 mr-1" /> Download</span>
-                                </a>
+                                <div key={index} className="flex flex-col items-center justify-between h-28 w-[120px] rounded-lg border border-gray-200 bg-white p-2 shrink-0 hover:shadow-sm transition-shadow">
+                                  <div className="flex flex-col items-center flex-1 justify-center w-full overflow-hidden">
+                                    <FileText className="w-8 h-8 text-indigo-400 mb-1 shrink-0" />
+                                    <span className="text-[10px] text-gray-600 px-1 truncate w-full text-center">Document {index + 1}</span>
+                                  </div>
+                                  <div className="flex w-full items-center justify-center gap-1.5 mt-1 border-t border-gray-100 pt-2 shrink-0">
+                                    <a href={url} target="_blank" rel="noopener noreferrer" className="flex-1 text-[9px] font-medium text-blue-600 hover:text-blue-800 flex items-center justify-center bg-blue-50 hover:bg-blue-100 transition-colors px-1 py-1.5 rounded">
+                                      <Eye className="w-3 h-3 mr-1" /> View
+                                    </a>
+                                    <a href={url} download={`Attachment-${index + 1}`} className="flex-1 text-[9px] font-medium text-indigo-600 hover:text-indigo-800 flex items-center justify-center bg-indigo-50 hover:bg-indigo-100 transition-colors px-1 py-1.5 rounded">
+                                      <Download className="w-3 h-3 mr-1" /> Save
+                                    </a>
+                                  </div>
+                                </div>
                               );
                             })}
                           </div>
