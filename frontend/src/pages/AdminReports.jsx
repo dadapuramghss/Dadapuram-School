@@ -940,7 +940,7 @@ export function AdminReports() {
                         <td className="p-4 text-sm text-gray-500 font-medium">{student.emisNumber || student.rollNumber || 'N/A'}</td>
                         <td className="p-4 text-sm font-bold text-gray-700">{student.name}</td>
                         <td className="p-4">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-adminSidebar text-white/10 text-adminSidebar border border-[#5D7D9A]/20">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#1F2937] text-white border border-[#374151]">
                             {student.standard} - {student.section}
                           </span>
                         </td>
@@ -1062,7 +1062,7 @@ export function AdminReports() {
                     const isSelected = matrixRow.includes(dim.id);
                     const isDisabled = matrixCol.includes(dim.id);
                     return (
-                      <label key={`row-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${isSelected ? 'bg-adminAccent2 text-white/20 border-adminAccent2 text-adminAccent2 shadow-[0_0_10px_rgba(249,203,132,0.2)]' :
+                      <label key={`row-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${isSelected ? 'bg-adminAccent2 text-white border-adminAccent2 font-semibold shadow-[0_0_10px_rgba(249,203,132,0.4)]' :
                         isDisabled ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' :
                           'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'
                         }`}>
@@ -1075,8 +1075,8 @@ export function AdminReports() {
                           onChange={() => toggleDimension('row', dim.id)}
                           className="hidden"
                         />
-                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-adminAccent2 bg-adminAccent2 text-white/20' : 'border-white/30'}`}>
-                          {isSelected && <div className="w-2 h-2 rounded-sm bg-adminAccent2 text-white" />}
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-white bg-adminAccent2' : 'border-gray-300 bg-white'}`}>
+                          {isSelected && <div className="w-2 h-2 rounded-sm bg-white" />}
                         </div>
                         <span className="text-sm font-medium">{dim.label}</span>
                       </label>
@@ -1096,7 +1096,7 @@ export function AdminReports() {
                     const isSelected = matrixCol.includes(dim.id);
                     const isDisabled = matrixRow.includes(dim.id);
                     return (
-                      <label key={`col-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${isSelected ? 'bg-adminSidebar/20 border-adminSidebar text-adminSidebar shadow-sm shadow-adminSidebar/20' :
+                      <label key={`col-${dim.id}`} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${isSelected ? 'bg-adminSidebar border-adminSidebar text-white font-semibold shadow-sm' :
                         isDisabled ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed' :
                           'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'
                         }`}>
@@ -1109,8 +1109,8 @@ export function AdminReports() {
                           onChange={() => toggleDimension('col', dim.id)}
                           className="hidden"
                         />
-                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-adminSidebar bg-adminSidebar/20' : 'border-white/30'}`}>
-                          {isSelected && <div className="w-2 h-2 rounded-sm bg-adminSidebar text-white" />}
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'border-white bg-adminSidebar' : 'border-gray-300 bg-white'}`}>
+                          {isSelected && <div className="w-2 h-2 rounded-sm bg-white" />}
                         </div>
                         <span className="text-sm font-medium">{dim.label}</span>
                       </label>
