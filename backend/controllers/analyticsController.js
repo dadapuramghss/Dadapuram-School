@@ -137,6 +137,75 @@ const getDashboardStats = async (req, res) => {
       }
     ]);
 
+    const top12Students = await Student.aggregate([
+      {
+        $match: { ...query, standard: '12' }
+      },
+      {
+        $unwind: {
+          path: "$terms",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $unwind: {
+          path: "$terms.marks",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $group: {
+          _id: "$_id",
+          emisNumber: { $first: "$emisNumber" },
+          name: { $first: "$name" },
+          standard: { $first: "$standard" },
+          section: { $first: "$section" },
+          totalMarks: { $sum: "$terms.marks.score" }
+        }
+      },
+      {
+        $sort: { totalMarks: -1 }
+      },
+      {
+        $limit: 3
+      }
+    ]);
+
+    const top10Students = await Student.aggregate([
+      {
+        $match: { ...query, standard: '10' }
+      },
+      {
+        $unwind: {
+          path: "$terms",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $unwind: {
+          path: "$terms.marks",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $group: {
+          _id: "$_id",
+          emisNumber: { $first: "$emisNumber" },
+          name: { $first: "$name" },
+          standard: { $first: "$standard" },
+          section: { $first: "$section" },
+          totalMarks: { $sum: "$terms.marks.score" }
+        }
+      },
+      {
+        $sort: { totalMarks: -1 }
+      },
+      {
+        $limit: 3
+      }
+    ]);
+
+
     // Students Abstract Pipeline (Total, Male, Female by class/section)
     const studentsAbstract = await Student.aggregate([
       { $match: query },
@@ -191,6 +260,8 @@ const getDashboardStats = async (req, res) => {
         femaleStudents,
         totalTeachers,
         topStudents,
+        top12Students,
+        top10Students,
         studentsAbstract,
         classwiseFirstMarks
       }

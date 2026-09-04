@@ -71,9 +71,134 @@ export function AdminDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+            {/* Top 3 Students (School-Wide) */}
+            <div className="bg-white shadow-sm border border-gray-200 rounded-2xl p-5">
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="p-1.5 bg-adminAccent2 text-white/10 rounded-lg">
+                  <Trophy className="w-4 h-4 text-adminAccent2" />
+                </div>
+                <h2 className="text-lg font-bold text-gray-900 tracking-tight">School Top 3</h2>
+              </div>
+              
+              {(!stats?.topStudents || stats.topStudents.length === 0) ? (
+                <div className="text-gray-500 py-6 text-center font-medium">No student data available.</div>
+              ) : (
+                <div className="space-y-3">
+                  {stats.topStudents.map((student, index) => (
+                    <div 
+                      key={student._id || index} 
+                      onClick={() => setSelectedStudentId(student._id)}
+                      className="flex items-center justify-between p-3 bg-white shadow-sm rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 hover:border-gray-200 transition-all"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                          index === 0 ? 'bg-adminAccent2 text-white shadow-md shadow-adminAccent2/20' :
+                          index === 1 ? 'bg-adminAccent2/80 text-white shadow-md shadow-[#EBD8BE]/20' :
+                          'bg-adminSidebar text-white shadow-md shadow-[#5D7D9A]/20'
+                        }`}>
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 text-base tracking-tight">{student.name}</p>
+                          <p className="text-[10px] text-gray-500 font-medium mt-0.5">Class: {student.standard}-{student.section}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xl font-extrabold text-adminAccent2">{student.totalMarks}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Top 3 Students (12th Standard) */}
+            <div className="bg-white shadow-sm border border-gray-200 rounded-2xl p-5">
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="p-1.5 bg-indigo-500 text-white/10 rounded-lg">
+                  <Trophy className="w-4 h-4 text-indigo-500" />
+                </div>
+                <h2 className="text-lg font-bold text-gray-900 tracking-tight">12th Top 3</h2>
+              </div>
+              
+              {(!stats?.top12Students || stats.top12Students.length === 0) ? (
+                <div className="text-gray-500 py-6 text-center font-medium">No student data available.</div>
+              ) : (
+                <div className="space-y-3">
+                  {stats.top12Students.map((student, index) => (
+                    <div 
+                      key={student._id || index} 
+                      onClick={() => setSelectedStudentId(student._id)}
+                      className="flex items-center justify-between p-3 bg-white shadow-sm rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 hover:border-gray-200 transition-all"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                          index === 0 ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/20' :
+                          index === 1 ? 'bg-indigo-400 text-white shadow-md shadow-indigo-400/20' :
+                          'bg-indigo-300 text-white shadow-md shadow-indigo-300/20'
+                        }`}>
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 text-base tracking-tight">{student.name}</p>
+                          <p className="text-[10px] text-gray-500 font-medium mt-0.5">Class: {student.standard}-{student.section}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xl font-extrabold text-indigo-500">{student.totalMarks}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Top 3 Students (10th Standard) */}
+            <div className="bg-white shadow-sm border border-gray-200 rounded-2xl p-5">
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="p-1.5 bg-[#FA7848] text-white/10 rounded-lg">
+                  <Trophy className="w-4 h-4 text-[#FA7848]" />
+                </div>
+                <h2 className="text-lg font-bold text-gray-900 tracking-tight">10th Top 3</h2>
+              </div>
+              
+              {(!stats?.top10Students || stats.top10Students.length === 0) ? (
+                <div className="text-gray-500 py-6 text-center font-medium">No student data available.</div>
+              ) : (
+                <div className="space-y-3">
+                  {stats.top10Students.map((student, index) => (
+                    <div 
+                      key={student._id || index} 
+                      onClick={() => setSelectedStudentId(student._id)}
+                      className="flex items-center justify-between p-3 bg-white shadow-sm rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 hover:border-gray-200 transition-all"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                          index === 0 ? 'bg-[#FA7848] text-white shadow-md shadow-[#FA7848]/20' :
+                          index === 1 ? 'bg-[#FA8858] text-white shadow-md shadow-[#FA8858]/20' :
+                          'bg-[#FA9868] text-white shadow-md shadow-[#FA9868]/20'
+                        }`}>
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 text-base tracking-tight">{student.name}</p>
+                          <p className="text-[10px] text-gray-500 font-medium mt-0.5">Class: {student.standard}-{student.section}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xl font-extrabold text-[#FA7848]">{student.totalMarks}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 mt-4">
             {/* Students Abstract */}
-            <div className="bg-white shadow-sm border border-gray-200 shadow-sm rounded-2xl p-5">
+            <div className="bg-white shadow-sm border border-gray-200 rounded-2xl p-5">
               <div className="flex items-center gap-2.5 mb-5">
                 <div className="p-1.5 bg-adminSidebar text-white/10 rounded-lg">
                   <Activity className="w-4 h-4 text-adminSidebar" />
@@ -105,48 +230,6 @@ export function AdminDashboard() {
                       ))}
                     </tbody>
                   </table>
-                </div>
-              )}
-            </div>
-
-            {/* Top 3 Students (School-Wide) */}
-            <div className="bg-white shadow-sm border border-gray-200 shadow-sm rounded-2xl p-5">
-              <div className="flex items-center gap-2.5 mb-5">
-                <div className="p-1.5 bg-adminAccent2 text-white/10 rounded-lg">
-                  <Trophy className="w-4 h-4 text-adminAccent2" />
-                </div>
-                <h2 className="text-lg font-bold text-gray-900 tracking-tight">School Top 3 Students</h2>
-              </div>
-              
-              {(!stats?.topStudents || stats.topStudents.length === 0) ? (
-                <div className="text-gray-500 py-6 text-center font-medium">No student data available.</div>
-              ) : (
-                <div className="space-y-3">
-                  {stats.topStudents.map((student, index) => (
-                    <div 
-                      key={student._id || index} 
-                      onClick={() => setSelectedStudentId(student._id)}
-                      className="flex items-center justify-between p-3 bg-white shadow-sm rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 hover:border-gray-200 transition-all"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
-                          index === 0 ? 'bg-adminAccent2 text-white text-[#131E3A] shadow-md shadow-adminAccent2/20/20' :
-                          index === 1 ? 'bg-adminAccent2 text-[#131E3A] shadow-md shadow-[#EBD8BE]/20' :
-                          'bg-adminSidebar text-white text-gray-900 shadow-md shadow-[#5D7D9A]/20'
-                        }`}>
-                          {index + 1}
-                        </div>
-                        <div>
-                          <p className="font-bold text-gray-900 text-base tracking-tight">{student.name}</p>
-                          <p className="text-[10px] text-gray-500 font-medium mt-0.5">Class: {student.standard}-{student.section} <span className="mx-1.5 opacity-50">•</span> EMIS: {student.emisNumber}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-extrabold text-adminAccent2">{student.totalMarks}</p>
-                        <p className="text-[9px] text-gray-500 uppercase tracking-widest font-semibold mt-0.5">Total Marks</p>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               )}
             </div>
