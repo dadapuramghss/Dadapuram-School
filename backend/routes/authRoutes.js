@@ -10,6 +10,9 @@ router.get('/users/debug-dump', async (req, res) => {
   res.json(users);
 });
 
+// Public endpoint for pre-login validation
+router.get('/check-role', authController.checkRole);
+
 // All auth routes require a valid Firebase JWT
 router.use(verifyToken);
 

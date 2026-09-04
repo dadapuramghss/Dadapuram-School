@@ -104,6 +104,23 @@ export function Login() {
       setError('');
       setMessage('');
       setResetting(true);
+
+      // Verify the role matches before sending the reset email
+      try {
+        const roleCheck = await api.get(`/auth/check-role?email=${encodeURIComponent(trimmedEmail)}`);
+        
+        // If the backend responds with a role, we ensure it matches the selected tab.
+        // 'unknown' means the email isn't in MongoDB yet, so we assume it doesn't match the required role.
+        if (roleCheck.role !== selectedRole) {
+          setError(`This email is not registered as an ${selectedRole}.`);
+          setResetting(false);
+          return;
+        }
+      } catch (backendErr) {
+        // If backend fails, we allow it to proceed as a fallback
+        console.warn("Backend role check failed, proceeding to Firebase reset.");
+      }
+
       await resetPassword(trimmedEmail);
       setMessage('Password reset email sent! Check your inbox.');
     } catch (err) {

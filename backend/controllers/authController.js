@@ -31,6 +31,26 @@ exports.syncUser = async (req, res) => {
   }
 };
 
+// GET /api/auth/check-role
+// Public endpoint to check role by email before login
+exports.checkRole = async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) return res.status(400).json({ message: 'Email required' });
+    
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      // If not in DB, they might be an admin based on hardcoded email, or unknown
+      const isAdminEmail = email.toLowerCase() === 'dadapuramghss@gmail.com';
+      return res.json({ role: isAdminEmail ? 'admin' : 'unknown' });
+    }
+    
+    res.json({ role: user.role });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // GET /api/auth/me
 exports.getMe = async (req, res) => {
   try {
