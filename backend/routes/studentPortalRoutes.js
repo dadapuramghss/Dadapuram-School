@@ -100,7 +100,7 @@ router.post('/login-verify', async (req, res) => {
     const expectedPassword = `${day}${month}${year}`;
 
     if (password !== expectedPassword) {
-      return res.status(401).json({ message: 'Invalid password' });
+      return res.status(401).json({ message: 'DEBUG_FAIL: ' + password + ' !== ' + expectedPassword + ' (raw: ' + student.dob + ')' });
     }
 
     // Generate JWT
