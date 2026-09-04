@@ -13,6 +13,7 @@ export function Gradebook() {
   const [selectedTerm, setSelectedTerm] = useState('All Terms');
   const [students, setStudents] = useState([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const { dbUser } = useAuth();
   const { classConfigs } = useClassConfig();
@@ -124,6 +125,9 @@ export function Gradebook() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (isSaving) return;
+    
+    setIsSaving(true);
     try {
       // Group marks by student ID
       const studentUpdates = {};
@@ -149,6 +153,8 @@ export function Gradebook() {
     } catch (err) {
       console.error('Failed to save marks', err);
       alert('Error saving marks.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -261,7 +267,9 @@ export function Gradebook() {
           
           <div className="mt-6 flex justify-end">
             {hasFullAccess ? (
-              <NeonButton type="submit" className="bg-adminSidebar text-white text-[#2E1C40]">Save {selectedTerm} Marks</NeonButton>
+              <NeonButton type="submit" disabled={isSaving} className="bg-adminSidebar text-white text-[#2E1C40]">
+                {isSaving ? 'Saving...' : `Save ${selectedTerm} Marks`}
+              </NeonButton>
             ) : (
               <p className="text-[#4C677C]/60 dark:text-gray-400 text-sm italic">
                 {isReportView ? 'Report views are read-only.' : 'You have view-only access to this class.'}

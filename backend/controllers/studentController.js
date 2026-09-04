@@ -190,21 +190,38 @@ const updateStudentMarks = async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to modify this student' });
     }
 
-    // Check if term already exists
-    const termIndex = student.terms.findIndex(t => t.termName === termName);
-    
-    if (termIndex > -1) {
-      // Update existing term
-      student.terms[termIndex].marks = marks;
-    } else {
-      // Add new term
-      student.terms.push({ termName, marks });
+    // Atomic Upsert Logic
+    let action = 'updated';
+
+    // Step 1: Try to update the existing term
+    const updateResult = await Student.updateOne(
+      { _id: studentId, "terms.termName": termName },
+      { $set: { "terms.$.marks": marks } }
+    );
+
+    if (updateResult.matchedCount === 0) {
+      // Step 2: Term does not exist. Try to conditionally push it.
+      const pushResult = await Student.updateOne(
+        { _id: studentId, "terms.termName": { $ne: termName } },
+        { $push: { terms: { termName, marks } } }
+      );
+      
+      action = 'created';
+
+      if (pushResult.matchedCount === 0) {
+        // Step 3: Conditional push failed. Another concurrent request pushed it!
+        // Fallback to update.
+        await Student.updateOne(
+          { _id: studentId, "terms.termName": termName },
+          { $set: { "terms.$.marks": marks } }
+        );
+        action = 'updated';
+      }
     }
 
-    // Save with validateModifiedOnly to bypass validation errors for existing dirty data 
-    // (e.g. students missing emisNumber)
-    await student.save({ validateModifiedOnly: true });
-    res.status(200).json({ success: true, data: student });
+    // Fetch the updated student to return
+    const updatedStudent = await Student.findById(studentId);
+    res.status(200).json({ success: true, action, data: updatedStudent });
   } catch (error) {
     console.error('Error updating marks:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -252,18 +269,39 @@ const bulkUpdateMarks = async (req, res) => {
         continue;
       }
 
-      // Check if term already exists
-      const termIndex = student.terms.findIndex(t => t.termName === termName);
-      if (termIndex > -1) {
-        student.terms[termIndex].marks = marks;
-      } else {
-        student.terms.push({ termName, marks });
-      }
-
       try {
-        student.markModified('terms');
-        await student.save({ validateModifiedOnly: true });
-        results.updated++;
+        // Step 1: Try to update existing term
+        const updateResult = await Student.updateOne(
+          { _id: student._id, "terms.termName": termName },
+          { $set: { "terms.$.marks": marks } }
+        );
+
+        let success = true;
+
+        if (updateResult.matchedCount === 0) {
+          // Step 2: Try to push conditionally
+          const pushResult = await Student.updateOne(
+            { _id: student._id, "terms.termName": { $ne: termName } },
+            { $push: { terms: { termName, marks } } }
+          );
+
+          if (pushResult.matchedCount === 0) {
+            // Step 3: Fallback update
+            const fallbackUpdate = await Student.updateOne(
+              { _id: student._id, "terms.termName": termName },
+              { $set: { "terms.$.marks": marks } }
+            );
+            
+            if (fallbackUpdate.matchedCount === 0) {
+              success = false;
+              results.errors.push(`Failed to update or create term for EMIS: ${emisNumber}`);
+            }
+          }
+        }
+
+        if (success) {
+          results.updated++;
+        }
       } catch (err) {
         results.errors.push(`Failed to save EMIS: ${emisNumber} - ${err.message}`);
       }
