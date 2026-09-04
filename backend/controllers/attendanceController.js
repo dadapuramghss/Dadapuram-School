@@ -85,6 +85,7 @@ exports.saveAttendance = async (req, res) => {
 };
 
 const Student = require('../models/Student');
+const { sortStudentsByGenderAndName } = require('../utils/sortUtils');
 
 exports.getAttendanceSummary = async (req, res) => {
   try {
@@ -94,7 +95,8 @@ exports.getAttendanceSummary = async (req, res) => {
       return res.status(400).json({ error: 'Missing required query parameters' });
     }
 
-    const students = await Student.find({ standard, section }).sort({ name: 1 });
+    let students = await Student.find({ standard, section });
+    students = sortStudentsByGenderAndName(students);
 
     const attendances = await Attendance.find({
       standard,

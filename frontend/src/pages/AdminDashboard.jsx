@@ -7,6 +7,39 @@ export function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
+  const [selectedExamFilter, setSelectedExamFilter] = useState('All Exams');
+
+  const uniqueExams = React.useMemo(() => {
+    const predefinedExams = [
+      "First Midterm",
+      "Quarterly",
+      "Second Midterm",
+      "Half-Yearly",
+      "Third Midterm",
+      "Annual"
+    ];
+    if (!stats?.classwiseFirstMarks) return predefinedExams;
+    
+    const dbExams = stats.classwiseFirstMarks.map(fm => fm._id.termName);
+    const combinedExams = [...predefinedExams];
+    
+    dbExams.forEach(exam => {
+      if (!combinedExams.some(e => e.toLowerCase() === exam.toLowerCase())) {
+        combinedExams.push(exam);
+      }
+    });
+    
+    return combinedExams;
+  }, [stats]);
+
+  const filteredFirstMarks = React.useMemo(() => {
+    if (!stats?.classwiseFirstMarks) return [];
+    if (selectedExamFilter === 'All Exams') return stats.classwiseFirstMarks;
+    
+    return stats.classwiseFirstMarks.filter(fm => 
+      fm._id.termName.toLowerCase() === selectedExamFilter.toLowerCase()
+    );
+  }, [stats, selectedExamFilter]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -241,18 +274,34 @@ export function AdminDashboard() {
           <div className="grid grid-cols-1 gap-4 mt-4">
             {/* Classwise First Marks */}
             <div className="bg-white shadow-sm border border-gray-200 shadow-sm rounded-2xl p-5">
-              <div className="flex items-center gap-2.5 mb-5">
-                <div className="p-1.5 bg-[#FA7848]/10 rounded-lg">
-                  <Medal className="w-4 h-4 text-[#FA7848]" />
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 bg-[#FA7848]/10 rounded-lg">
+                    <Medal className="w-4 h-4 text-[#FA7848]" />
+                  </div>
+                  <h2 className="text-lg font-bold text-gray-900 tracking-tight">Classwise First Marks</h2>
                 </div>
-                <h2 className="text-lg font-bold text-gray-900 tracking-tight">Classwise First Marks</h2>
+                {uniqueExams.length > 0 && (
+                  <select
+                    value={selectedExamFilter}
+                    onChange={(e) => setSelectedExamFilter(e.target.value)}
+                    className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-adminAccent2 focus:border-adminAccent2 block w-full sm:w-auto p-2 outline-none font-medium transition-colors"
+                  >
+                    <option value="All Exams">All Exams</option>
+                    {uniqueExams.map(exam => (
+                      <option key={exam} value={exam}>{exam}</option>
+                    ))}
+                  </select>
+                )}
               </div>
               
               {(!stats?.classwiseFirstMarks || stats.classwiseFirstMarks.length === 0) ? (
                 <div className="text-gray-500 py-6 text-center font-medium">No exam data available.</div>
+              ) : filteredFirstMarks.length === 0 ? (
+                <div className="text-gray-500 py-6 text-center font-medium">No top marks found for the selected exam.</div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {stats.classwiseFirstMarks.map((fm, idx) => (
+                  {filteredFirstMarks.map((fm, idx) => (
                     <div key={idx} className="p-4 bg-white shadow-sm rounded-xl border border-gray-200 hover:bg-white/[0.05] transition-colors flex flex-col justify-between">
                       <div className="flex justify-between items-start mb-3">
                         <span className="text-[10px] uppercase font-bold tracking-widest text-adminSidebar bg-adminSidebar text-white/10 px-2 py-1 rounded-md">

@@ -1,5 +1,6 @@
 const Student = require('../models/Student');
 const ClassConfig = require('../models/ClassConfig');
+const { sortStudentsByGenderAndName } = require('../utils/sortUtils');
 
 const isAuthorizedForClass = (user, standard, section, requireFullAccess = false) => {
   if (!user) return false;
@@ -164,7 +165,8 @@ const getStudentsByClass = async (req, res) => {
       }
     }
 
-    const students = await Student.find(query).collation({ locale: 'en', strength: 2 }).sort({ name: 1 });
+    let students = await Student.find(query);
+    students = sortStudentsByGenderAndName(students);
     res.status(200).json({ success: true, data: students });
   } catch (err) {
     console.error('Error fetching students:', err);

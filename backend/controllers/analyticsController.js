@@ -126,6 +126,7 @@ const getDashboardStats = async (req, res) => {
           name: { $first: "$name" },
           standard: { $first: "$standard" },
           section: { $first: "$section" },
+          gender: { $first: "$gender" },
           totalMarks: { $sum: "$terms.marks.score" }
         }
       },
@@ -157,11 +158,20 @@ const getDashboardStats = async (req, res) => {
               { $multiply: [ { $divide: ["$totalMarks", "$maximumMarks"] }, 100 ] },
               2
             ]
+          },
+          genderPriority: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$gender", "Male"] }, then: 1 },
+                { case: { $eq: ["$gender", "Female"] }, then: 2 }
+              ],
+              default: 3
+            }
           }
         }
       },
       {
-        $sort: { percentage: -1, totalMarks: -1, name: 1 }
+        $sort: { percentage: -1, totalMarks: -1, genderPriority: 1, name: 1 }
       },
       {
         $limit: 3
@@ -191,6 +201,7 @@ const getDashboardStats = async (req, res) => {
           name: { $first: "$name" },
           standard: { $first: "$standard" },
           section: { $first: "$section" },
+          gender: { $first: "$gender" },
           totalMarks: { $sum: "$terms.marks.score" }
         }
       },
@@ -222,11 +233,20 @@ const getDashboardStats = async (req, res) => {
               { $multiply: [ { $divide: ["$totalMarks", "$maximumMarks"] }, 100 ] },
               2
             ]
+          },
+          genderPriority: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$gender", "Male"] }, then: 1 },
+                { case: { $eq: ["$gender", "Female"] }, then: 2 }
+              ],
+              default: 3
+            }
           }
         }
       },
       {
-        $sort: { percentage: -1, totalMarks: -1, name: 1 }
+        $sort: { percentage: -1, totalMarks: -1, genderPriority: 1, name: 1 }
       },
       {
         $limit: 3
@@ -256,6 +276,7 @@ const getDashboardStats = async (req, res) => {
           name: { $first: "$name" },
           standard: { $first: "$standard" },
           section: { $first: "$section" },
+          gender: { $first: "$gender" },
           totalMarks: { $sum: "$terms.marks.score" }
         }
       },
@@ -287,11 +308,20 @@ const getDashboardStats = async (req, res) => {
               { $multiply: [ { $divide: ["$totalMarks", "$maximumMarks"] }, 100 ] },
               2
             ]
+          },
+          genderPriority: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$gender", "Male"] }, then: 1 },
+                { case: { $eq: ["$gender", "Female"] }, then: 2 }
+              ],
+              default: 3
+            }
           }
         }
       },
       {
-        $sort: { percentage: -1, totalMarks: -1, name: 1 }
+        $sort: { percentage: -1, totalMarks: -1, genderPriority: 1, name: 1 }
       },
       {
         $limit: 3
