@@ -105,7 +105,7 @@ export function AdminDashboard() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-xl font-extrabold text-adminAccent2">{student.totalMarks}</p>
+                        <p className="text-xl font-extrabold text-adminAccent2">{student.percentage}%</p>
                       </div>
                     </div>
                   ))}
@@ -146,7 +146,7 @@ export function AdminDashboard() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-xl font-extrabold text-indigo-500">{student.totalMarks}</p>
+                        <p className="text-xl font-extrabold text-indigo-500">{student.percentage}%</p>
                       </div>
                     </div>
                   ))}
@@ -187,7 +187,7 @@ export function AdminDashboard() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-xl font-extrabold text-[#FA7848]">{student.totalMarks}</p>
+                        <p className="text-xl font-extrabold text-[#FA7848]">{student.percentage}%</p>
                       </div>
                     </div>
                   ))}

@@ -130,7 +130,38 @@ const getDashboardStats = async (req, res) => {
         }
       },
       {
-        $sort: { totalMarks: -1 }
+        $match: {
+          standard: { $in: ["6", "7", "8", "9", "10", "11", "12"] }
+        }
+      },
+      {
+        $addFields: {
+          maximumMarks: {
+            $switch: {
+              branches: [
+                { case: { $in: ["$standard", ["11", "12"]] }, then: 600 },
+                { case: { $in: ["$standard", ["6", "7", "8", "9", "10"]] }, then: 500 }
+              ],
+              default: null
+            }
+          }
+        }
+      },
+      {
+        $match: { maximumMarks: { $gt: 0 } }
+      },
+      {
+        $addFields: {
+          percentage: {
+            $round: [
+              { $multiply: [ { $divide: ["$totalMarks", "$maximumMarks"] }, 100 ] },
+              2
+            ]
+          }
+        }
+      },
+      {
+        $sort: { percentage: -1, totalMarks: -1, name: 1 }
       },
       {
         $limit: 3
@@ -164,7 +195,38 @@ const getDashboardStats = async (req, res) => {
         }
       },
       {
-        $sort: { totalMarks: -1 }
+        $match: {
+          standard: { $in: ["6", "7", "8", "9", "10", "11", "12"] }
+        }
+      },
+      {
+        $addFields: {
+          maximumMarks: {
+            $switch: {
+              branches: [
+                { case: { $in: ["$standard", ["11", "12"]] }, then: 600 },
+                { case: { $in: ["$standard", ["6", "7", "8", "9", "10"]] }, then: 500 }
+              ],
+              default: null
+            }
+          }
+        }
+      },
+      {
+        $match: { maximumMarks: { $gt: 0 } }
+      },
+      {
+        $addFields: {
+          percentage: {
+            $round: [
+              { $multiply: [ { $divide: ["$totalMarks", "$maximumMarks"] }, 100 ] },
+              2
+            ]
+          }
+        }
+      },
+      {
+        $sort: { percentage: -1, totalMarks: -1, name: 1 }
       },
       {
         $limit: 3
@@ -198,7 +260,38 @@ const getDashboardStats = async (req, res) => {
         }
       },
       {
-        $sort: { totalMarks: -1 }
+        $match: {
+          standard: { $in: ["6", "7", "8", "9", "10", "11", "12"] }
+        }
+      },
+      {
+        $addFields: {
+          maximumMarks: {
+            $switch: {
+              branches: [
+                { case: { $in: ["$standard", ["11", "12"]] }, then: 600 },
+                { case: { $in: ["$standard", ["6", "7", "8", "9", "10"]] }, then: 500 }
+              ],
+              default: null
+            }
+          }
+        }
+      },
+      {
+        $match: { maximumMarks: { $gt: 0 } }
+      },
+      {
+        $addFields: {
+          percentage: {
+            $round: [
+              { $multiply: [ { $divide: ["$totalMarks", "$maximumMarks"] }, 100 ] },
+              2
+            ]
+          }
+        }
+      },
+      {
+        $sort: { percentage: -1, totalMarks: -1, name: 1 }
       },
       {
         $limit: 3
