@@ -104,8 +104,9 @@ export function AdminDashboard() {
                           <p className="text-[10px] text-gray-500 font-medium mt-0.5">Class: {student.standard}-{student.section}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xl font-extrabold text-adminAccent2">{student.percentage}%</p>
+                      <div className="text-right flex flex-col items-end justify-center">
+                        <span className="text-[10px] font-bold text-gray-400 mb-0.5 tracking-wide">{student.totalMarks} / {student.maximumMarks}</span>
+                        <p className="text-xl font-extrabold text-adminAccent2 leading-none">{student.percentage}%</p>
                       </div>
                     </div>
                   ))}
@@ -145,8 +146,9 @@ export function AdminDashboard() {
                           <p className="text-[10px] text-gray-500 font-medium mt-0.5">Class: {student.standard}-{student.section}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xl font-extrabold text-indigo-500">{student.percentage}%</p>
+                      <div className="text-right flex flex-col items-end justify-center">
+                        <span className="text-[10px] font-bold text-gray-400 mb-0.5 tracking-wide">{student.totalMarks} / {student.maximumMarks}</span>
+                        <p className="text-xl font-extrabold text-indigo-500 leading-none">{student.percentage}%</p>
                       </div>
                     </div>
                   ))}
@@ -186,8 +188,9 @@ export function AdminDashboard() {
                           <p className="text-[10px] text-gray-500 font-medium mt-0.5">Class: {student.standard}-{student.section}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xl font-extrabold text-[#FA7848]">{student.percentage}%</p>
+                      <div className="text-right flex flex-col items-end justify-center">
+                        <span className="text-[10px] font-bold text-gray-400 mb-0.5 tracking-wide">{student.totalMarks} / {student.maximumMarks}</span>
+                        <p className="text-xl font-extrabold text-[#FA7848] leading-none">{student.percentage}%</p>
                       </div>
                     </div>
                   ))}
