@@ -22,7 +22,7 @@ export function Login() {
       setError('');
       setMessage('');
       setLoading(true);
-      await login(email, password);
+      await login(email.trim(), password);
       
       // Verify role against backend
       try {
@@ -94,8 +94,9 @@ export function Login() {
   };
 
   const handleResetPassword = async () => {
-    if (!email) {
-      setError('Please enter your email address first to reset your password.');
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      setError('Please type your email address into the box first to reset your password.');
       return;
     }
     
@@ -103,12 +104,14 @@ export function Login() {
       setError('');
       setMessage('');
       setResetting(true);
-      await resetPassword(email);
+      await resetPassword(trimmedEmail);
       setMessage('Password reset email sent! Check your inbox.');
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/user-not-found') {
         setError('No account found with this email.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('The email address is invalid or badly formatted.');
       } else {
         setError('Failed to send reset email. ' + err.message);
       }
