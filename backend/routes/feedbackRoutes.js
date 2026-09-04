@@ -3,9 +3,19 @@ const router = express.Router();
 const { verifyToken } = require('../middleware/auth');
 const StudentFeedback = require('../models/StudentFeedback');
 
+const checkAdmin = (req, res, next) => {
+  if (req.user?.studentId) {
+    return res.status(403).json({ success: false, message: 'Forbidden: Students cannot access admin feedback' });
+  }
+  if (req.dbUser && req.dbUser.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
+  }
+  next();
+};
+
 // GET /api/feedback
 // Get all active feedback (for admins)
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', verifyToken, checkAdmin, async (req, res) => {
   try {
     // We explicitly filter where expiresAt is strictly in the future,
     // providing a safety net if MongoDB TTL hasn't run yet.
@@ -24,7 +34,7 @@ router.get('/', verifyToken, async (req, res) => {
 
 // DELETE /api/feedback/:id
 // Delete a feedback record
-router.delete('/:id', verifyToken, async (req, res) => {
+router.delete('/:id', verifyToken, checkAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     

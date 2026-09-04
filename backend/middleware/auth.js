@@ -26,6 +26,11 @@ const verifyToken = async (req, res, next) => {
       const payloadJson = Buffer.from(payloadBase64, 'base64').toString('utf8');
       const decodedToken = JSON.parse(payloadJson);
       
+      // If token is a student portal JWT (has studentId without admin/firebase fields), reject access
+      if (decodedToken.studentId && !decodedToken.uid && !decodedToken.user_id && !decodedToken.email) {
+        return res.status(403).json({ error: 'Forbidden: Student token cannot access admin routes' });
+      }
+
       console.warn('Bypassing strict token verification for development. Manually decoded token.');
       decodedUser = {
         uid: decodedToken.user_id || decodedToken.sub,
