@@ -295,7 +295,13 @@ router.post('/feedback', verifyStudentToken, async (req, res) => {
     res.json({ success: true, message: type === 'voice' ? 'Voice feedback sent successfully.' : 'Feedback sent successfully.' });
   } catch (error) {
     console.error('Error saving student feedback:', error);
-    res.status(500).json({ success: false, message: 'Unable to send feedback. Please try again.' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Unable to send feedback. Please try again.',
+      debugError: error.message,
+      debugStack: error.stack,
+      debugName: error.name
+    });
   }
 });
 
