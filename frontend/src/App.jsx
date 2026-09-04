@@ -23,6 +23,7 @@ import { PendingApproval } from './pages/PendingApproval';
 import { AdminUsers } from './pages/AdminUsers';
 import { AdminClasses } from './pages/AdminClasses';
 import { AdminReports } from './pages/AdminReports';
+import StudentFeedback from './pages/StudentFeedback';
 
 import { DataSync } from './pages/DataSync';
 
@@ -124,6 +125,7 @@ function AppRoutes() {
         <Route path="data-sync" element={<DataSync />} />
         <Route path="ai" element={<AiDashboard />} />
         <Route path="attendance" element={<Attendance />} />
+        <Route path="feedback" element={<StudentFeedback />} />
       </Route>
     </Routes>
   );

@@ -14,7 +14,8 @@ import {
   Calendar,
   Download,
   CalendarCheck,
-  Link as LinkIcon
+  Link as LinkIcon,
+  MessageSquare
 } from 'lucide-react';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 
@@ -112,6 +113,7 @@ export default function StudentLayout() {
     { name: 'Materials', path: '/materials', icon: LinkIcon },
     { name: 'Marks', path: '/marks', icon: Award },
     { name: 'Profile', path: '/profile', icon: User },
+    { name: 'Feedback', path: '/feedback', icon: MessageSquare },
   ];
 
   if (loading) {

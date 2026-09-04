@@ -29,6 +29,7 @@ export function AdminLayout() {
     { name: 'Certificates', path: '/admin/certificates', exact: false, icon: FileText },
     { name: 'Attendance', path: '/admin/attendance', exact: false, icon: CalendarCheck },
     { name: 'Class Config', path: '/admin/classes', exact: false, icon: Settings },
+    { name: 'Student Feedback', path: '/admin/feedback', exact: false, icon: MessageSquare },
     { name: 'Data Sync', path: '/admin/data-sync', exact: false, icon: Database },
     { name: 'AI Analyst', path: '/admin/ai', exact: false, icon: Bot },
   ];

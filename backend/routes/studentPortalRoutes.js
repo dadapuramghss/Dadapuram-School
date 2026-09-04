@@ -248,5 +248,55 @@ router.get('/materials', verifyStudentToken, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+// POST /api/student-portal/feedback
+router.post('/feedback', verifyStudentToken, async (req, res) => {
+  try {
+    const student = req.student;
+    const { type, message, voiceData } = req.body;
+
+    if (!type || !['text', 'voice'].includes(type)) {
+      return res.status(400).json({ success: false, message: 'Invalid feedback type' });
+    }
+
+    const StudentFeedback = require('../models/StudentFeedback');
+
+    const feedbackData = {
+      studentId: student._id,
+      type,
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+    };
+
+    if (type === 'text') {
+      if (!message || message.trim().length === 0) {
+        return res.status(400).json({ success: false, message: 'Please enter your feedback.' });
+      }
+      if (message.length > 1000) {
+        return res.status(400).json({ success: false, message: 'Feedback is too long.' });
+      }
+      feedbackData.message = message.trim();
+    } else if (type === 'voice') {
+      if (!voiceData) {
+        return res.status(400).json({ success: false, message: 'Voice data is required.' });
+      }
+      // Check rough base64 size (5MB limit)
+      // Base64 size = (characters * 3) / 4 roughly
+      const sizeInBytes = (voiceData.length * 3) / 4;
+      const sizeInMB = sizeInBytes / (1024 * 1024);
+      if (sizeInMB > 5) {
+        return res.status(400).json({ success: false, message: 'Voice recording is too large.' });
+      }
+      feedbackData.voiceData = voiceData;
+    }
+
+    const feedback = new StudentFeedback(feedbackData);
+    await feedback.save();
+
+    res.json({ success: true, message: type === 'voice' ? 'Voice feedback sent successfully.' : 'Feedback sent successfully.' });
+  } catch (error) {
+    console.error('Error saving student feedback:', error);
+    res.status(500).json({ success: false, message: 'Unable to send feedback. Please try again.' });
+  }
+});
 
 module.exports = router;
