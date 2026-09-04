@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const Student = require('../models/Student');
 const { verifyStudentToken } = require('../middleware/studentAuth');
+const StudentFeedback = require('../models/StudentFeedback');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'edupulse_student_secret_key_2026';
 
@@ -251,56 +252,87 @@ router.get('/materials', verifyStudentToken, async (req, res) => {
 // POST /api/student-portal/feedback
 router.post('/feedback', verifyStudentToken, async (req, res) => {
   try {
-    const student = req.student;
+    const student = req.student || req.user;
+    const studentId = student?._id || student?.id || req.studentId;
+
+    if (!studentId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized: Student identity could not be verified'
+      });
+    }
+
     const { type, message, voiceData } = req.body;
 
     if (!type || !['text', 'voice'].includes(type)) {
-      return res.status(400).json({ success: false, message: 'Invalid feedback type' });
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid feedback type. Must be "text" or "voice".'
+      });
     }
 
-    const StudentFeedback = require('../models/StudentFeedback');
+    const createdAt = new Date();
+    const expiresAt = new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000); // 7-day TTL
 
     const feedbackData = {
-      studentId: student._id,
+      studentId,
       type,
-      createdAt: new Date(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+      createdAt,
+      expiresAt
     };
 
     if (type === 'text') {
-      if (!message || message.trim().length === 0) {
-        return res.status(400).json({ success: false, message: 'Please enter your feedback.' });
+      const trimmedMessage = String(message || '').trim();
+      if (!trimmedMessage || trimmedMessage.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please enter your feedback.'
+        });
       }
-      if (message.length > 1000) {
-        return res.status(400).json({ success: false, message: 'Feedback is too long.' });
+      if (trimmedMessage.length > 1000) {
+        return res.status(400).json({
+          success: false,
+          message: 'Feedback cannot exceed 1000 characters.'
+        });
       }
-      feedbackData.message = message.trim();
+      feedbackData.message = trimmedMessage;
+      feedbackData.voiceData = null;
     } else if (type === 'voice') {
-      if (!voiceData) {
-        return res.status(400).json({ success: false, message: 'Voice data is required.' });
+      if (!voiceData || typeof voiceData !== 'string' || voiceData.trim().length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Voice recording data is required.'
+        });
       }
-      // Check rough base64 size (5MB limit)
-      // Base64 size = (characters * 3) / 4 roughly
-      const sizeInBytes = (voiceData.length * 3) / 4;
-      const sizeInMB = sizeInBytes / (1024 * 1024);
-      if (sizeInMB > 5) {
-        return res.status(400).json({ success: false, message: 'Voice recording is too large.' });
+
+      // Check Base64 payload size (maximum 5 MB binary data)
+      const base64Data = voiceData.includes('base64,') ? voiceData.split('base64,')[1] : voiceData;
+      const sizeInBytes = (base64Data.length * 3) / 4;
+      const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
+
+      if (sizeInBytes > maxSizeBytes) {
+        return res.status(400).json({
+          success: false,
+          message: 'Voice recording is too large.'
+        });
       }
+
+      feedbackData.message = null;
       feedbackData.voiceData = voiceData;
     }
 
     const feedback = new StudentFeedback(feedbackData);
     await feedback.save();
 
-    res.json({ success: true, message: type === 'voice' ? 'Voice feedback sent successfully.' : 'Feedback sent successfully.' });
+    return res.status(201).json({
+      success: true,
+      message: type === 'voice' ? 'Voice feedback sent successfully.' : 'Feedback sent successfully.'
+    });
   } catch (error) {
-    console.error('Error saving student feedback:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Unable to send feedback. Please try again.',
-      debugError: error.message,
-      debugStack: error.stack,
-      debugName: error.name
+    console.error('Student feedback error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Unable to send feedback. Please try again.'
     });
   }
 });

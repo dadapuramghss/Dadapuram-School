@@ -28,19 +28,26 @@ const studentFeedbackSchema = new mongoose.Schema({
   expiresAt: {
     type: Date,
     required: true,
-    index: { expires: 0 } // MongoDB TTL index. Automatically deletes document at expiresAt.
+    index: true,
+    expires: 0 // MongoDB TTL index. Automatically deletes document at expiresAt.
   }
 });
 
 // Enforce that text feedback has message and voice feedback has voiceData
 studentFeedbackSchema.pre('save', function(next) {
   if (this.type === 'text' && (!this.message || this.message.trim().length === 0)) {
-    return next(new Error('Text feedback must contain a message.'));
+    const err = new Error('Text feedback must contain a message.');
+    if (typeof next === 'function') return next(err);
+    throw err;
   }
   if (this.type === 'voice' && !this.voiceData) {
-    return next(new Error('Voice feedback must contain audio data.'));
+    const err = new Error('Voice feedback must contain audio data.');
+    if (typeof next === 'function') return next(err);
+    throw err;
   }
-  next();
+  if (typeof next === 'function') {
+    next();
+  }
 });
 
-module.exports = mongoose.model('StudentFeedback', studentFeedbackSchema);
+module.exports = mongoose.models.StudentFeedback || mongoose.model('StudentFeedback', studentFeedbackSchema);

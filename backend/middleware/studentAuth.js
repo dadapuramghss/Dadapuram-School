@@ -20,6 +20,8 @@ const verifyStudentToken = async (req, res, next) => {
     }
     
     req.student = student;
+    req.user = student;
+    req.studentId = student._id;
     next();
   } catch (error) {
     console.error('Student token verification error:', error.message);
