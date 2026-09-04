@@ -9,6 +9,33 @@ export default function Homework() {
   const [loading, setLoading] = useState(true);
   const [expandedImage, setExpandedImage] = useState(null);
 
+  const handleViewDocument = (e, url) => {
+    e.preventDefault();
+    if (url.startsWith('data:')) {
+      try {
+        const arr = url.split(',');
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while(n--){
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        const blob = new Blob([u8arr], {type: mime});
+        const objectUrl = URL.createObjectURL(blob);
+        window.open(objectUrl, '_blank');
+        
+        // Clean up object URL after a delay (give browser time to open it)
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 10000);
+      } catch (err) {
+        console.error("Failed to parse base64 for viewing:", err);
+        window.open(url, '_blank');
+      }
+    } else {
+      window.open(url, '_blank');
+    }
+  };
+
   useEffect(() => {
     const fetchHomework = async () => {
       try {
@@ -159,9 +186,9 @@ export default function Homework() {
                                     <span className="text-[10px] text-gray-600 px-1 truncate w-full text-center">Document {index + 1}</span>
                                   </div>
                                   <div className="flex w-full items-center justify-center gap-1.5 mt-1 border-t border-gray-100 pt-2 shrink-0">
-                                    <a href={url} target="_blank" rel="noopener noreferrer" className="flex-1 text-[9px] font-medium text-blue-600 hover:text-blue-800 flex items-center justify-center bg-blue-50 hover:bg-blue-100 transition-colors px-1 py-1.5 rounded">
+                                    <button onClick={(e) => handleViewDocument(e, url)} className="flex-1 text-[9px] font-medium text-blue-600 hover:text-blue-800 flex items-center justify-center bg-blue-50 hover:bg-blue-100 transition-colors px-1 py-1.5 rounded">
                                       <Eye className="w-3 h-3 mr-1" /> View
-                                    </a>
+                                    </button>
                                     <a href={url} download={`Attachment-${index + 1}`} className="flex-1 text-[9px] font-medium text-indigo-600 hover:text-indigo-800 flex items-center justify-center bg-indigo-50 hover:bg-indigo-100 transition-colors px-1 py-1.5 rounded">
                                       <Download className="w-3 h-3 mr-1" /> Save
                                     </a>
