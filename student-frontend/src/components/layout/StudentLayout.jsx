@@ -15,7 +15,11 @@ import {
   Download,
   CalendarCheck,
   Link as LinkIcon,
-  MessageSquare
+  MessageSquare,
+  ChevronDown,
+  UserPlus,
+  Check,
+  RefreshCw
 } from 'lucide-react';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 
@@ -27,6 +31,17 @@ export default function StudentLayout() {
   const [circularIds, setCircularIds] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [isNotificationPanelOpen, setIsNotificationPanelOpen] = useState(false);
+  
+  // Multi-Account State
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isAddAccountModalOpen, setIsAddAccountModalOpen] = useState(false);
+  const [linkedAccounts, setLinkedAccounts] = useState([]);
+  const [addIdentifier, setAddIdentifier] = useState('');
+  const [addPassword, setAddPassword] = useState('');
+  const [addError, setAddError] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
+  
   const navigate = useNavigate();
   const { isInstallable, installApp } = usePWAInstall();
 
@@ -36,6 +51,15 @@ export default function StudentLayout() {
       if (!token) {
         navigate('/login');
         return;
+      }
+
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.linkedAccounts) {
+          setLinkedAccounts(payload.linkedAccounts);
+        }
+      } catch (e) {
+        console.error('Failed to parse token payload:', e);
       }
 
       try {
@@ -106,6 +130,85 @@ export default function StudentLayout() {
     navigate('/login');
   };
 
+  const switchAccount = async (targetStudentId) => {
+    if (targetStudentId === student._id) {
+      setIsProfileDropdownOpen(false);
+      return;
+    }
+    
+    setIsSwitching(true);
+    setIsProfileDropdownOpen(false);
+    try {
+      const token = localStorage.getItem('studentToken');
+      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await axios.post(`${baseURL}/student-portal/accounts/switch`, {
+        targetStudentId
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      
+      if (response.data.token) {
+        localStorage.setItem('studentToken', response.data.token);
+        window.location.reload(); // Reload context for new student
+      }
+    } catch (error) {
+      console.error('Error switching account:', error);
+      alert(error.response?.data?.message || 'Error switching account');
+      setIsSwitching(false);
+    }
+  };
+
+  const removeAccount = async (targetStudentId, e) => {
+    e.stopPropagation(); // prevent triggering switch
+    if (!window.confirm('Remove this linked account from your current session?')) return;
+    
+    setIsSwitching(true);
+    try {
+      const token = localStorage.getItem('studentToken');
+      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await axios.post(`${baseURL}/student-portal/accounts/remove`, {
+        targetStudentId
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      
+      if (response.data.requireLogout) {
+        handleLogout();
+      } else if (response.data.token) {
+        localStorage.setItem('studentToken', response.data.token);
+        window.location.reload(); 
+      }
+    } catch (error) {
+      console.error('Error removing account:', error);
+      alert(error.response?.data?.message || 'Error removing account');
+      setIsSwitching(false);
+    }
+  };
+
+  const handleAddAccount = async (e) => {
+    e.preventDefault();
+    setAddError('');
+    setIsAdding(true);
+
+    try {
+      const token = localStorage.getItem('studentToken');
+      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await axios.post(`${baseURL}/student-portal/accounts/add`, {
+        identifier: addIdentifier,
+        password: addPassword
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      
+      if (response.data.token) {
+        localStorage.setItem('studentToken', response.data.token);
+        setIsAddAccountModalOpen(false);
+        setAddIdentifier('');
+        setAddPassword('');
+        window.location.reload(); 
+      }
+    } catch (error) {
+      console.error('Error adding account:', error);
+      setAddError(error.response?.data?.message || 'Failed to add student account');
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Attendance', path: '/attendance', icon: CalendarCheck },
@@ -128,6 +231,14 @@ export default function StudentLayout() {
 
   return (
     <div className="min-h-[100dvh] h-[100dvh] bg-gray-50/50 flex font-sans overflow-hidden">
+      {/* Loading Overlay when switching */}
+      {isSwitching && (
+        <div className="fixed inset-0 z-[100] bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center">
+          <RefreshCw className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
+          <p className="text-lg font-bold text-gray-900">Switching Student Profile...</p>
+        </div>
+      )}
+
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
@@ -236,15 +347,98 @@ export default function StudentLayout() {
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
               )}
             </button>
-            <div className="hidden sm:flex flex-col items-end mr-2">
-              <span className="text-sm font-bold text-gray-900">{student.name}</span>
-              <span className="text-xs font-medium text-gray-500">Std {student.standard} - {student.section}</span>
-            </div>
-            <div className="w-10 h-10 rounded-full border-2 border-indigo-100 overflow-hidden bg-indigo-50 flex items-center justify-center flex-shrink-0">
-              {student.photoUrl ? (
-                <img src={student.photoUrl} alt={student.name} className="w-full h-full object-cover" />
-              ) : (
-                <User className="w-5 h-5 text-indigo-300" />
+            
+            {/* Multi-Account Profile Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                className="flex items-center gap-3 p-1 pr-2 rounded-full hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200"
+              >
+                <div className="hidden sm:flex flex-col items-end">
+                  <span className="text-sm font-bold text-gray-900">{student.name}</span>
+                  <span className="text-xs font-medium text-gray-500">Std {student.standard} - {student.section}</span>
+                </div>
+                <div className="w-10 h-10 rounded-full border-2 border-indigo-100 overflow-hidden bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                  {student.photoUrl ? (
+                    <img src={student.photoUrl} alt={student.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-5 h-5 text-indigo-300" />
+                  )}
+                </div>
+                <ChevronDown className="w-4 h-4 text-gray-400 hidden sm:block" />
+              </button>
+
+              {/* Dropdown Menu */}
+              {isProfileDropdownOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setIsProfileDropdownOpen(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Switch Student</p>
+                      
+                      <div className="space-y-1">
+                        {linkedAccounts.length > 0 ? (
+                          linkedAccounts.map(acc => (
+                            <button
+                              key={acc.studentId}
+                              onClick={() => switchAccount(acc.studentId)}
+                              className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors text-left ${
+                                acc.studentId === student._id 
+                                  ? 'bg-indigo-50 text-indigo-700' 
+                                  : 'hover:bg-gray-50 text-gray-700'
+                              }`}
+                            >
+                              <div className="flex-1 min-w-0 pr-2">
+                                <p className="font-bold text-sm truncate">{acc.name}</p>
+                                <p className="text-xs opacity-80 truncate">Std {acc.standard} - {acc.section} • {acc.emisNumber}</p>
+                              </div>
+                              {acc.studentId === student._id ? (
+                                <Check className="w-5 h-5 shrink-0 text-indigo-600" />
+                              ) : (
+                                <span 
+                                  onClick={(e) => removeAccount(acc.studentId, e)}
+                                  className="shrink-0 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                                  title="Remove account from session"
+                                >
+                                  <X className="w-4 h-4" />
+                                </span>
+                              )}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="p-2 bg-indigo-50 text-indigo-700 rounded-lg">
+                            <p className="font-bold text-sm truncate">{student.name}</p>
+                            <p className="text-xs opacity-80 truncate">Std {student.standard} - {student.section}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="p-2">
+                      <button 
+                        onClick={() => {
+                          setIsProfileDropdownOpen(false);
+                          setIsAddAccountModalOpen(true);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl transition-colors"
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        Add Student Account
+                      </button>
+                      
+                      <button 
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors mt-1"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -334,6 +528,77 @@ export default function StudentLayout() {
           )}
         </div>
       </div>
+
+      {/* Add Account Modal */}
+      {isAddAccountModalOpen && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center px-4">
+          <div 
+            className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" 
+            onClick={() => !isAdding && setIsAddAccountModalOpen(false)}
+          />
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 sm:p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Add Account</h2>
+              <p className="text-sm text-gray-500 mb-6">Link another student profile to your current session.</p>
+              
+              <form onSubmit={handleAddAccount} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Login ID</label>
+                  <input 
+                    type="text" 
+                    required
+                    disabled={isAdding}
+                    placeholder="EMIS / Mobile Number"
+                    value={addIdentifier}
+                    onChange={(e) => setAddIdentifier(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition-all disabled:opacity-50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                  <input 
+                    type="password" 
+                    required
+                    disabled={isAdding}
+                    placeholder="DDMMYYYY (DOB)"
+                    value={addPassword}
+                    onChange={(e) => setAddPassword(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition-all disabled:opacity-50"
+                  />
+                </div>
+                
+                {addError && (
+                  <div className="p-3 bg-red-50 text-red-700 text-sm font-medium rounded-xl border border-red-100">
+                    {addError}
+                  </div>
+                )}
+                
+                <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddAccountModalOpen(false)}
+                    disabled={isAdding}
+                    className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isAdding}
+                    className="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    {isAdding ? (
+                      <RefreshCw className="w-5 h-5 animate-spin" />
+                    ) : (
+                      'Add Account'
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

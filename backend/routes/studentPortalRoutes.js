@@ -105,9 +105,19 @@ router.post('/login-verify', async (req, res) => {
       return res.status(401).json({ message: 'Invalid password' });
     }
 
+    // Initial multi-account payload
+    const activeStudentId = student._id.toString();
+    const linkedAccounts = [{
+      studentId: activeStudentId,
+      name: student.name,
+      standard: student.standard,
+      section: student.section,
+      emisNumber: student.emisNumber
+    }];
+
     // Generate JWT
     const token = jwt.sign(
-      { studentId: student._id },
+      { activeStudentId, linkedAccounts },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -124,6 +134,169 @@ router.post('/login-verify', async (req, res) => {
   } catch (error) {
     console.error('Student login-verify error:', error);
     res.status(500).json({ message: 'Server error during login verification' });
+  }
+});
+
+// POST /api/student-portal/accounts/add
+router.post('/accounts/add', verifyStudentToken, async (req, res) => {
+  try {
+    const { identifier, mobileNumber, password } = req.body;
+    const loginId = identifier || mobileNumber;
+
+    if (!loginId || !password) {
+      return res.status(400).json({ message: 'Login ID and Password are required' });
+    }
+
+    const students = await Student.find({
+      $or: [
+        { mobileNumber: loginId },
+        { emisNumber: loginId }
+      ]
+    });
+
+    if (!students || students.length === 0) {
+      return res.status(404).json({ message: 'Student account not found' });
+    }
+
+    // For simplicity if multiple siblings share mobile, we check all of them against password
+    let matchedStudent = null;
+    for (const s of students) {
+      if (!s.dob) continue;
+      let dbDob = String(s.dob).trim();
+      if (dbDob.includes('T')) dbDob = dbDob.split('T')[0];
+      
+      const parts = dbDob.split(/[-/]/);
+      let year, month, day;
+      if (parts.length === 3) {
+        if (parts[0].length === 4) {
+          year = parts[0]; month = parts[1].padStart(2, '0'); day = parts[2].padStart(2, '0');
+        } else if (parts[2].length === 4) {
+          day = parts[0].padStart(2, '0'); month = parts[1].padStart(2, '0'); year = parts[2];
+        }
+      }
+      
+      const p1 = `${day}${month}${year}`;
+      const p2 = `${month}${day}${year}`;
+      
+      if (password === p1 || password === p2) {
+        matchedStudent = s;
+        break;
+      }
+    }
+
+    if (!matchedStudent) {
+      return res.status(401).json({ message: 'Unable to verify this student account. Invalid credentials.' });
+    }
+
+    // Check if already linked
+    const existingAccounts = req.decodedToken.linkedAccounts || [];
+    const newStudentIdStr = matchedStudent._id.toString();
+    
+    if (existingAccounts.some(acc => acc.studentId === newStudentIdStr)) {
+      return res.status(400).json({ message: 'This student account is already added.' });
+    }
+
+    // Add to linked accounts
+    const newLinkedAccounts = [...existingAccounts, {
+      studentId: newStudentIdStr,
+      name: matchedStudent.name,
+      standard: matchedStudent.standard,
+      section: matchedStudent.section,
+      emisNumber: matchedStudent.emisNumber
+    }];
+
+    // Generate new JWT
+    const token = jwt.sign(
+      { activeStudentId: newStudentIdStr, linkedAccounts: newLinkedAccounts },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    const studentData = matchedStudent.toObject();
+    delete studentData.dob;
+
+    res.json({
+      message: 'Account added successfully',
+      token,
+      student: studentData
+    });
+
+  } catch (error) {
+    console.error('Add account error:', error);
+    res.status(500).json({ message: 'Server error during account addition' });
+  }
+});
+
+// POST /api/student-portal/accounts/switch
+router.post('/accounts/switch', verifyStudentToken, async (req, res) => {
+  try {
+    const { targetStudentId } = req.body;
+    
+    if (!targetStudentId) {
+      return res.status(400).json({ message: 'Target student ID is required' });
+    }
+
+    const existingAccounts = req.decodedToken.linkedAccounts || [];
+    
+    // Verify target exists in session
+    const targetAccount = existingAccounts.find(acc => acc.studentId === targetStudentId);
+    if (!targetAccount) {
+      return res.status(403).json({ message: 'You are not authorized to switch to this account.' });
+    }
+
+    // Generate new JWT with swapped active ID
+    const token = jwt.sign(
+      { activeStudentId: targetStudentId, linkedAccounts: existingAccounts },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      message: 'Switched account successfully',
+      token
+    });
+  } catch (error) {
+    console.error('Switch account error:', error);
+    res.status(500).json({ message: 'Server error during account switch' });
+  }
+});
+
+// POST /api/student-portal/accounts/remove
+router.post('/accounts/remove', verifyStudentToken, async (req, res) => {
+  try {
+    const { targetStudentId } = req.body;
+    
+    if (!targetStudentId) {
+      return res.status(400).json({ message: 'Target student ID is required' });
+    }
+
+    const existingAccounts = req.decodedToken.linkedAccounts || [];
+    const newLinkedAccounts = existingAccounts.filter(acc => acc.studentId !== targetStudentId);
+
+    if (newLinkedAccounts.length === 0) {
+      // Last account removed, signal client to logout
+      return res.json({ requireLogout: true });
+    }
+
+    let newActiveId = req.decodedToken.activeStudentId;
+    // If we removed the currently active account, fallback to the first available
+    if (newActiveId === targetStudentId) {
+      newActiveId = newLinkedAccounts[0].studentId;
+    }
+
+    const token = jwt.sign(
+      { activeStudentId: newActiveId, linkedAccounts: newLinkedAccounts },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      message: 'Account removed successfully',
+      token
+    });
+  } catch (error) {
+    console.error('Remove account error:', error);
+    res.status(500).json({ message: 'Server error during account removal' });
   }
 });
 

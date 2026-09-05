@@ -1,5 +1,9 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
+const dns = require('dns');
+
+// Override DNS to use Google's DNS to bypass local SRV block on Windows
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 // Helper to wait
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -67,24 +71,42 @@ async function runMigration() {
     
     if (sourceCount === 0) {
       console.log(`- Skipping ${collectionName} (Empty)`);
-      migrationStats[collectionName] = { source: 0, migrated: 0, targetBefore: targetCountBefore, targetAfter: targetCountBefore };
+      migrationStats[collectionName] = { 
+        source: 0, 
+        targetBefore: targetCountBefore,
+        inserted: 0,
+        skipped: 0,
+        conflicts: 0,
+        targetAfter: targetCountBefore 
+      };
       continue;
     }
 
     // Fetch all documents from the source
     const documents = await sourceCollection.find({}).toArray();
     
+    // Drop deprecated indexes on students collection if they exist to prevent E11000 null duplicates
+    if (collectionName === 'students') {
+      try {
+        await targetCollection.dropIndex('standard_1_section_1_rollNumber_1');
+        console.log('- Dropped deprecated index: standard_1_section_1_rollNumber_1');
+      } catch (e) { console.log('Index standard_1_section_1_rollNumber_1 not found or error:', e.message); }
+      try {
+        await targetCollection.dropIndex('rollNumber_1');
+        console.log('- Dropped deprecated index: rollNumber_1');
+      } catch (e) { console.log('Index rollNumber_1 not found or error:', e.message); }
+    }
+
     let inserted = 0;
     let skipped = 0;
     let conflicts = 0;
     
     // Safely upsert each document to preserve _id and avoid duplicates
-    // Using individual operations instead of bulkWrite to accurately catch conflicts if any unexpected issue happens
     for (const doc of documents) {
       try {
         const existing = await targetCollection.findOne({ _id: doc._id });
         if (existing) {
-          // Document exists, skipping to avoid destroying existing edupulse data
+          // Document exists, skipping
           skipped++;
         } else {
           // Document missing, inserting safely
