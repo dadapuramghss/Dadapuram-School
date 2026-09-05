@@ -19,7 +19,9 @@ import {
   ChevronDown,
   UserPlus,
   Check,
-  RefreshCw
+  RefreshCw,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 
@@ -38,6 +40,7 @@ export default function StudentLayout() {
   const [linkedAccounts, setLinkedAccounts] = useState([]);
   const [addIdentifier, setAddIdentifier] = useState('');
   const [addPassword, setAddPassword] = useState('');
+  const [showAddPassword, setShowAddPassword] = useState(false);
   const [addError, setAddError] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
@@ -474,7 +477,7 @@ export default function StudentLayout() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar relative z-0">
           <Outlet context={{ student }} />
         </main>
       </div>
@@ -585,15 +588,24 @@ export default function StudentLayout() {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
-                  <input 
-                    type="password" 
-                    required
-                    disabled={isAdding}
-                    placeholder="DDMMYYYY (DOB)"
-                    value={addPassword}
-                    onChange={(e) => setAddPassword(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition-all disabled:opacity-50"
-                  />
+                  <div className="relative">
+                    <input 
+                      type={showAddPassword ? "text" : "password"}
+                      required
+                      disabled={isAdding}
+                      placeholder="DDMMYYYY (DOB)"
+                      value={addPassword}
+                      onChange={(e) => setAddPassword(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 text-gray-900 px-4 py-3 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition-all disabled:opacity-50 pr-12"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAddPassword(!showAddPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      {showAddPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
                 </div>
                 
                 {addError && (
