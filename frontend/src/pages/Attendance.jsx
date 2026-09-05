@@ -18,6 +18,7 @@ export function Attendance() {
   const [standard, setStandard] = useState('');
   const [section, setSection] = useState('');
   const [period, setPeriod] = useState('1');
+  const [attendanceType, setAttendanceType] = useState('period'); // 'daily' or 'period'
   
   const [students, setStudents] = useState([]);
   const [records, setRecords] = useState({});
@@ -43,9 +44,11 @@ export function Attendance() {
         if (activeTab === 'summary' && date === data.date) {
           fetchSummaryData();
         }
-        // Also refresh 'take' view if looking at same date and period
-        if (activeTab === 'take' && date === data.date && period === data.period.toString()) {
-          fetchAttendanceData();
+        // Also refresh 'take' view if looking at same date and period/type
+        if (activeTab === 'take' && date === data.date && attendanceType === data.attendanceType) {
+          if (attendanceType === 'daily' || period === data.period?.toString()) {
+            fetchAttendanceData();
+          }
         }
       }
     });
@@ -73,7 +76,8 @@ export function Attendance() {
   }, [dbUser, isAdmin, standard]);
 
   const fetchAttendanceData = async () => {
-    if (!standard || !section || !date || !period) return;
+    if (!standard || !section || !date) return;
+    if (attendanceType === 'period' && !period) return;
     
     setIsLoading(true);
     setError(null);
@@ -86,7 +90,7 @@ export function Attendance() {
       setStudents(studentList);
       
       // 2. Fetch Attendance Record
-      const attRes = await api.getAttendance(standard, section, date, period);
+      const attRes = await api.getAttendance(standard, section, date, attendanceType === 'period' ? period : null, attendanceType);
       
       const newRecords = {};
       if (attRes.records && attRes.records.length > 0) {
@@ -147,7 +151,8 @@ export function Attendance() {
         date,
         standard,
         section,
-        period: Number(period),
+        period: attendanceType === 'period' ? Number(period) : null,
+        attendanceType,
         records: recordsArray,
         isSubmitted: submit
       });
@@ -160,6 +165,23 @@ export function Attendance() {
     } catch (err) {
       console.error(err);
       setError(err.message || 'Failed to save attendance.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete attendance for this class and date?')) return;
+    setIsSaving(true);
+    setError(null);
+    try {
+      await api.deleteAttendance(standard, section, date, attendanceType === 'period' ? period : null, attendanceType);
+      setSuccessMsg('Attendance deleted successfully!');
+      setRecords({});
+      setIsSubmitted(false);
+      fetchAttendanceData();
+    } catch(err) {
+      setError(err.message || 'Failed to delete attendance.');
     } finally {
       setIsSaving(false);
     }
@@ -204,6 +226,24 @@ export function Attendance() {
         </div>
       )}
 
+      {/* Attendance Mode Toggle */}
+      {activeTab === 'take' && (
+        <div className="flex bg-white rounded-xl p-1 shadow-sm border border-gray-100 w-fit">
+          <button
+            onClick={() => { setAttendanceType('daily'); setStudents([]); setIsSubmitted(false); }}
+            className={cn("px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors", attendanceType === 'daily' ? "bg-adminSidebar text-white" : "text-gray-500 hover:bg-gray-50")}
+          >
+            Daily Attendance
+          </button>
+          <button
+            onClick={() => { setAttendanceType('period'); setStudents([]); setIsSubmitted(false); }}
+            className={cn("px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors", attendanceType === 'period' ? "bg-adminSidebar text-white" : "text-gray-500 hover:bg-gray-50")}
+          >
+            Period Attendance
+          </button>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
         <div>
@@ -245,7 +285,7 @@ export function Attendance() {
           </select>
         </div>
         
-        {activeTab === 'take' && (
+        {activeTab === 'take' && attendanceType === 'period' && (
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Period</label>
             <div className="relative">
@@ -265,7 +305,7 @@ export function Attendance() {
           {activeTab === 'take' ? (
             <button 
               onClick={fetchAttendanceData}
-              disabled={!standard || !section || isLoading}
+              disabled={!standard || !section || (attendanceType === 'period' && !period) || isLoading}
               className="w-full bg-[#2E1C40] text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#4C677C] transition-colors disabled:opacity-50"
             >
               {isLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Search className="w-4 h-4" />}
@@ -343,21 +383,34 @@ export function Attendance() {
           </div>
           
           {(!isLocked) && (
-            <div className="p-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end gap-3">
-              <button 
-                onClick={() => handleSave(false)}
-                disabled={isSaving}
-                className="px-4 py-2 border border-[#4C677C] text-[#2E1C40] rounded-xl text-sm font-bold hover:bg-gray-100 transition-colors disabled:opacity-50 flex items-center gap-2"
-              >
-                <Save className="w-4 h-4" /> Save Draft
-              </button>
-              <button 
-                onClick={() => handleSave(true)}
-                disabled={isSaving}
-                className="px-4 py-2 bg-[#2E1C40] text-white rounded-xl text-sm font-bold hover:bg-[#4C677C] transition-colors disabled:opacity-50 flex items-center gap-2 shadow-sm"
-              >
-                <CheckCircle className="w-4 h-4" /> Submit Attendance
-              </button>
+            <div className="p-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between gap-3">
+              <div>
+                {isSubmitted && isAdmin && (
+                  <button 
+                    onClick={handleDelete}
+                    disabled={isSaving}
+                    className="px-4 py-2 border border-red-200 text-red-600 rounded-xl text-sm font-bold hover:bg-red-50 transition-colors disabled:opacity-50 flex items-center gap-2"
+                  >
+                    Delete {attendanceType === 'daily' ? 'Daily' : 'Period'} Attendance
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => handleSave(false)}
+                  disabled={isSaving}
+                  className="px-4 py-2 border border-[#4C677C] text-[#2E1C40] rounded-xl text-sm font-bold hover:bg-gray-100 transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4" /> Save Draft
+                </button>
+                <button 
+                  onClick={() => handleSave(true)}
+                  disabled={isSaving}
+                  className="px-4 py-2 bg-[#2E1C40] text-white rounded-xl text-sm font-bold hover:bg-[#4C677C] transition-colors disabled:opacity-50 flex items-center gap-2 shadow-sm"
+                >
+                  <CheckCircle className="w-4 h-4" /> {isSubmitted ? 'Update Attendance' : 'Submit Attendance'}
+                </button>
+              </div>
             </div>
           )}
         </div>

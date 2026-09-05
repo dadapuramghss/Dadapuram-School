@@ -123,6 +123,17 @@ export function Students() {
     setIsFormOpen(true);
   };
 
+  const formatDobForInput = (dobStr) => {
+    if (!dobStr) return '';
+    try {
+      const d = new Date(dobStr);
+      if (isNaN(d.getTime())) return dobStr;
+      return d.toISOString().split('T')[0];
+    } catch(e) {
+      return dobStr;
+    }
+  };
+
   const handleEdit = (student) => {
     setEditingId(student._id);
     setFormData({
@@ -134,7 +145,7 @@ export function Students() {
       medium: student.medium || 'TAMIL',
       tamilName: student.tamilName || '',
       fatherName: student.fatherName || '',
-      dob: student.dob || '',
+      dob: formatDobForInput(student.dob),
       admissionNumber: student.admissionNumber || '',
       religion: student.religion || '',
       community: student.community || '',

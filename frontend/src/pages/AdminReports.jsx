@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { FileText, Download, X, Eye, Grid, BookOpen, CheckCircle, XCircle, GraduationCap, Printer } from 'lucide-react';
+import { FileText, Download, X, Eye, Grid, BookOpen, CheckCircle, XCircle, GraduationCap, Printer, ClipboardCheck, Search } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export function AdminReports() {
@@ -10,6 +10,17 @@ export function AdminReports() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('student');
   const [selectedStudentDetails, setSelectedStudentDetails] = useState(null);
+
+  // Attendance Report State
+  const [attReportData, setAttReportData] = useState([]);
+  const [attReportLoading, setAttReportLoading] = useState(false);
+  const [attFilters, setAttFilters] = useState({
+    fromDate: '',
+    toDate: '',
+    standard: 'All',
+    section: 'All',
+    percentage: 'All'
+  });
 
   // Matrix specific state
   const [selectedMatrixGroup, setSelectedMatrixGroup] = useState(null);
@@ -802,6 +813,148 @@ export function AdminReports() {
     );
   };
 
+  const fetchAttendanceReport = async () => {
+    setAttReportLoading(true);
+    try {
+      const res = await api.getAttendanceReport(
+        attFilters.fromDate, 
+        attFilters.toDate, 
+        attFilters.standard, 
+        attFilters.section, 
+        attFilters.percentage
+      );
+      if (res.success) {
+        setAttReportData(res.data);
+      }
+    } catch(err) {
+      console.error(err);
+    } finally {
+      setAttReportLoading(false);
+    }
+  };
+
+  const handleExportAttendanceReport = () => {
+    if (!attReportData.length) return;
+    const excelData = attReportData.map(r => ({
+      'EMIS Number': r.emisNumber,
+      'Student Name': r.name,
+      'Standard': r.standard,
+      'Section': r.section,
+      'Total Days': r.totalDays,
+      'Present Days': r.presentDays,
+      'Absent Days': r.absentDays,
+      'Attendance Percentage': `${r.percentage}%`
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance Report");
+    XLSX.writeFile(workbook, `Attendance_Report.xlsx`);
+  };
+
+  const renderAttendanceReport = () => {
+    const standards = ['All', ...Array.from(new Set(classConfigsData.map(c => c.standard))).sort((a,b) => {
+       const order = ['LKG', 'UKG', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', '11', '12'];
+       let iA = order.indexOf(a); let iB = order.indexOf(b);
+       if (iA === -1) iA = parseInt(a) || 999;
+       if (iB === -1) iB = parseInt(b) || 999;
+       return iA - iB;
+    })];
+    
+    const sections = ['All', ...Array.from(new Set(classConfigsData
+       .filter(c => attFilters.standard === 'All' || c.standard === attFilters.standard)
+       .map(c => c.section))).sort()];
+       
+    return (
+      <div className="mt-6 animate-in slide-in-from-top-4 duration-300 space-y-6">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#FCA311]"></span>
+            Attendance Report Filters
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">From Date</label>
+              <input type="date" value={attFilters.fromDate} onChange={e => setAttFilters({...attFilters, fromDate: e.target.value})} className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">To Date</label>
+              <input type="date" value={attFilters.toDate} onChange={e => setAttFilters({...attFilters, toDate: e.target.value})} className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Standard</label>
+              <select value={attFilters.standard} onChange={e => setAttFilters({...attFilters, standard: e.target.value, section: 'All'})} className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none">
+                {standards.map(std => <option key={std} value={std}>{std}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Section</label>
+              <select value={attFilters.section} onChange={e => setAttFilters({...attFilters, section: e.target.value})} className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none">
+                {sections.map(sec => <option key={sec} value={sec}>{sec}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Percentage</label>
+              <select value={attFilters.percentage} onChange={e => setAttFilters({...attFilters, percentage: e.target.value})} className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none">
+                <option value="All">All</option>
+                <option value="90% and Above">90% and Above</option>
+                <option value="80%–89%">80%–89%</option>
+                <option value="75%–79%">75%–79%</option>
+                <option value="Below 75%">Below 75%</option>
+              </select>
+            </div>
+          </div>
+          <div className="mt-6 flex justify-end gap-3">
+             <button onClick={fetchAttendanceReport} disabled={attReportLoading} className="flex items-center gap-2 bg-[#2E1C40] hover:bg-[#4C677C] text-white px-6 py-2.5 rounded-xl font-bold transition-colors disabled:opacity-50">
+               {attReportLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/> : <Search className="w-4 h-4" />}
+               Generate Report
+             </button>
+          </div>
+        </div>
+        
+        {attReportData.length > 0 && (
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-xl">
+             <div className="p-4 md:p-5 border-b border-gray-200 flex justify-between items-center bg-white shadow-sm">
+                <h3 className="text-lg font-bold text-gray-900">Report Results ({attReportData.length} students)</h3>
+                <button onClick={handleExportAttendanceReport} className="flex items-center gap-2 bg-[#FCA311] hover:bg-[#E07D08] text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors">
+                  <Download className="w-4 h-4" /> Export Report
+                </button>
+             </div>
+             <div className="overflow-x-auto max-h-[600px] custom-scrollbar">
+                <table className="w-full text-left border-collapse relative">
+                   <thead className="sticky top-0 bg-gray-50 z-10 shadow-sm">
+                      <tr className="text-[11px] uppercase tracking-wider text-gray-500 font-bold">
+                         <th className="p-4 border-b border-gray-200">EMIS Number</th>
+                         <th className="p-4 border-b border-gray-200">Student Name</th>
+                         <th className="p-4 border-b border-gray-200 text-center">Standard</th>
+                         <th className="p-4 border-b border-gray-200 text-center">Section</th>
+                         <th className="p-4 border-b border-gray-200 text-center">Total Days</th>
+                         <th className="p-4 border-b border-gray-200 text-center text-green-600">Present</th>
+                         <th className="p-4 border-b border-gray-200 text-center text-red-600">Absent</th>
+                         <th className="p-4 border-b border-gray-200 text-center">Attendance %</th>
+                      </tr>
+                   </thead>
+                   <tbody className="divide-y divide-gray-100">
+                      {attReportData.map(r => (
+                         <tr key={r.studentId} className="hover:bg-gray-50 transition-colors text-sm">
+                            <td className="p-4 text-gray-600 font-medium">{r.emisNumber}</td>
+                            <td className="p-4 font-bold text-gray-800">{r.name}</td>
+                            <td className="p-4 text-center">{r.standard}</td>
+                            <td className="p-4 text-center">{r.section}</td>
+                            <td className="p-4 text-center font-semibold text-gray-600">{r.totalDays}</td>
+                            <td className="p-4 text-center font-bold text-green-500">{r.presentDays}</td>
+                            <td className="p-4 text-center font-bold text-red-500">{r.absentDays}</td>
+                            <td className="p-4 text-center font-bold text-[#FCA311]">{r.percentage}%</td>
+                         </tr>
+                      ))}
+                   </tbody>
+                </table>
+             </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderSelectedGroupPreview = () => {
     return (
       <>
@@ -1042,6 +1195,17 @@ export function AdminReports() {
           <GraduationCap className="w-5 h-5" />
           Student Grade Book Report
         </button>
+        <button
+          onClick={() => setActiveTab('attendance')}
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all whitespace-nowrap ${
+            activeTab === 'attendance' 
+              ? 'bg-[#FCA311] text-gray-900 shadow-md' 
+              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+          }`}
+        >
+          <ClipboardCheck className="w-5 h-5" />
+          Attendance Report
+        </button>
       </div>
 
       {activeTab === 'student' && (
@@ -1231,6 +1395,7 @@ export function AdminReports() {
 
       {activeTab === 'homework' && renderHomeworkReport()}
       {activeTab === 'gradebook' && renderGradeBookReport()}
+      {activeTab === 'attendance' && renderAttendanceReport()}
 
       {renderSelectedGroupPreview()}
     </div>

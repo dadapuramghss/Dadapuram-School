@@ -29,9 +29,13 @@ const attendanceSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  attendanceType: {
+    type: String,
+    enum: ['daily', 'period'],
+    default: 'period'
+  },
   period: {
     type: Number,
-    required: true,
     min: 1,
     max: 8
   },
@@ -48,7 +52,7 @@ const attendanceSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Ensure unique record per class per period per day
-attendanceSchema.index({ date: 1, standard: 1, section: 1, period: 1 }, { unique: true });
+// Ensure unique record per class per type per day (and period if applicable)
+attendanceSchema.index({ date: 1, standard: 1, section: 1, attendanceType: 1, period: 1 }, { unique: true });
 
 module.exports = mongoose.model('Attendance', attendanceSchema);

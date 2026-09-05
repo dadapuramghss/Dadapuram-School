@@ -128,12 +128,38 @@ export const api = {
   getAllUsers: () => fetchWithAuth('/auth/users'),
 
   // Attendance
-  getAttendance: (standard, section, date, period) => fetchWithAuth(`/attendance?standard=${standard}&section=${section}&date=${date}&period=${period}`),
+  getAttendance: (standard, section, date, period, attendanceType = 'period') => {
+    let url = `/attendance?standard=${standard}&section=${section}&date=${date}&attendanceType=${attendanceType}`;
+    if (period) url += `&period=${period}`;
+    return fetchWithAuth(url);
+  },
   getAttendanceSummary: (standard, section, date) => fetchWithAuth(`/attendance/summary?standard=${standard}&section=${section}&date=${date}`),
   saveAttendance: (data) => fetchWithAuth('/attendance', {
     method: 'POST',
     body: JSON.stringify(data)
   }),
+  deleteAttendance: (standard, section, date, period, attendanceType = 'period') => {
+    let url = `/attendance?standard=${standard}&section=${section}&date=${date}&attendanceType=${attendanceType}`;
+    if (period) url += `&period=${period}`;
+    return fetchWithAuth(url, { method: 'DELETE' });
+  },
+  bulkImportDailyAttendance: (records) => fetchWithAuth('/attendance/bulk', {
+    method: 'POST',
+    body: JSON.stringify(records)
+  }),
+  getAttendanceReport: (fromDate, toDate, standard, section, percentage) => {
+    let url = `/attendance/report?standard=${standard}&section=${section}`;
+    if (fromDate) url += `&fromDate=${fromDate}`;
+    if (toDate) url += `&toDate=${toDate}`;
+    if (percentage) url += `&percentage=${encodeURIComponent(percentage)}`;
+    return fetchWithAuth(url);
+  },
+  exportDailyAttendance: (fromDate, toDate, standard, section) => {
+    let url = `/attendance/export?standard=${standard}&section=${section}`;
+    if (fromDate) url += `&fromDate=${fromDate}`;
+    if (toDate) url += `&toDate=${toDate}`;
+    return fetchWithAuth(url);
+  },
 
   // Materials
   addMaterial: (data) => fetchWithAuth('/materials', {

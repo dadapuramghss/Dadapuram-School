@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Papa from 'papaparse';
-import { Database, Upload, Download, FileSpreadsheet, AlertCircle, CheckCircle2, UserSquare2, GraduationCap } from 'lucide-react';
+import { Database, Upload, Download, FileSpreadsheet, AlertCircle, CheckCircle2, UserSquare2, GraduationCap, ClipboardCheck } from 'lucide-react';
 import { api } from '../lib/api';
 import * as XLSX from 'xlsx';
 
 export function DataSync() {
-  const [syncType, setSyncType] = useState('profiles'); // 'profiles' or 'marks'
+  const [syncType, setSyncType] = useState('profiles'); // 'profiles', 'marks', 'attendance'
   const [importing, setImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [importResults, setImportResults] = useState(null);
@@ -16,13 +16,19 @@ export function DataSync() {
   const [selectedStandard, setSelectedStandard] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedTerm, setSelectedTerm] = useState('');
+  
+  // Attendance specific state
+  const [attFromDate, setAttFromDate] = useState('');
+  const [attToDate, setAttToDate] = useState('');
+  const [attStandard, setAttStandard] = useState('All');
+  const [attSection, setAttSection] = useState('All');
+
   const [classConfigs, setClassConfigs] = useState([]);
 
   useEffect(() => {
     const fetchConfigs = async () => {
       try {
         const response = await api.getClassConfigs();
-        // The API returns the array directly, not { success: true, data: [...] }
         if (Array.isArray(response)) {
           setClassConfigs(response);
         } else if (response.success) {
@@ -36,15 +42,18 @@ export function DataSync() {
   }, []);
 
   const standards = [...new Set(classConfigs.map(c => c.standard))].sort((a, b) => {
-    // Custom sort for standards (e.g., LKG, UKG, I, II, ..., XII)
     const order = ['LKG', 'UKG', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
     return order.indexOf(a) - order.indexOf(b);
   });
   
-  const sections = selectedStandard 
+  const sections = selectedStandard && selectedStandard !== 'All'
     ? [...new Set(classConfigs.filter(c => c.standard === selectedStandard).map(c => c.section))].sort()
-    : [];
+    : [...new Set(classConfigs.map(c => c.section))].sort();
     
+  const attSections = attStandard && attStandard !== 'All'
+    ? [...new Set(classConfigs.filter(c => c.standard === attStandard).map(c => c.section))].sort()
+    : [...new Set(classConfigs.map(c => c.section))].sort();
+
   const terms = ['First Midterm', 'Quarterly', 'Second Midterm', 'Half-Yearly', 'Third Midterm', 'Annual'];
 
   // --- PROFILES LOGIC ---
@@ -281,7 +290,6 @@ export function DataSync() {
           const recordsToImport = rows.map(row => {
             const marks = [];
             config.subjects.forEach(subj => {
-              // try to find exactly matching header or case insensitive
               const headerKey = Object.keys(row).find(k => k.toLowerCase() === subj.toLowerCase());
               if (headerKey && row[headerKey] !== '' && !isNaN(row[headerKey])) {
                 marks.push({
@@ -291,7 +299,6 @@ export function DataSync() {
               }
             });
 
-            // Map headers
             const emisNumber = row['EMIS Number'] || row['emisnumber'] || row['emisno'] || row['EMIS'] || '';
             const standard = row['Standard'] || row['standard'] || row['class'] || selectedStandard;
             const section = row['Section'] || row['section'] || selectedSection;
@@ -438,8 +445,6 @@ export function DataSync() {
             const section = String(row['Section'] || row['section'] || '').trim().toUpperCase();
             
             const marks = [];
-            
-            // Standard Class 6-10 subjects
             const validSubjects = ['Tamil', 'English', 'Mathematics', 'Science', 'Social Science'];
             
             validSubjects.forEach(subj => {
@@ -474,12 +479,141 @@ export function DataSync() {
           }
         } catch (err) {
           console.error('Import parse error:', err);
-          
-          if (err.message && err.message.includes('HTTP error') && err.validationErrors) {
-             // In case the API utility throws HTTP errors natively, we must catch its body
-          }
-          
           setError(err.message || 'Failed to process Excel file.');
+        } finally {
+          setImporting(false);
+          event.target.value = '';
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } catch (err) {
+      setImporting(false);
+      setError(`Failed to read file: ${err.message}`);
+      event.target.value = '';
+    }
+  };
+
+  // --- ATTENDANCE LOGIC ---
+  const handleExportAttendance = async () => {
+    try {
+      setExporting(true);
+      setError(null);
+      
+      const response = await api.exportDailyAttendance(
+        attFromDate, 
+        attToDate, 
+        attStandard, 
+        attSection
+      );
+      
+      if (!response.data || response.data.length === 0) {
+        setError('No daily attendance records found for the selected criteria.');
+        return;
+      }
+      
+      const worksheet = XLSX.utils.json_to_sheet(response.data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Daily Attendance");
+      XLSX.writeFile(workbook, `Daily_Attendance_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } catch (err) {
+      console.error('Export error:', err);
+      setError('Failed to export daily attendance.');
+    } finally {
+      setExporting(false);
+    }
+  };
+  
+  const downloadAttendanceTemplate = () => {
+    const templateData = [{
+      'Date': new Date().toISOString().split('T')[0],
+      'EMIS Number': '1012345678',
+      'Student Name': 'Arun K',
+      'Standard': '10',
+      'Section': 'A',
+      'Status': 'Present'
+    }, {
+      'Date': new Date().toISOString().split('T')[0],
+      'EMIS Number': '1012345679',
+      'Student Name': 'Priya S',
+      'Standard': '10',
+      'Section': 'A',
+      'Status': 'Absent'
+    }];
+    
+    const instructionsData = [
+      { 'Instruction': '1. Date must be in YYYY-MM-DD format.' },
+      { 'Instruction': '2. Enter the correct 10-15 digit EMIS Number. Name is for reference only.' },
+      { 'Instruction': '3. Standard and Section must match the database exactly.' },
+      { 'Instruction': '4. Status MUST be exactly "Present" or "Absent".' },
+      { 'Instruction': '5. Do not include duplicate EMIS Numbers on the same Date.' }
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    const dataSheet = XLSX.utils.json_to_sheet(templateData);
+    const instructionsSheet = XLSX.utils.json_to_sheet(instructionsData);
+
+    XLSX.utils.book_append_sheet(workbook, dataSheet, "Attendance Data");
+    XLSX.utils.book_append_sheet(workbook, instructionsSheet, "Instructions");
+    XLSX.writeFile(workbook, `Daily_Attendance_Template.xlsx`);
+  };
+
+  const handleAttendanceUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setImporting(true);
+    setError(null);
+    setImportResults(null);
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          
+          const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false, dateNF: 'yyyy-mm-dd' });
+
+          const recordsToImport = rawData.map(row => {
+            return {
+              date: String(row['Date'] || '').trim(),
+              emisNumber: String(row['EMIS Number'] || row['emisnumber'] || row['emisno'] || row['EMIS'] || '').trim(),
+              standard: String(row['Standard'] || row['standard'] || row['class'] || '').trim(),
+              section: String(row['Section'] || row['section'] || '').trim().toUpperCase(),
+              status: String(row['Status'] || row['status'] || '').trim()
+            };
+          }).filter(record => record.emisNumber);
+
+          if (recordsToImport.length === 0) {
+            setError('No valid records found in the Excel file.');
+            setImporting(false);
+            return;
+          }
+
+          const response = await api.bulkImportDailyAttendance(recordsToImport);
+          if (response.success) {
+            setImportResults({
+              added: response.data.created,
+              updated: response.data.updated,
+              errors: []
+            });
+          } else {
+            setError('Import failed on the server.');
+          }
+        } catch (err) {
+          console.error('Import parse error:', err);
+          if (err.validationErrors) {
+            setImportResults({
+               added: 0,
+               updated: 0,
+               errors: err.validationErrors
+            });
+            setError('Validation failed. Please check the error log below.');
+          } else {
+            setError(err.message || 'Failed to process Excel file.');
+          }
         } finally {
           setImporting(false);
           event.target.value = '';
@@ -502,13 +636,13 @@ export function DataSync() {
             Data Synchronization
           </h1>
           <p className="text-[#4C677C] dark:text-gray-500 text-lg">
-            Bulk import and export student profiles and gradebook marks.
+            Bulk import and export student profiles, marks, and daily attendance.
           </p>
         </div>
       </div>
 
       {/* TABS */}
-      <div className="flex bg-white/50 dark:bg-gray-900/50 p-1 rounded-xl w-full max-w-md mb-8 border border-gray-200 shadow-sm backdrop-blur-xl">
+      <div className="flex bg-white/50 dark:bg-gray-900/50 p-1 rounded-xl w-full max-w-3xl mb-8 border border-gray-200 shadow-sm backdrop-blur-xl">
         <button
           onClick={() => { setSyncType('profiles'); setError(null); setImportResults(null); }}
           className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all ${
@@ -526,6 +660,15 @@ export function DataSync() {
         >
           <GraduationCap className="w-5 h-5" />
           Marks / Grades
+        </button>
+        <button
+          onClick={() => { setSyncType('attendance'); setError(null); setImportResults(null); }}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all ${
+            syncType === 'attendance' ? 'bg-[#FCA311] text-gray-900 shadow-md' : 'text-gray-500 hover:text-gray-900'
+          }`}
+        >
+          <ClipboardCheck className="w-5 h-5" />
+          Daily Attendance
         </button>
       </div>
 
@@ -599,6 +742,57 @@ export function DataSync() {
         </>
       )}
 
+      {/* ATTENDANCE FILTERS (For Export) */}
+      {syncType === 'attendance' && (
+        <div className="mb-8 p-6 glass-card border border-[#FCA311]/30">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            Export Filters
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">From Date</label>
+              <input
+                type="date"
+                value={attFromDate}
+                onChange={e => setAttFromDate(e.target.value)}
+                className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">To Date</label>
+              <input
+                type="date"
+                value={attToDate}
+                onChange={e => setAttToDate(e.target.value)}
+                className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Standard</label>
+              <select
+                value={attStandard}
+                onChange={(e) => { setAttStandard(e.target.value); setAttSection('All'); }}
+                className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none"
+              >
+                <option value="All">All Standards</option>
+                {standards.map(std => <option key={std} value={std}>{std}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Section</label>
+              <select
+                value={attSection}
+                onChange={(e) => setAttSection(e.target.value)}
+                className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none"
+              >
+                <option value="All">All Sections</option>
+                {attSections.map(sec => <option key={sec} value={sec}>{sec}</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+
       {error && (
         <div className="mb-8 p-4 rounded-xl border border-red-500/50 bg-red-500/10 flex items-start gap-3 text-red-500 animate-in slide-in-from-top-4">
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
@@ -613,18 +807,24 @@ export function DataSync() {
         <div className="mb-8 p-6 rounded-2xl border border-green-500/30 bg-green-500/10 flex flex-col gap-3 animate-in fade-in">
           <div className="flex items-center gap-3 text-green-600">
             <CheckCircle2 className="w-6 h-6 shrink-0" />
-            <h3 className="text-lg font-bold">Import Completed Successfully</h3>
+            <h3 className="text-lg font-bold">Import Completed</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
             {syncType === 'profiles' && (
               <div className="bg-white/50 p-4 rounded-xl border border-gray-200">
                 <p className="text-sm text-gray-500">New Profiles Added</p>
-                <p className="text-3xl font-bold text-gray-900">{importResults.added}</p>
+                <p className="text-3xl font-bold text-gray-900">{importResults.added || 0}</p>
+              </div>
+            )}
+            {(syncType === 'marks' || syncType === 'attendance') && importResults.added !== undefined && (
+              <div className="bg-white/50 p-4 rounded-xl border border-gray-200">
+                <p className="text-sm text-gray-500">New Records</p>
+                <p className="text-3xl font-bold text-gray-900">{importResults.added || 0}</p>
               </div>
             )}
             <div className="bg-white/50 p-4 rounded-xl border border-gray-200">
               <p className="text-sm text-gray-500">Records Updated</p>
-              <p className="text-3xl font-bold text-gray-900">{importResults.updated}</p>
+              <p className="text-3xl font-bold text-gray-900">{importResults.updated || 0}</p>
             </div>
             <div className="bg-white/50 p-4 rounded-xl border border-gray-200">
               <p className="text-sm text-gray-500">Errors Encountered</p>
@@ -655,16 +855,17 @@ export function DataSync() {
           </div>
           
           <h2 className="text-2xl font-bold text-gray-900 mb-3">
-            {syncType === 'profiles' ? 'Export Profiles' : 'Export Marks'}
+            {syncType === 'profiles' ? 'Export Profiles' : syncType === 'marks' ? 'Export Marks' : 'Export Daily Attendance'}
           </h2>
           <p className="text-[#4C677C] mb-8 max-w-sm">
             {syncType === 'profiles' 
               ? 'Download a complete backup of all student records in Excel format.'
-              : 'Download an Excel spreadsheet containing students and their subject marks.'}
+              : syncType === 'marks' ? 'Download an Excel spreadsheet containing students and their subject marks.' 
+              : 'Download Daily Attendance records in Excel format based on filters.'}
           </p>
           
           <button 
-            onClick={syncType === 'profiles' ? handleExportProfiles : (syncType === 'marks' && marksMode === 'universal' ? downloadUniversalMarksTemplate : handleExportMarks)}
+            onClick={syncType === 'profiles' ? handleExportProfiles : (syncType === 'marks' && marksMode === 'universal' ? downloadUniversalMarksTemplate : syncType === 'attendance' ? handleExportAttendance : handleExportMarks)}
             disabled={exporting || (syncType === 'marks' && marksMode === 'universal' ? false : false)}
             className="glass-button-primary bg-blue-600 hover:bg-blue-700 text-white w-full max-w-xs flex items-center justify-center gap-2 py-3 relative z-10"
           >
@@ -681,43 +882,44 @@ export function DataSync() {
         <div className="glass-card p-8 flex flex-col items-center text-center justify-center relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-[#62D4CA]/5 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           
-          <div className={`w-20 h-20 ${syncType === 'profiles' ? 'bg-adminSidebar/10 border-adminSidebar/20 text-adminSidebar' : 'bg-[#62D4CA]/10 border-[#62D4CA]/20 text-[#2E1C40]'} rounded-2xl flex items-center justify-center mb-6 border shadow-sm group-hover:shadow-md transition-shadow`}>
+          <div className={`w-20 h-20 ${syncType === 'profiles' ? 'bg-adminSidebar/10 border-adminSidebar/20 text-adminSidebar' : syncType === 'marks' ? 'bg-[#62D4CA]/10 border-[#62D4CA]/20 text-[#2E1C40]' : 'bg-[#FCA311]/10 border-[#FCA311]/20 text-[#2E1C40]'} rounded-2xl flex items-center justify-center mb-6 border shadow-sm group-hover:shadow-md transition-shadow`}>
             <Upload className="w-10 h-10" />
           </div>
           
           <h2 className="text-2xl font-bold text-gray-900 mb-3">
-            {syncType === 'profiles' ? 'Import Profiles' : 'Import Marks'}
+            {syncType === 'profiles' ? 'Import Profiles' : syncType === 'marks' ? 'Import Marks' : 'Import Daily Attendance'}
           </h2>
           <p className="text-[#4C677C] mb-6 max-w-sm">
             {syncType === 'profiles'
               ? 'Upload a CSV file to add new students or update existing ones.'
-              : 'Upload a CSV file containing subject marks for the selected term.'}
+              : syncType === 'marks' ? 'Upload an Excel/CSV file containing subject marks for the selected term.'
+              : 'Upload an Excel file containing Daily Attendance records.'}
           </p>
           
           <div className="flex flex-col gap-4 w-full max-w-xs relative z-10">
             <label className={`cursor-pointer w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold shadow-md transition-all ${
-              syncType === 'profiles' ? 'bg-adminSidebar text-white hover:bg-adminSidebar/90' : 'bg-[#62D4CA] text-gray-900 hover:bg-[#62D4CA]/90'
+              syncType === 'profiles' ? 'bg-adminSidebar text-white hover:bg-adminSidebar/90' : syncType === 'marks' ? 'bg-[#62D4CA] text-gray-900 hover:bg-[#62D4CA]/90' : 'bg-[#FCA311] text-gray-900 hover:bg-[#FCA311]/90'
             }`}>
               {importing ? (
                 <div className="w-5 h-5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
               ) : (
                 <FileSpreadsheet className="w-5 h-5" />
               )}
-              {importing ? 'Processing...' : (syncType === 'marks' && marksMode === 'universal' ? 'Select Excel File (.xlsx)' : 'Select CSV File')}
+              {importing ? 'Processing...' : (syncType === 'profiles' ? 'Select CSV File' : 'Select Excel File (.xlsx)')}
               <input 
                 type="file" 
-                accept={syncType === 'marks' && marksMode === 'universal' ? '.xlsx,.xls' : '.csv'} 
+                accept={syncType === 'profiles' ? '.csv' : '.xlsx,.xls'} 
                 className="hidden" 
-                onChange={syncType === 'profiles' ? handleProfileUpload : (syncType === 'marks' && marksMode === 'universal' ? handleUniversalMarksUpload : handleMarksUpload)}
+                onChange={syncType === 'profiles' ? handleProfileUpload : (syncType === 'marks' && marksMode === 'universal' ? handleUniversalMarksUpload : syncType === 'attendance' ? handleAttendanceUpload : handleMarksUpload)}
                 disabled={importing || (syncType === 'marks' && (marksMode === 'legacy' && (!selectedStandard || !selectedSection || !selectedTerm)))}
               />
             </label>
             
             <button 
-              onClick={syncType === 'profiles' ? downloadProfileTemplate : (syncType === 'marks' && marksMode === 'universal' ? downloadUniversalMarksTemplate : downloadMarksTemplate)}
+              onClick={syncType === 'profiles' ? downloadProfileTemplate : (syncType === 'marks' && marksMode === 'universal' ? downloadUniversalMarksTemplate : syncType === 'attendance' ? downloadAttendanceTemplate : downloadMarksTemplate)}
               className="text-sm text-[#4C677C] hover:text-gray-900 underline transition-colors"
             >
-              {syncType === 'marks' && marksMode === 'universal' ? 'Download Class 6-10 Excel Template' : 'Download CSV Template'}
+              {syncType === 'profiles' ? 'Download CSV Template' : syncType === 'attendance' ? 'Download Attendance Excel Template' : 'Download Excel Template'}
             </button>
           </div>
         </div>
@@ -726,20 +928,20 @@ export function DataSync() {
       {/* Import Guide */}
       <div className="mt-8 glass-card p-6 md:p-8">
         <h3 className="text-xl font-bold text-gray-900 mb-4">
-          How {syncType === 'profiles' ? 'Profile' : 'Marks'} Import Works
+          How {syncType === 'profiles' ? 'Profile' : syncType === 'marks' ? 'Marks' : 'Attendance'} Import Works
         </h3>
         {syncType === 'profiles' ? (
           <ul className="space-y-3 text-[#4C677C]">
             <li className="flex items-start gap-3">
               <div className="w-6 h-6 shrink-0 rounded-full bg-adminSidebar/10 text-adminSidebar flex items-center justify-center text-sm font-bold mt-0.5">1</div>
-              <p><strong>Upsert Logic:</strong> If a student with the same EMIS Number, Standard, and Section already exists, their information will be updated. If not, a new student will be created.</p>
+              <p><strong>Upsert Logic:</strong> If a student with the same EMIS Number already exists, their information will be updated. If not, a new student will be created.</p>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-6 h-6 shrink-0 rounded-full bg-adminSidebar/10 text-adminSidebar flex items-center justify-center text-sm font-bold mt-0.5">2</div>
               <p><strong>Required Fields:</strong> EMIS Number, Name, Standard, Section, and Medium are strictly required. Rows missing these will be skipped.</p>
             </li>
           </ul>
-        ) : (
+        ) : syncType === 'marks' ? (
           <ul className="space-y-3 text-[#4C677C]">
             <li className="flex items-start gap-3">
               <div className="w-6 h-6 shrink-0 rounded-full bg-[#62D4CA]/20 text-[#2E1C40] flex items-center justify-center text-sm font-bold mt-0.5">1</div>
@@ -747,11 +949,26 @@ export function DataSync() {
             </li>
             <li className="flex items-start gap-3">
               <div className="w-6 h-6 shrink-0 rounded-full bg-[#62D4CA]/20 text-[#2E1C40] flex items-center justify-center text-sm font-bold mt-0.5">2</div>
-              <p><strong>Template First:</strong> Always download the {marksMode === 'universal' ? 'Excel' : 'CSV'} Template first, as it contains exactly the right columns for the chosen format.</p>
+              <p><strong>Template First:</strong> Always download the Excel Template first, as it contains exactly the right columns for the chosen format.</p>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-6 h-6 shrink-0 rounded-full bg-[#62D4CA]/20 text-[#2E1C40] flex items-center justify-center text-sm font-bold mt-0.5">3</div>
-              <p><strong>Match by EMIS:</strong> The system strictly matches students by EMIS Number. Name, Standard, and Section are used only for validation.</p>
+              <p><strong>Match by EMIS:</strong> The system strictly matches students by EMIS Number.</p>
+            </li>
+          </ul>
+        ) : (
+          <ul className="space-y-3 text-[#4C677C]">
+            <li className="flex items-start gap-3">
+              <div className="w-6 h-6 shrink-0 rounded-full bg-[#FCA311]/20 text-[#2E1C40] flex items-center justify-center text-sm font-bold mt-0.5">1</div>
+              <p><strong>ALL-OR-NOTHING:</strong> If any single row fails validation (e.g. unknown EMIS, wrong class, wrong status), the ENTIRE import is rejected. No partial imports.</p>
+            </li>
+            <li className="flex items-start gap-3">
+              <div className="w-6 h-6 shrink-0 rounded-full bg-[#FCA311]/20 text-[#2E1C40] flex items-center justify-center text-sm font-bold mt-0.5">2</div>
+              <p><strong>Sync to Period 1:</strong> Successfully importing Daily Attendance will automatically synchronize those statuses to Period 1.</p>
+            </li>
+            <li className="flex items-start gap-3">
+              <div className="w-6 h-6 shrink-0 rounded-full bg-[#FCA311]/20 text-[#2E1C40] flex items-center justify-center text-sm font-bold mt-0.5">3</div>
+              <p><strong>Updating:</strong> If a record for the student and date already exists, the import will UPDATE it instead of creating duplicates.</p>
             </li>
           </ul>
         )}
