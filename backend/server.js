@@ -84,6 +84,12 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/edupulse';
 mongoose.connect(MONGO_URI)
   .then((conn) => {
     const dbName = conn.connection.name;
+    if (dbName !== 'edupulse') {
+      console.error(`\nERROR: Application connected to the wrong MongoDB database.`);
+      console.error(`Expected database: edupulse`);
+      console.error(`Connected database: ${dbName}\n`);
+      process.exit(1);
+    }
     console.log(`MongoDB connected successfully`);
     console.log(`Database: ${dbName}`);
   })

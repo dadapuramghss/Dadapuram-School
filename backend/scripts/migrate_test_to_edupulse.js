@@ -74,48 +74,51 @@ async function runMigration() {
     // Fetch all documents from the source
     const documents = await sourceCollection.find({}).toArray();
     
-    let upsertedCount = 0;
+    let inserted = 0;
+    let skipped = 0;
+    let conflicts = 0;
     
     // Safely upsert each document to preserve _id and avoid duplicates
-    const bulkOps = documents.map(doc => ({
-      updateOne: {
-        filter: { _id: doc._id },
-        update: { $set: doc },
-        upsert: true
-      }
-    }));
-    
-    // Execute bulk write
-    if (bulkOps.length > 0) {
+    // Using individual operations instead of bulkWrite to accurately catch conflicts if any unexpected issue happens
+    for (const doc of documents) {
       try {
-        const result = await targetCollection.bulkWrite(bulkOps);
-        upsertedCount = result.upsertedCount + result.modifiedCount + (result.matchedCount - result.modifiedCount);
+        const existing = await targetCollection.findOne({ _id: doc._id });
+        if (existing) {
+          // Document exists, skipping to avoid destroying existing edupulse data
+          skipped++;
+        } else {
+          // Document missing, inserting safely
+          await targetCollection.insertOne(doc);
+          inserted++;
+        }
       } catch (err) {
-        console.error(`- ERROR writing to ${collectionName}:`, err.message);
+        conflicts++;
+        console.error(`- ERROR writing doc ${doc._id} to ${collectionName}:`, err.message);
       }
     }
     
     // Count after migration
     const targetCountAfter = await targetCollection.countDocuments();
-    console.log(`- Successfully migrated/upserted documents.`);
-    console.log(`- Documents in 'edupulse.${collectionName}' after: ${targetCountAfter}`);
     
     migrationStats[collectionName] = {
       source: sourceCount,
       targetBefore: targetCountBefore,
+      inserted,
+      skipped,
+      conflicts,
       targetAfter: targetCountAfter
     };
   }
 
   // Final Database Count Verification
   console.log(`\n==================================================`);
-  console.log(`   FINAL DATABASE COUNT VERIFICATION`);
+  console.log(`   FINAL DATABASE MIGRATION SUMMARY`);
   console.log(`==================================================`);
+  console.log(`Collection`.padEnd(20) + ` | ` + `Test`.padEnd(6) + ` | ` + `EduPulse Before`.padEnd(16) + ` | ` + `Inserted`.padEnd(10) + ` | ` + `Skipped`.padEnd(10) + ` | ` + `Conflicts`.padEnd(10) + ` | ` + `EduPulse After`);
+  console.log(`-------------------------------------------------------------------------------------------------------------------------`);
+  
   for (const [col, stats] of Object.entries(migrationStats)) {
-    console.log(`${col.padEnd(20)} | test: ${stats.source.toString().padEnd(6)} | edupulse: ${stats.targetAfter.toString().padEnd(6)}`);
-    if (stats.targetAfter < stats.source) {
-      console.log(`  => WARNING: 'edupulse' has fewer records than 'test'. Please investigate.`);
-    }
+    console.log(`${col.padEnd(20)} | ${stats.source.toString().padEnd(6)} | ${stats.targetBefore.toString().padEnd(16)} | ${stats.inserted.toString().padEnd(10)} | ${stats.skipped.toString().padEnd(10)} | ${stats.conflicts.toString().padEnd(10)} | ${stats.targetAfter.toString()}`);
   }
 
   console.log(`\n==================================================`);
