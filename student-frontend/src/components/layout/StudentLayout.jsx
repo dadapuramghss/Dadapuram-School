@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
@@ -42,6 +42,7 @@ export default function StudentLayout() {
   const [isAdding, setIsAdding] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
   
+  const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const { isInstallable, installApp } = usePWAInstall();
 
@@ -118,6 +119,25 @@ export default function StudentLayout() {
     };
     fetchNotifications();
   }, []);
+
+  // Handle outside click for profile dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    if (isProfileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileDropdownOpen]);
 
   const handleNotificationClick = () => {
     localStorage.setItem('studentReadCirculars', JSON.stringify(circularIds));
@@ -349,7 +369,7 @@ export default function StudentLayout() {
             </button>
             
             {/* Multi-Account Profile Dropdown */}
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <button 
                 onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                 className="flex items-center gap-3 p-1 pr-2 rounded-full hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200"
@@ -370,13 +390,8 @@ export default function StudentLayout() {
 
               {/* Dropdown Menu */}
               {isProfileDropdownOpen && (
-                <>
-                  <div 
-                    className="fixed inset-0 z-40" 
-                    onClick={() => setIsProfileDropdownOpen(false)}
-                  />
-                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+                <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Switch Student</p>
                       
                       <div className="space-y-1">
@@ -387,7 +402,6 @@ export default function StudentLayout() {
                               type="button"
                               onClick={(e) => {
                                 e.preventDefault();
-                                e.stopPropagation();
                                 switchAccount(acc.studentId);
                               }}
                               className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors text-left ${
@@ -409,7 +423,7 @@ export default function StudentLayout() {
                                     e.stopPropagation();
                                     removeAccount(acc.studentId, e);
                                   }}
-                                  className="shrink-0 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                                  className="shrink-0 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
                                   title="Remove account from session"
                                 >
                                   <X className="w-4 h-4" />
@@ -431,31 +445,29 @@ export default function StudentLayout() {
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
-                          e.stopPropagation();
                           setIsProfileDropdownOpen(false);
                           setIsAddAccountModalOpen(true);
                         }}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl transition-colors relative z-50 cursor-pointer"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl transition-colors cursor-pointer"
                       >
-                        <UserPlus className="w-4 h-4 pointer-events-none" />
-                        <span className="pointer-events-none">Add Student Account</span>
+                        <UserPlus className="w-4 h-4" />
+                        Add Student Account
                       </button>
                       
                       <button 
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
-                          e.stopPropagation();
+                          setIsProfileDropdownOpen(false);
                           handleLogout();
                         }}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors mt-1 relative z-50 cursor-pointer"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors mt-1 cursor-pointer"
                       >
-                        <LogOut className="w-4 h-4 pointer-events-none" />
-                        <span className="pointer-events-none">Logout</span>
+                        <LogOut className="w-4 h-4" />
+                        Logout
                       </button>
                     </div>
                   </div>
-                </>
               )}
             </div>
           </div>
