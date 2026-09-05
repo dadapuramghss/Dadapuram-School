@@ -384,7 +384,12 @@ export default function StudentLayout() {
                           linkedAccounts.map(acc => (
                             <button
                               key={acc.studentId}
-                              onClick={() => switchAccount(acc.studentId)}
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                switchAccount(acc.studentId);
+                              }}
                               className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors text-left ${
                                 acc.studentId === student._id 
                                   ? 'bg-indigo-50 text-indigo-700' 
@@ -399,7 +404,11 @@ export default function StudentLayout() {
                                 <Check className="w-5 h-5 shrink-0 text-indigo-600" />
                               ) : (
                                 <span 
-                                  onClick={(e) => removeAccount(acc.studentId, e)}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    removeAccount(acc.studentId, e);
+                                  }}
                                   className="shrink-0 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
                                   title="Remove account from session"
                                 >
@@ -419,22 +428,30 @@ export default function StudentLayout() {
                     
                     <div className="p-2">
                       <button 
-                        onClick={() => {
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           setIsProfileDropdownOpen(false);
                           setIsAddAccountModalOpen(true);
                         }}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl transition-colors relative z-50 cursor-pointer"
                       >
-                        <UserPlus className="w-4 h-4" />
-                        Add Student Account
+                        <UserPlus className="w-4 h-4 pointer-events-none" />
+                        <span className="pointer-events-none">Add Student Account</span>
                       </button>
                       
                       <button 
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors mt-1"
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleLogout();
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors mt-1 relative z-50 cursor-pointer"
                       >
-                        <LogOut className="w-4 h-4" />
-                        Logout
+                        <LogOut className="w-4 h-4 pointer-events-none" />
+                        <span className="pointer-events-none">Logout</span>
                       </button>
                     </div>
                   </div>
