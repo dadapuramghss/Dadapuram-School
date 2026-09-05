@@ -67,13 +67,25 @@ app.get('/', (req, res) => {
   res.send('EduPulse API is running');
 });
 
+// Health check route
+app.get('/api/health', (req, res) => {
+  const isConnected = mongoose.connection.readyState === 1;
+  res.json({
+    success: true,
+    database: mongoose.connection.name || 'unknown',
+    status: isConnected ? 'connected' : 'disconnected'
+  });
+});
+
 // Database connection
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/edupulse';
 
 mongoose.connect(MONGO_URI)
-  .then(() => {
-    console.log('Connected to MongoDB');
+  .then((conn) => {
+    const dbName = conn.connection.name;
+    console.log(`MongoDB connected successfully`);
+    console.log(`Database: ${dbName}`);
   })
   .catch((err) => {
     console.error('MongoDB connection error:', err);
