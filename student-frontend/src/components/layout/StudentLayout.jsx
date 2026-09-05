@@ -337,7 +337,7 @@ export default function StudentLayout() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-[100dvh] overflow-hidden">
         {/* Top Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 h-16 flex-shrink-0 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10">
+        <header className="relative z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 h-16 flex-shrink-0 flex items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center">
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -369,7 +369,7 @@ export default function StudentLayout() {
             </button>
             
             {/* Multi-Account Profile Dropdown */}
-            <div className="relative" ref={dropdownRef}>
+            <div className="relative z-50" ref={dropdownRef}>
               <button 
                 onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                 className="flex items-center gap-3 p-1 pr-2 rounded-full hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200"
