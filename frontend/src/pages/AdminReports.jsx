@@ -355,14 +355,14 @@ export function AdminReports() {
                       </td>
                     );
                   })}
-                  <td className="px-3 py-2 text-gray-900 bg-adminAccent2 text-white/15 border-l border-gray-200">
+                  <td className="px-3 py-2 bg-adminAccent2 text-white font-bold border-l border-gray-200">
                     {matrixData.grandTotal > 0 ? (
                       <button
                         onClick={() => {
                           setSelectedMatrixGroup(`Grand Total`);
                           setSelectedMatrixStudents(matrixData.grandTotalStudents);
                         }}
-                        className="hover:text-gray-900 underline decoration-dashed underline-offset-4 transition-colors"
+                        className="hover:text-white/80 underline decoration-dashed underline-offset-4 transition-colors"
                       >
                         {matrixData.grandTotal}
                       </button>

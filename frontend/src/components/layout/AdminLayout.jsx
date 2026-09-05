@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, Bot, BookOpen, Database, Settings, PieChart, Download, CalendarCheck, Link as LinkIcon, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, ChevronUp, Bot, BookOpen, Database, Settings, PieChart, Download, CalendarCheck, Link as LinkIcon, MessageSquare, Code } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
+  const [isBottomMenuExpanded, setIsBottomMenuExpanded] = useState(true);
   const { logout, dbUser } = useAuth();
   const { isInstallable, installApp } = usePWAInstall();
 
@@ -129,33 +130,12 @@ export function AdminLayout() {
           </nav>
         </div>
 
-        <div className={cn("p-4 space-y-2 shrink-0 border-t border-white/5", !isSidebarOpen && "flex flex-col items-center")}>
-          <NavLink
-            to="/admin/profile"
-            onClick={handleNavClick}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center rounded-2xl transition-all duration-300 w-full",
-                isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12",
-                isActive 
-                  ? "bg-adminAccent1 text-white shadow-md font-bold" 
-                  : "text-white/70 hover:bg-white/10 hover:text-white font-medium"
-              )
-            }
-            title={!isSidebarOpen ? "My Profile" : undefined}
-          >
-            <User className={cn("w-5 h-5 flex-shrink-0", !isSidebarOpen && "md:mx-auto")} />
-            {isSidebarOpen ? (
-              <span className="whitespace-nowrap overflow-hidden">My Profile</span>
-            ) : (
-              <span className="md:hidden whitespace-nowrap overflow-hidden ml-3">My Profile</span>
-            )}
-          </NavLink>
+        <div className={cn("p-4 shrink-0 border-t border-white/5", !isSidebarOpen && "flex flex-col items-center")}>
           {isInstallable && (
             <button 
               onClick={installApp}
               className={cn(
-                "flex items-center rounded-2xl transition-all duration-300 w-full font-bold",
+                "flex items-center rounded-2xl transition-all duration-300 w-full font-bold mb-2",
                 isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12",
                 "bg-adminAccent2 text-white shadow-md"
               )}
@@ -169,21 +149,83 @@ export function AdminLayout() {
               )}
             </button>
           )}
-          <button 
-            onClick={logout}
+
+          <div className="flex justify-center w-full mb-1">
+            <button 
+              type="button"
+              onClick={() => setIsBottomMenuExpanded(!isBottomMenuExpanded)}
+              className="p-1.5 rounded-full text-white/50 hover:bg-white/10 hover:text-white transition-colors focus:outline-none"
+              aria-label={isBottomMenuExpanded ? "Collapse account menu" : "Expand account menu"}
+              aria-expanded={isBottomMenuExpanded}
+            >
+              <ChevronUp className={cn("w-4 h-4 transition-transform duration-300", isBottomMenuExpanded && "rotate-180")} />
+            </button>
+          </div>
+
+          <div 
             className={cn(
-              "flex items-center rounded-xl text-white/70 hover:bg-adminAccent1 hover:text-white transition-all duration-300 w-full font-medium",
-              isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12"
+              "flex flex-col gap-2 overflow-hidden transition-all duration-300 ease-in-out w-full",
+              isBottomMenuExpanded ? "max-h-64 opacity-100" : "max-h-0 opacity-0 pointer-events-none"
             )}
-            title={!isSidebarOpen ? "Logout" : undefined}
           >
-            <LogOut className={cn("w-5 h-5 flex-shrink-0", !isSidebarOpen && "md:mx-auto")} />
-            {isSidebarOpen ? (
-              <span className="whitespace-nowrap overflow-hidden">Logout</span>
-            ) : (
-              <span className="md:hidden whitespace-nowrap overflow-hidden ml-3">Logout</span>
-            )}
-          </button>
+            <NavLink
+              to="/admin/profile"
+              onClick={handleNavClick}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center rounded-2xl transition-all duration-300 w-full",
+                  isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12",
+                  isActive 
+                    ? "bg-adminAccent1 text-white shadow-md font-bold" 
+                    : "text-white/70 hover:bg-white/10 hover:text-white font-medium"
+                )
+              }
+              title={!isSidebarOpen ? "My Profile" : undefined}
+            >
+              <User className={cn("w-5 h-5 flex-shrink-0", !isSidebarOpen && "md:mx-auto")} />
+              {isSidebarOpen ? (
+                <span className="whitespace-nowrap overflow-hidden">My Profile</span>
+              ) : (
+                <span className="md:hidden whitespace-nowrap overflow-hidden ml-3">My Profile</span>
+              )}
+            </NavLink>
+            <NavLink 
+              to="developer-profile"
+              onClick={handleNavClick}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center rounded-xl transition-all duration-300 w-full",
+                  isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12",
+                  isActive 
+                    ? "bg-adminAccent1 text-white shadow-md font-bold" 
+                    : "text-white/70 hover:bg-white/10 hover:text-white font-medium"
+                )
+              }
+              title={!isSidebarOpen ? "Developer Profile" : undefined}
+            >
+              <Code className={cn("w-5 h-5 flex-shrink-0", !isSidebarOpen && "md:mx-auto")} />
+              {isSidebarOpen ? (
+                <span className="whitespace-nowrap overflow-hidden">Developer Profile</span>
+              ) : (
+                <span className="md:hidden whitespace-nowrap overflow-hidden ml-3">Developer Profile</span>
+              )}
+            </NavLink>
+            <button 
+              onClick={logout}
+              className={cn(
+                "flex items-center rounded-xl text-white/70 hover:bg-adminAccent1 hover:text-white transition-all duration-300 w-full font-medium",
+                isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12"
+              )}
+              title={!isSidebarOpen ? "Logout" : undefined}
+            >
+              <LogOut className={cn("w-5 h-5 flex-shrink-0", !isSidebarOpen && "md:mx-auto")} />
+              {isSidebarOpen ? (
+                <span className="whitespace-nowrap overflow-hidden">Logout</span>
+              ) : (
+                <span className="md:hidden whitespace-nowrap overflow-hidden ml-3">Logout</span>
+              )}
+            </button>
+          </div>
         </div>
       </aside>
 

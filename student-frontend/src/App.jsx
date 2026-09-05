@@ -8,6 +8,7 @@ import Attendance from './pages/Attendance';
 import Materials from './pages/Materials';
 import Feedback from './pages/Feedback';
 import StudentLayout from './components/layout/StudentLayout';
+import { DeveloperProfile } from './components/ui/DeveloperProfile';
 
 function App() {
   const ProtectedRoute = ({ children }) => {
@@ -37,6 +38,7 @@ function App() {
           <Route path="/attendance" element={<Attendance />} />
           <Route path="/materials" element={<Materials />} />
           <Route path="/feedback" element={<Feedback />} />
+          <Route path="/developer-profile" element={<DeveloperProfile />} />
         </Route>
         
         <Route path="/" element={<Navigate to="/dashboard" replace />} />

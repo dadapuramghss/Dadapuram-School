@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, GraduationCap, LogOut, BarChart3, ShieldAlert, FileText, User, ChevronLeft, ChevronRight, Menu, X, Bot, BookOpen, Bell, Megaphone, CalendarCheck, Link, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Users, GraduationCap, LogOut, BarChart3, ShieldAlert, FileText, User, ChevronLeft, ChevronRight, ChevronUp, Menu, X, Bot, BookOpen, Bell, Megaphone, CalendarCheck, Link, MessageSquare, Code } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { api } from '../../lib/api';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 export function TeacherLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
+  const [isBottomMenuExpanded, setIsBottomMenuExpanded] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
   const [circularIds, setCircularIds] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -177,33 +178,12 @@ export function TeacherLayout() {
           </nav>
         </div>
 
-        <div className={cn("p-4 space-y-2 shrink-0 border-t border-[#4C677C]/30", !isSidebarOpen && "flex flex-col items-center")}>
-          <NavLink
-            to="/teacher/profile"
-            onClick={handleNavClick}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center rounded-xl transition-all duration-300 w-full",
-                isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12",
-                isActive 
-                  ? "bg-adminSidebar text-white text-[#2E1C40] shadow-md font-bold border-l-4 border-[#D8FDF6]" 
-                  : "text-[#E5D9C4]/70 hover:bg-[#4C677C]/40 hover:text-[#E5D9C4] font-medium border-l-4 border-transparent"
-              )
-            }
-            title={!isSidebarOpen ? "My Profile" : undefined}
-          >
-            <User className={cn("w-5 h-5 flex-shrink-0", !isSidebarOpen && "md:mx-auto")} />
-            {isSidebarOpen ? (
-              <span className="whitespace-nowrap overflow-hidden">My Profile</span>
-            ) : (
-              <span className="md:hidden whitespace-nowrap overflow-hidden ml-3">My Profile</span>
-            )}
-          </NavLink>
+        <div className={cn("p-4 shrink-0 border-t border-[#4C677C]/30", !isSidebarOpen && "flex flex-col items-center")}>
           {isInstallable && (
             <button 
               onClick={installApp}
               className={cn(
-                "flex items-center rounded-xl transition-all duration-300 w-full font-bold",
+                "flex items-center rounded-xl transition-all duration-300 w-full font-bold mb-2",
                 isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12",
                 "bg-[#D8FDF6] text-[#2E1C40] shadow-md border-l-4 border-transparent"
               )}
@@ -217,21 +197,83 @@ export function TeacherLayout() {
               )}
             </button>
           )}
-          <button 
-            onClick={logout}
+
+          <div className="flex justify-center w-full mb-1">
+            <button 
+              type="button"
+              onClick={() => setIsBottomMenuExpanded(!isBottomMenuExpanded)}
+              className="p-1.5 rounded-full text-[#E5D9C4]/50 hover:bg-[#4C677C]/40 hover:text-[#E5D9C4] transition-colors focus:outline-none"
+              aria-label={isBottomMenuExpanded ? "Collapse account menu" : "Expand account menu"}
+              aria-expanded={isBottomMenuExpanded}
+            >
+              <ChevronUp className={cn("w-4 h-4 transition-transform duration-300", isBottomMenuExpanded && "rotate-180")} />
+            </button>
+          </div>
+
+          <div 
             className={cn(
-              "flex items-center rounded-xl text-[#E5D9C4]/70 hover:bg-[#732A26] hover:text-[#E5D9C4] transition-all duration-300 w-full font-medium border border-transparent hover:border-[#AE634A]/50",
-              isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12"
+              "flex flex-col gap-2 overflow-hidden transition-all duration-300 ease-in-out w-full",
+              isBottomMenuExpanded ? "max-h-64 opacity-100" : "max-h-0 opacity-0 pointer-events-none"
             )}
-            title={!isSidebarOpen ? "Logout" : undefined}
           >
-            <LogOut className={cn("w-5 h-5 flex-shrink-0", !isSidebarOpen && "md:mx-auto")} />
-            {isSidebarOpen ? (
-              <span className="whitespace-nowrap overflow-hidden">Logout</span>
-            ) : (
-              <span className="md:hidden whitespace-nowrap overflow-hidden ml-3">Logout</span>
-            )}
-          </button>
+            <NavLink
+              to="/teacher/profile"
+              onClick={handleNavClick}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center rounded-xl transition-all duration-300 w-full",
+                  isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12",
+                  isActive 
+                    ? "bg-adminSidebar text-white text-[#2E1C40] shadow-md font-bold border-l-4 border-[#D8FDF6]" 
+                    : "text-[#E5D9C4]/70 hover:bg-[#4C677C]/40 hover:text-[#E5D9C4] font-medium border-l-4 border-transparent"
+                )
+              }
+              title={!isSidebarOpen ? "My Profile" : undefined}
+            >
+              <User className={cn("w-5 h-5 flex-shrink-0", !isSidebarOpen && "md:mx-auto")} />
+              {isSidebarOpen ? (
+                <span className="whitespace-nowrap overflow-hidden">My Profile</span>
+              ) : (
+                <span className="md:hidden whitespace-nowrap overflow-hidden ml-3">My Profile</span>
+              )}
+            </NavLink>
+            <NavLink 
+              to="developer-profile"
+              onClick={handleNavClick}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center rounded-xl transition-all duration-300 w-full font-medium border-l-4",
+                  isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12",
+                  isActive 
+                    ? "bg-adminSidebar text-[#2E1C40] shadow-md font-bold border-[#D8FDF6]" 
+                    : "border-transparent text-[#E5D9C4]/70 hover:bg-[#4C677C]/40 hover:text-[#E5D9C4]"
+                )
+              }
+              title={!isSidebarOpen ? "Developer Profile" : undefined}
+            >
+              <Code className={cn("w-5 h-5 flex-shrink-0", !isSidebarOpen && "md:mx-auto")} />
+              {isSidebarOpen ? (
+                <span className="whitespace-nowrap overflow-hidden">Developer Profile</span>
+              ) : (
+                <span className="md:hidden whitespace-nowrap overflow-hidden ml-3">Developer Profile</span>
+              )}
+            </NavLink>
+            <button 
+              onClick={logout}
+              className={cn(
+                "flex items-center rounded-xl text-[#E5D9C4]/70 hover:bg-[#732A26] hover:text-[#E5D9C4] transition-all duration-300 w-full font-medium border border-transparent hover:border-[#AE634A]/50",
+                isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12"
+              )}
+              title={!isSidebarOpen ? "Logout" : undefined}
+            >
+              <LogOut className={cn("w-5 h-5 flex-shrink-0", !isSidebarOpen && "md:mx-auto")} />
+              {isSidebarOpen ? (
+                <span className="whitespace-nowrap overflow-hidden">Logout</span>
+              ) : (
+                <span className="md:hidden whitespace-nowrap overflow-hidden ml-3">Logout</span>
+              )}
+            </button>
+          </div>
         </div>
       </aside>
 
