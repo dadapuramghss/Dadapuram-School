@@ -1,9 +1,10 @@
-import React from 'react';
-import { Code, Briefcase, GraduationCap, Globe, User, Layout, Smartphone, BrainCircuit, Server, Database, MonitorPlay, Cloud, Network } from 'lucide-react';
+import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Code, Briefcase, GraduationCap, Globe, User, Layout, Smartphone, BrainCircuit, Server, Database, MonitorPlay, Cloud, Network, X } from 'lucide-react';
 
 const DEVELOPER_INFO = {
   name: 'Aravindh V',
-  photoUrl: '/Aravindh.jpeg',
+  photoUrl: '/Aravindh.jpeg?v=2',
   title: 'Full-Stack Web & Mobile App Developer',
   education: 'B.Sc Computer Science (AI & ML)',
   university: 'Takshashila University',
@@ -33,17 +34,24 @@ const DEVELOPER_INFO = {
 };
 
 export function DeveloperProfile() {
+  const [isImageOpen, setIsImageOpen] = useState(false);
+
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in pb-12">
+    <>
+      <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in pb-12">
       {/* Page Header */}
       <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
         <div className="h-32 sm:h-48 bg-gradient-to-br from-indigo-600 via-purple-600 to-orange-500"></div>
         <div className="px-6 sm:px-10 pb-8 relative">
           <div className="absolute -top-12 sm:-top-16 left-6 sm:left-10 bg-white dark:bg-gray-900 p-2 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800">
             {DEVELOPER_INFO.photoUrl ? (
-              <div className="w-[72px] h-[72px] sm:w-[96px] sm:h-[96px] rounded-xl overflow-hidden bg-gray-100">
+              <button 
+                onClick={() => setIsImageOpen(true)}
+                className="w-[72px] h-[72px] sm:w-[96px] sm:h-[96px] rounded-xl overflow-hidden bg-gray-100 block transition-transform hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                title="Click to view clearly"
+              >
                 <img src={DEVELOPER_INFO.photoUrl} alt="Developer Profile" className="w-full h-full object-cover" />
-              </div>
+              </button>
             ) : (
               <div className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 p-4 sm:p-6 rounded-xl flex items-center justify-center w-[72px] h-[72px] sm:w-[96px] sm:h-[96px]">
                 <Code className="w-10 h-10 sm:w-12 sm:h-12" />
@@ -164,6 +172,34 @@ export function DeveloperProfile() {
           &copy; 2026
         </p>
       </div>
-    </div>
+      </div>
+
+      {/* Image Modal/Lightbox */}
+      {isImageOpen && DEVELOPER_INFO.photoUrl && createPortal(
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setIsImageOpen(false)}
+        >
+          <button 
+            onClick={() => setIsImageOpen(false)}
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-white z-50"
+            aria-label="Close image"
+          >
+            <X className="w-6 h-6 sm:w-8 sm:h-8" />
+          </button>
+          <div 
+            className="relative max-w-4xl w-full max-h-[90vh] flex items-center justify-center animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img 
+              src={DEVELOPER_INFO.photoUrl} 
+              alt="Developer Profile Full" 
+              className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl" 
+            />
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
   );
 }
