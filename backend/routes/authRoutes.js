@@ -22,6 +22,8 @@ router.put('/me', authController.updateProfile);
 router.get('/users', authController.getAllUsers);
 router.get('/users/pending', authController.getPendingUsers);
 router.put('/users/:uid/approve', authController.approveUser);
+router.patch('/users/:uid/deactivate', authController.deactivateUser);
+router.patch('/users/:uid/activate', authController.activateUser);
 router.delete('/users/:uid', authController.deleteUser);
 
 module.exports = router;

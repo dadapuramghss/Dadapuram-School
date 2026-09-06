@@ -158,6 +158,11 @@ exports.deleteUser = async (req, res) => {
 
     const { uid } = req.params;
 
+    // Prevent self-deletion
+    if (req.user.uid === uid) {
+      return res.status(403).json({ message: 'Access denied: Cannot delete your own account' });
+    }
+
     // Delete from MongoDB
     const deletedUser = await User.findOneAndDelete({ uid });
     
@@ -177,5 +182,57 @@ exports.deleteUser = async (req, res) => {
   } catch (error) {
     console.error('deleteUser error:', error);
     res.status(500).json({ message: 'Server error while deleting user' });
+  }
+};
+
+// PATCH /api/auth/users/:uid/deactivate (Admin only)
+exports.deactivateUser = async (req, res) => {
+  try {
+    if (!req.dbUser || req.dbUser.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied: Admins only' });
+    }
+
+    const { uid } = req.params;
+
+    if (req.user.uid === uid) {
+      return res.status(403).json({ message: 'Access denied: Cannot deactivate your own account' });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { uid },
+      { isActive: false },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    res.json({ message: 'User deactivated successfully', user });
+  } catch (error) {
+    console.error('deactivateUser error:', error);
+    res.status(500).json({ message: 'Server error while deactivating user' });
+  }
+};
+
+// PATCH /api/auth/users/:uid/activate (Admin only)
+exports.activateUser = async (req, res) => {
+  try {
+    if (!req.dbUser || req.dbUser.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied: Admins only' });
+    }
+
+    const { uid } = req.params;
+
+    const user = await User.findOneAndUpdate(
+      { uid },
+      { isActive: true },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    res.json({ message: 'User activated successfully', user });
+  } catch (error) {
+    console.error('activateUser error:', error);
+    res.status(500).json({ message: 'Server error while activating user' });
   }
 };

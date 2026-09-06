@@ -49,6 +49,9 @@ const verifyToken = async (req, res, next) => {
   try {
     if (req.user && req.user.uid) {
       req.dbUser = await User.findOne({ uid: req.user.uid });
+      if (req.dbUser && req.dbUser.isActive === false) {
+        return res.status(403).json({ error: 'Your account has been deactivated. Please contact the administrator.' });
+      }
     }
   } catch (dbError) {
     console.error('Error fetching db user in auth middleware:', dbError);

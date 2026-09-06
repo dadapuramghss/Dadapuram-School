@@ -79,6 +79,42 @@ export function AdminUsers() {
     }
   };
 
+  const handleDelete = async (uid) => {
+    if (!window.confirm('Delete this teacher account permanently?\n\nThis action permanently removes the teacher account and cannot be undone.')) return;
+    
+    try {
+      await api.delete(`/auth/users/${uid}`);
+      setUsers(users.filter(u => u.uid !== uid));
+    } catch (err) {
+      console.error('Failed to delete user', err);
+      alert(err.response?.data?.message || 'Failed to delete user');
+    }
+  };
+
+  const handleDeactivate = async (uid) => {
+    if (!window.confirm('Are you sure you want to deactivate this teacher?')) return;
+    
+    try {
+      const res = await api.patch(`/auth/users/${uid}/deactivate`);
+      setUsers(users.map(u => u.uid === uid ? { ...u, isActive: false } : u));
+    } catch (err) {
+      console.error('Failed to deactivate user', err);
+      alert(err.response?.data?.message || 'Failed to deactivate user');
+    }
+  };
+
+  const handleActivate = async (uid) => {
+    if (!window.confirm('Activate this teacher account?')) return;
+    
+    try {
+      const res = await api.patch(`/auth/users/${uid}/activate`);
+      setUsers(users.map(u => u.uid === uid ? { ...u, isActive: true } : u));
+    } catch (err) {
+      console.error('Failed to activate user', err);
+      alert(err.response?.data?.message || 'Failed to activate user');
+    }
+  };
+
   const handleSave = async () => {
     if (!selectedUser) return;
     
@@ -200,6 +236,7 @@ export function AdminUsers() {
                     <th className="p-4 font-medium">Name</th>
                     <th className="p-4 font-medium">Email</th>
                     <th className="p-4 font-medium">Assigned Classes</th>
+                    <th className="p-4 font-medium text-center">Status</th>
                     <th className="p-4 font-medium text-right">Actions</th>
                   </tr>
                 </thead>
@@ -213,10 +250,28 @@ export function AdminUsers() {
                           ? user.assignedClasses.map(c => `${c.standard}-${c.section}`).join(', ') 
                           : 'None'}
                       </td>
-                      <td className="p-4 text-right">
+                      <td className="p-4 text-center">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${user.isActive !== false ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${user.isActive !== false ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                          {user.isActive !== false ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right space-x-2">
                         <NeonButton onClick={() => openModal(user)} variant="secondary" className="py-1.5 px-4 text-sm">
                           Edit Classes
                         </NeonButton>
+                        {user.isActive !== false ? (
+                          <button onClick={() => handleDeactivate(user.uid)} className="px-3 py-1.5 rounded-lg text-sm font-medium text-orange-600 hover:text-white hover:bg-orange-500 transition-colors border border-orange-200 hover:border-transparent">
+                            Deactivate
+                          </button>
+                        ) : (
+                          <button onClick={() => handleActivate(user.uid)} className="px-3 py-1.5 rounded-lg text-sm font-medium text-green-600 hover:text-white hover:bg-green-500 transition-colors border border-green-200 hover:border-transparent">
+                            Activate
+                          </button>
+                        )}
+                        <button onClick={() => handleDelete(user.uid)} className="px-3 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:text-white hover:bg-red-600 transition-colors border border-red-200 hover:border-transparent">
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))}
