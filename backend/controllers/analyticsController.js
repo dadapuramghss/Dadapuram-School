@@ -383,6 +383,65 @@ const getDashboardStats = async (req, res) => {
       { $sort: { "_id.standard": 1, "_id.section": 1, "_id.termName": 1 } }
     ]);
 
+    // All Exams First Marks Pipeline (Highest overall score across all exams, per class/section)
+    const allExamsFirstMarks = await Student.aggregate([
+      { $match: query },
+      { $unwind: { path: "$terms", preserveNullAndEmptyArrays: false } },
+      { $unwind: { path: "$terms.marks", preserveNullAndEmptyArrays: false } },
+      {
+        $group: {
+          _id: {
+            studentId: "$_id",
+            standard: "$standard",
+            section: "$section",
+            name: "$name"
+          },
+          totalScore: { $sum: "$terms.marks.score" }
+        }
+      },
+      {
+        $addFields: {
+          maximumMarks: {
+            $switch: {
+              branches: [
+                { case: { $in: ["$_id.standard", ["11", "12"]] }, then: 600 },
+                { case: { $in: ["$_id.standard", ["6", "7", "8", "9", "10"]] }, then: 500 }
+              ],
+              default: null
+            }
+          }
+        }
+      },
+      {
+        $match: { maximumMarks: { $gt: 0 } }
+      },
+      {
+        $addFields: {
+          percentage: {
+            $round: [
+              { $multiply: [ { $divide: ["$totalScore", "$maximumMarks"] }, 100 ] },
+              2
+            ]
+          }
+        }
+      },
+      { $sort: { percentage: -1, totalScore: -1, "_id.name": 1 } },
+      {
+        $group: {
+          _id: {
+            standard: "$_id.standard",
+            section: "$_id.section"
+          },
+          studentId: { $first: "$_id.studentId" },
+          topStudent: { $first: "$_id.name" },
+          topScore: { $first: "$totalScore" },
+          maximumMarks: { $first: "$maximumMarks" },
+          percentage: { $first: "$percentage" }
+        }
+      },
+      { $sort: { "_id.standard": 1, "_id.section": 1 } }
+    ]);
+
     res.status(200).json({
       success: true,
       data: {
@@ -394,7 +453,8 @@ const getDashboardStats = async (req, res) => {
         top12Students,
         top10Students,
         studentsAbstract,
-        classwiseFirstMarks
+        classwiseFirstMarks,
+        allExamsFirstMarks
       }
     });
 

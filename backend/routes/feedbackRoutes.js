@@ -20,7 +20,8 @@ router.get('/', verifyToken, checkAdmin, async (req, res) => {
     // We explicitly filter where expiresAt is strictly in the future,
     // providing a safety net if MongoDB TTL hasn't run yet.
     const feedbackList = await StudentFeedback.find({
-      expiresAt: { $gt: new Date() }
+      expiresAt: { $gt: new Date() },
+      isDeleted: { $ne: true }
     })
       .populate('studentId', 'name emisNumber standard section mobileNumber')
       .sort({ createdAt: -1 });
@@ -38,14 +39,21 @@ router.delete('/:id', verifyToken, checkAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     
-    const feedback = await StudentFeedback.findById(id);
+    const feedback = await StudentFeedback.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          isDeleted: true,
+          deletedAt: new Date(),
+          deletedBy: req.dbUser ? req.dbUser._id : null
+        }
+      },
+      { new: true }
+    );
+
     if (!feedback) {
       return res.status(404).json({ success: false, message: 'Feedback not found' });
     }
-
-    // Because voiceData is stored as a base64 string directly in the MongoDB document,
-    // deleting the document automatically removes the audio data.
-    await StudentFeedback.findByIdAndDelete(id);
 
     res.json({ success: true, message: 'Feedback deleted successfully' });
   } catch (error) {

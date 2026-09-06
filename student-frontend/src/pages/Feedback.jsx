@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
+import { appState } from '../lib/appState';
 import { MessageSquare, Mic, Square, Trash2, Send, Play } from 'lucide-react';
 
 export default function Feedback() {
@@ -22,6 +23,18 @@ export default function Feedback() {
   const timerRef = useRef(null);
   const streamRef = useRef(null);
   const MAX_RECORDING_TIME = 120; // 2 minutes in seconds
+
+  React.useEffect(() => {
+    if (textMessage.trim() || isRecording || audioUrl) {
+      appState.setFormDirty('Feedback', true);
+    } else {
+      appState.setFormDirty('Feedback', false);
+    }
+  }, [textMessage, isRecording, audioUrl]);
+
+  React.useEffect(() => {
+    return () => appState.setFormDirty('Feedback', false);
+  }, []);
 
   const cleanupVoiceResources = () => {
     if (streamRef.current) {

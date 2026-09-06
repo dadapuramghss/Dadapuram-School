@@ -28,8 +28,21 @@ const studentFeedbackSchema = new mongoose.Schema({
   expiresAt: {
     type: Date,
     required: true,
-    index: true,
-    expires: 0 // MongoDB TTL index. Automatically deletes document at expiresAt.
+    index: true
+    // TTL index 'expires: 0' removed to preserve data history
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
+  deletedAt: {
+    type: Date,
+    default: null
+  },
+  deletedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
   }
 });
 

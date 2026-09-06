@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { appState } from '../lib/appState';
 import { useClassConfig } from '../context/ClassConfigContext';
 import { api } from '../lib/api';
 import { Calendar, Save, CheckCircle, Clock, Search, ShieldAlert, BarChart2, Edit3 } from 'lucide-react';
@@ -58,6 +59,10 @@ export function Attendance() {
     };
   }, [standard, section, date, period, activeTab]);
 
+  useEffect(() => {
+    return () => appState.setFormDirty('Attendance', false);
+  }, []);
+
   // Extract unique standards
   const standards = [...new Set(configs.map(c => c.standard))].sort();
   // Extract sections for selected standard
@@ -108,6 +113,7 @@ export function Attendance() {
       }
       
       setRecords(newRecords);
+      appState.setFormDirty('Attendance', false);
     } catch (err) {
       console.error(err);
       setError('Failed to fetch data.');
@@ -134,6 +140,7 @@ export function Attendance() {
   const handleStatusChange = (studentId, status) => {
     if (isLocked) return;
     setRecords(prev => ({ ...prev, [studentId]: status }));
+    appState.setFormDirty('Attendance', true);
   };
 
   const handleSave = async (submit = false) => {
@@ -162,6 +169,7 @@ export function Attendance() {
       if (submit) {
         setIsSubmitted(true);
       }
+      appState.setFormDirty('Attendance', false);
     } catch (err) {
       console.error(err);
       setError(err.message || 'Failed to save attendance.');
@@ -179,6 +187,7 @@ export function Attendance() {
       setSuccessMsg('Attendance deleted successfully!');
       setRecords({});
       setIsSubmitted(false);
+      appState.setFormDirty('Attendance', false);
       fetchAttendanceData();
     } catch(err) {
       setError(err.message || 'Failed to delete attendance.');

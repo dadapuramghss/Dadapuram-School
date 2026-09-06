@@ -3,6 +3,7 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { useAuth } from '../context/AuthContext';
 import { NeonButton } from '../components/ui/NeonButton';
 import { api } from '../lib/api';
+import { appState } from '../lib/appState';
 import { useClassConfig } from '../context/ClassConfigContext';
 
 
@@ -69,7 +70,12 @@ export function Gradebook() {
       ...prev,
       [`${studentId}-${subject}`]: value
     }));
+    appState.setFormDirty('Gradebook', true);
   };
+
+  useEffect(() => {
+    return () => appState.setFormDirty('Gradebook', false);
+  }, []);
 
   const loadStudents = async () => {
     try {
@@ -149,6 +155,7 @@ export function Gradebook() {
         await api.updateMarks(studentId, selectedTerm, marksArray);
       }
 
+      appState.setFormDirty('Gradebook', false);
       alert(`${selectedTerm} marks saved successfully!`);
     } catch (err) {
       console.error('Failed to save marks', err);

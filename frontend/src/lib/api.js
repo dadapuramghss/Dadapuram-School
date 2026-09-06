@@ -1,4 +1,5 @@
 import { auth } from './firebase';
+import { appState } from './appState';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -20,21 +21,32 @@ async function fetchWithAuth(endpoint, options = {}) {
     ...options.headers,
   };
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    const err = new Error(errorData.error || `HTTP error! status: ${response.status}`);
-    if (errorData.validationErrors) {
-      err.validationErrors = errorData.validationErrors;
-    }
-    throw err;
+  const isMutation = options.method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method.toUpperCase());
+  if (isMutation) {
+    appState.incrementMutation();
   }
 
-  return response.json();
+  try {
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const err = new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      if (errorData.validationErrors) {
+        err.validationErrors = errorData.validationErrors;
+      }
+      throw err;
+    }
+
+    return await response.json();
+  } finally {
+    if (isMutation) {
+      appState.decrementMutation();
+    }
+  }
 }
 
 export const api = {

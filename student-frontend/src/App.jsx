@@ -9,6 +9,31 @@ import Materials from './pages/Materials';
 import Feedback from './pages/Feedback';
 import StudentLayout from './components/layout/StudentLayout';
 import { DeveloperProfile } from './components/ui/DeveloperProfile';
+import { DeploymentUpdateBanner } from './components/ui/DeploymentUpdateBanner';
+import { appState } from './lib/appState';
+import axios from 'axios';
+
+axios.interceptors.request.use(config => {
+  if (config.method && ['post', 'put', 'patch', 'delete'].includes(config.method.toLowerCase())) {
+    appState.incrementMutation();
+  }
+  return config;
+});
+
+axios.interceptors.response.use(
+  response => {
+    if (response.config.method && ['post', 'put', 'patch', 'delete'].includes(response.config.method.toLowerCase())) {
+      appState.decrementMutation();
+    }
+    return response;
+  },
+  error => {
+    if (error.config && error.config.method && ['post', 'put', 'patch', 'delete'].includes(error.config.method.toLowerCase())) {
+      appState.decrementMutation();
+    }
+    return Promise.reject(error);
+  }
+);
 
 function App() {
   const ProtectedRoute = ({ children }) => {
@@ -21,6 +46,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <DeploymentUpdateBanner />
       <Routes>
         <Route path="/login" element={<Login />} />
         

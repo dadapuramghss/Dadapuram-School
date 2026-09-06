@@ -27,6 +27,33 @@ export function StudentProfileModal({ studentId, onClose }) {
     fetchStudent();
   }, [studentId]);
 
+  useEffect(() => {
+    if (!studentId) return;
+
+    // Push a temporary history state to intercept the back button
+    window.history.pushState({ studentModalOpen: true }, '');
+
+    const handlePopState = () => {
+      // Hardware back button pressed
+      onClose();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [studentId, onClose]);
+
+  const handleClose = () => {
+    if (window.history.state && window.history.state.studentModalOpen) {
+      // User manually clicked close. Clean up the temporary history state.
+      window.history.back();
+    } else {
+      onClose();
+    }
+  };
+
   if (!studentId) return null;
 
   return (
@@ -36,7 +63,7 @@ export function StudentProfileModal({ studentId, onClose }) {
         {/* Header Background */}
         <div className="h-32 bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-800">
           <button 
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 text-gray-900 rounded-full transition-colors backdrop-blur-md"
           >
             <X className="w-5 h-5" />
@@ -51,7 +78,7 @@ export function StudentProfileModal({ studentId, onClose }) {
         ) : error ? (
           <div className="p-8 text-center">
             <p className="text-red-500">{error}</p>
-            <button onClick={onClose} className="mt-4 px-4 py-2 bg-slate-100 dark:bg-gray-50 rounded-lg text-slate-700 dark:text-slate-300">Close</button>
+            <button onClick={handleClose} className="mt-4 px-4 py-2 bg-slate-100 dark:bg-gray-50 rounded-lg text-slate-700 dark:text-slate-300">Close</button>
           </div>
         ) : student ? (
           <div className="px-6 pb-6">

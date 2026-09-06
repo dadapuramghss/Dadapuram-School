@@ -33,12 +33,22 @@ export function AdminDashboard() {
   }, [stats]);
 
   const filteredFirstMarks = React.useMemo(() => {
+    if (selectedExamFilter === 'All Exams') {
+      if (!stats?.allExamsFirstMarks) return [];
+      let marks = stats.allExamsFirstMarks;
+      const classOrder = { '6': 1, '7': 2, '8': 3, '9': 4, '10': 5, '11': 6, '12': 7 };
+      return [...marks].sort((a, b) => {
+        const orderA = classOrder[a._id.standard] || 99;
+        const orderB = classOrder[b._id.standard] || 99;
+        if (orderA !== orderB) return orderA - orderB;
+        return (a._id.section || '').localeCompare(b._id.section || '');
+      });
+    }
+
     if (!stats?.classwiseFirstMarks) return [];
     let marks = stats.classwiseFirstMarks;
     
-    if (selectedExamFilter !== 'All Exams') {
-      marks = marks.filter(fm => fm._id.termName.toLowerCase() === selectedExamFilter.toLowerCase());
-    }
+    marks = marks.filter(fm => fm._id.termName.toLowerCase() === selectedExamFilter.toLowerCase());
     
     const classOrder = { '6': 1, '7': 2, '8': 3, '9': 4, '10': 5, '11': 6, '12': 7 };
     return [...marks].sort((a, b) => {
@@ -321,20 +331,31 @@ export function AdminDashboard() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {filteredFirstMarks.map((fm, idx) => (
-                    <div key={idx} className="p-4 bg-white shadow-sm rounded-xl border border-gray-200 hover:bg-white/[0.05] transition-colors flex flex-col justify-between">
+                    <div 
+                      key={idx} 
+                      onClick={() => fm.studentId && setSelectedStudentId(fm.studentId)}
+                      className={`p-4 bg-white shadow-sm rounded-xl border border-gray-200 transition-colors flex flex-col justify-between ${fm.studentId ? 'cursor-pointer hover:bg-gray-50' : 'hover:bg-white/[0.05]'}`}
+                    >
                       <div className="flex justify-between items-start mb-3">
                         <span className="text-[10px] uppercase font-bold tracking-widest bg-adminSidebar text-white px-2 py-1 rounded-md">
                           {fm._id.standard} - {fm._id.section}
                         </span>
                         <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500 bg-gray-50 px-2 py-1 rounded-md">
-                          {fm._id.termName}
+                          {fm._id.termName || 'ALL EXAMS'}
                         </span>
                       </div>
                       <div>
                         <p className="text-lg font-bold text-gray-900 truncate">{fm.topStudent}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Trophy className="w-3.5 h-3.5 text-adminAccent2" />
-                          <span className="text-sm font-semibold text-adminAccent2">{fm.topScore} marks</span>
+                        <div className="flex items-center justify-between mt-1">
+                          <div className="flex items-center gap-2">
+                            <Trophy className="w-3.5 h-3.5 text-adminAccent2" />
+                            <span className="text-sm font-semibold text-adminAccent2">
+                              {fm.percentage !== undefined ? `${fm.topScore} / ${fm.maximumMarks}` : `${fm.topScore} marks`}
+                            </span>
+                          </div>
+                          {fm.percentage !== undefined && (
+                            <span className="text-sm font-bold text-gray-900">{fm.percentage.toFixed(2)}%</span>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -3,6 +3,7 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { useAuth } from '../context/AuthContext';
 import { NeonButton } from '../components/ui/NeonButton';
 import { api } from '../lib/api';
+import { appState } from '../lib/appState';
 import { useClassConfig } from '../context/ClassConfigContext';
 import { compressImage, fileToBase64 } from '../lib/utils';
 import { Trash2, Plus, Calendar, BookOpen, Camera, Upload, Mic, Square, Play, Image as ImageIcon, FileText, Link as LinkIcon } from 'lucide-react';
@@ -45,6 +46,18 @@ export function Homework() {
   const [audioUrl, setAudioUrl] = useState(null);
   const mediaRecorder = useRef(null);
   const audioChunks = useRef([]);
+
+  useEffect(() => {
+    if (newHomework.title || newHomework.description || files.length > 0 || audioBlob) {
+      appState.setFormDirty('Homework', true);
+    } else {
+      appState.setFormDirty('Homework', false);
+    }
+  }, [newHomework.title, newHomework.description, files.length, audioBlob]);
+
+  useEffect(() => {
+    return () => appState.setFormDirty('Homework', false);
+  }, []);
 
   const { dbUser } = useAuth();
   

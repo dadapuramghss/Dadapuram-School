@@ -25,6 +25,7 @@ import { AdminClasses } from './pages/AdminClasses';
 import { AdminReports } from './pages/AdminReports';
 import StudentFeedback from './pages/StudentFeedback';
 import { DeveloperProfile } from './components/ui/DeveloperProfile';
+import { DeploymentUpdateBanner } from './components/ui/DeploymentUpdateBanner';
 
 import { DataSync } from './pages/DataSync';
 
@@ -138,6 +139,7 @@ function App() {
   return (
     <AuthProvider>
       <ClassConfigProvider>
+        <DeploymentUpdateBanner />
         <BrowserRouter>
           <AppRoutes />
         </BrowserRouter>
