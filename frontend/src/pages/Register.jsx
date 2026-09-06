@@ -28,7 +28,7 @@ export function Register() {
       setError('');
       setLoading(true);
       await register(email, password, name);
-      navigate('/pending-approval');
+      navigate('/pending-approval', { replace: true });
     } catch (err) {
       setError('Failed to create an account. ' + err.message);
     } finally {
@@ -41,7 +41,7 @@ export function Register() {
       setError('');
       setLoading(true);
       await loginWithGoogle(true);
-      navigate('/pending-approval');
+      navigate('/pending-approval', { replace: true });
     } catch (err) {
       setError('Failed to sign in with Google. ' + err.message);
     } finally {

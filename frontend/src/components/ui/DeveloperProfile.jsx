@@ -71,6 +71,13 @@ export function DeveloperProfile() {
                 <Briefcase className="w-5 h-5 sm:w-6 sm:h-6" />
                 {DEVELOPER_INFO.title}
               </p>
+              
+              <div className="mt-5 text-gray-700 dark:text-gray-300 font-medium text-sm sm:text-base max-w-2xl mx-auto sm:mx-0">
+                <p>Have a website, mobile app, or software project in mind? Feel free to contact me to discuss your requirements.</p>
+                <p className="mt-2 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center sm:justify-start gap-2">
+                  <span className="text-xl">📞</span> Contact: 9342695097
+                </p>
+              </div>
             </div>
           </div>
         </div>

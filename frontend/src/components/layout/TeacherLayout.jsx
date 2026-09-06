@@ -5,9 +5,10 @@ import { LayoutDashboard, Users, GraduationCap, LogOut, BarChart3, ShieldAlert, 
 import { cn } from '../../lib/utils';
 import { api } from '../../lib/api';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
+import { useMobileSidebar } from '../../hooks/useMobileSidebar';
 
 export function TeacherLayout() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
+  const { isSidebarOpen, setIsSidebarOpen, closeSidebarSafely, navigate } = useMobileSidebar(window.innerWidth >= 768, 768);
   const [isBottomMenuExpanded, setIsBottomMenuExpanded] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
   const [circularIds, setCircularIds] = useState([]);
@@ -44,9 +45,10 @@ export function TeacherLayout() {
     setIsNotificationPanelOpen(true);
   };
 
-  const handleNavClick = () => {
+  const handleNavClick = (e, path) => {
     if (window.innerWidth < 768) {
-      setIsSidebarOpen(false);
+      e.preventDefault();
+      closeSidebarSafely(() => navigate(path));
     }
   };
 
@@ -107,7 +109,7 @@ export function TeacherLayout() {
       {isSidebarOpen && (
         <div 
           className="md:hidden fixed inset-0 bg-[#2E1C40]/40 backdrop-blur-sm z-40"
-          onClick={() => setIsSidebarOpen(false)}
+          onClick={() => closeSidebarSafely()}
         />
       )}
 
@@ -155,7 +157,7 @@ export function TeacherLayout() {
                 key={item.name}
                 to={item.path}
                 end={item.exact}
-                onClick={handleNavClick}
+                onClick={(e) => handleNavClick(e, item.path)}
                 className={({ isActive }) =>
                   cn(
                     "flex items-center rounded-xl transition-all duration-300",
@@ -218,7 +220,7 @@ export function TeacherLayout() {
           >
             <NavLink
               to="/teacher/profile"
-              onClick={handleNavClick}
+              onClick={(e) => handleNavClick(e, '/teacher/profile')}
               className={({ isActive }) =>
                 cn(
                   "flex items-center rounded-xl transition-all duration-300 w-full",
@@ -239,7 +241,7 @@ export function TeacherLayout() {
             </NavLink>
             <NavLink 
               to="developer-profile"
-              onClick={handleNavClick}
+              onClick={(e) => handleNavClick(e, 'developer-profile')}
               className={({ isActive }) =>
                 cn(
                   "flex items-center rounded-xl transition-all duration-300 w-full font-medium border-l-4",
@@ -259,7 +261,7 @@ export function TeacherLayout() {
               )}
             </NavLink>
             <button 
-              onClick={logout}
+              onClick={() => closeSidebarSafely(logout)}
               className={cn(
                 "flex items-center rounded-xl text-[#E5D9C4]/70 hover:bg-[#732A26] hover:text-[#E5D9C4] transition-all duration-300 w-full font-medium border border-transparent hover:border-[#AE634A]/50",
                 isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12"

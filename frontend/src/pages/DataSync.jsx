@@ -642,7 +642,7 @@ export function DataSync() {
       </div>
 
       {/* TABS */}
-      <div className="flex bg-white/50 dark:bg-gray-900/50 p-1 rounded-xl w-full max-w-3xl mb-8 border border-gray-200 shadow-sm backdrop-blur-xl">
+      <div className="flex flex-col sm:flex-row bg-white/50 dark:bg-gray-900/50 p-1 rounded-xl w-full max-w-3xl mb-8 border border-gray-200 shadow-sm backdrop-blur-xl">
         <button
           onClick={() => { setSyncType('profiles'); setError(null); setImportResults(null); }}
           className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all ${

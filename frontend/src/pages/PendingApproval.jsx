@@ -13,7 +13,7 @@ export function PendingApproval() {
     if (currentUser) {
       logout();
     } else {
-      navigate('/login');
+      navigate('/login', { replace: true });
     }
   };
 

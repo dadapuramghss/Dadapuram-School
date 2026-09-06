@@ -34,12 +34,31 @@ export function AdminDashboard() {
 
   const filteredFirstMarks = React.useMemo(() => {
     if (!stats?.classwiseFirstMarks) return [];
-    if (selectedExamFilter === 'All Exams') return stats.classwiseFirstMarks;
+    let marks = stats.classwiseFirstMarks;
     
-    return stats.classwiseFirstMarks.filter(fm => 
-      fm._id.termName.toLowerCase() === selectedExamFilter.toLowerCase()
-    );
+    if (selectedExamFilter !== 'All Exams') {
+      marks = marks.filter(fm => fm._id.termName.toLowerCase() === selectedExamFilter.toLowerCase());
+    }
+    
+    const classOrder = { '6': 1, '7': 2, '8': 3, '9': 4, '10': 5, '11': 6, '12': 7 };
+    return [...marks].sort((a, b) => {
+      const orderA = classOrder[a._id.standard] || 99;
+      const orderB = classOrder[b._id.standard] || 99;
+      if (orderA !== orderB) return orderA - orderB;
+      return (a._id.section || '').localeCompare(b._id.section || '');
+    });
   }, [stats, selectedExamFilter]);
+
+  const sortedStudentsAbstract = React.useMemo(() => {
+    if (!stats?.studentsAbstract) return [];
+    const classOrder = { '6': 1, '7': 2, '8': 3, '9': 4, '10': 5, '11': 6, '12': 7 };
+    return [...stats.studentsAbstract].sort((a, b) => {
+      const orderA = classOrder[a._id.standard] || 99;
+      const orderB = classOrder[b._id.standard] || 99;
+      if (orderA !== orderB) return orderA - orderB;
+      return (a._id.section || '').localeCompare(b._id.section || '');
+    });
+  }, [stats]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -256,7 +275,7 @@ export function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {stats.studentsAbstract.map((abs, idx) => (
+                      {sortedStudentsAbstract.map((abs, idx) => (
                         <tr key={idx} className="border-b border-gray-200 last:border-0 hover:bg-white shadow-sm transition-colors">
                           <td className="px-4 py-3 font-bold text-gray-900 whitespace-nowrap">{abs._id.standard} - {abs._id.section}</td>
                           <td className="px-4 py-3 text-center text-adminSidebar font-semibold">{abs.maleStudents}</td>
@@ -304,7 +323,7 @@ export function AdminDashboard() {
                   {filteredFirstMarks.map((fm, idx) => (
                     <div key={idx} className="p-4 bg-white shadow-sm rounded-xl border border-gray-200 hover:bg-white/[0.05] transition-colors flex flex-col justify-between">
                       <div className="flex justify-between items-start mb-3">
-                        <span className="text-[10px] uppercase font-bold tracking-widest text-adminSidebar bg-adminSidebar text-white/10 px-2 py-1 rounded-md">
+                        <span className="text-[10px] uppercase font-bold tracking-widest bg-adminSidebar text-white px-2 py-1 rounded-md">
                           {fm._id.standard} - {fm._id.section}
                         </span>
                         <span className="text-[10px] uppercase font-bold tracking-widest text-gray-500 bg-gray-50 px-2 py-1 rounded-md">

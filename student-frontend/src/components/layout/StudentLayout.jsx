@@ -25,11 +25,13 @@ import {
   Code
 } from 'lucide-react';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
+import { useMobileSidebar } from '../../hooks/useMobileSidebar';
 
 export default function StudentLayout() {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { isSidebarOpen, setIsSidebarOpen, closeSidebarSafely } = useMobileSidebar(false, 1024);
+  const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
   const [circularIds, setCircularIds] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -47,14 +49,13 @@ export default function StudentLayout() {
   const [isSwitching, setIsSwitching] = useState(false);
   
   const dropdownRef = useRef(null);
-  const navigate = useNavigate();
   const { isInstallable, installApp } = usePWAInstall();
 
   useEffect(() => {
     const fetchStudentData = async () => {
       const token = localStorage.getItem('studentToken');
       if (!token) {
-        navigate('/login');
+        navigate('/login', { replace: true });
         return;
       }
 
@@ -76,7 +77,7 @@ export default function StudentLayout() {
       } catch (error) {
         console.error('Error fetching student data:', error);
         localStorage.removeItem('studentToken');
-        navigate('/login');
+        navigate('/login', { replace: true });
       } finally {
         setLoading(false);
       }
@@ -151,7 +152,7 @@ export default function StudentLayout() {
 
   const handleLogout = () => {
     localStorage.removeItem('studentToken');
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
   const switchAccount = async (targetStudentId) => {
@@ -267,7 +268,7 @@ export default function StudentLayout() {
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
+          onClick={() => closeSidebarSafely()}
         />
       )}
 
@@ -285,7 +286,7 @@ export default function StudentLayout() {
               Student Rise
             </span>
             <button 
-              onClick={() => setIsSidebarOpen(false)}
+              onClick={() => closeSidebarSafely()}
               className="ml-auto lg:hidden text-gray-500 hover:text-gray-700"
             >
               <X className="w-5 h-5" />
@@ -300,7 +301,12 @@ export default function StudentLayout() {
                 <NavLink
                   key={item.name}
                   to={item.path}
-                  onClick={() => setIsSidebarOpen(false)}
+                  onClick={(e) => {
+                    if (window.innerWidth < 1024) {
+                      e.preventDefault();
+                      closeSidebarSafely(() => navigate(item.path));
+                    }
+                  }}
                   className={({ isActive }) =>
                     `flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group ${
                       isActive
@@ -328,7 +334,7 @@ export default function StudentLayout() {
               </button>
             )}
             <button
-              onClick={handleLogout}
+              onClick={() => closeSidebarSafely(handleLogout)}
               className="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors group"
             >
               <LogOut className="w-5 h-5 mr-3 flex-shrink-0 opacity-80 group-hover:opacity-100" />
@@ -336,7 +342,12 @@ export default function StudentLayout() {
             </button>
             <NavLink
               to="/developer-profile"
-              onClick={() => setIsSidebarOpen(false)}
+              onClick={(e) => {
+                if (window.innerWidth < 1024) {
+                  e.preventDefault();
+                  closeSidebarSafely(() => navigate('/developer-profile'));
+                }
+              }}
               className={({ isActive }) =>
                 `flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group ${
                   isActive

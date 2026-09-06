@@ -14,7 +14,13 @@ export function Login() {
   const [resetting, setResetting] = useState(false);
   const [selectedRole, setSelectedRole] = useState('admin');
   const navigate = useNavigate();
-  const { login, loginWithGoogle, logout, resetPassword } = useAuth();
+  const { currentUser, login, loginWithGoogle, logout, resetPassword } = useAuth();
+
+  React.useEffect(() => {
+    if (currentUser) {
+      navigate('/', { replace: true });
+    }
+  }, [currentUser, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,7 +46,7 @@ export function Login() {
         // If backend is down, we can't verify role. We'll proceed and let ProtectedRoute handle it.
       }
       
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (err) {
       console.error("Login failed:", err.code, err.message);
       
@@ -85,7 +91,7 @@ export function Login() {
         // proceed if backend is down
       }
 
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (err) {
       setError('Failed to sign in with Google. ' + err.message);
     } finally {

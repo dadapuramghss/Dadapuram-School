@@ -4,16 +4,18 @@ import { useAuth } from '../../context/AuthContext';
 import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, ChevronUp, Bot, BookOpen, Database, Settings, PieChart, Download, CalendarCheck, Link as LinkIcon, MessageSquare, Code } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
+import { useMobileSidebar } from '../../hooks/useMobileSidebar';
 
 export function AdminLayout() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
+  const { isSidebarOpen, setIsSidebarOpen, closeSidebarSafely, navigate } = useMobileSidebar(window.innerWidth >= 768, 768);
   const [isBottomMenuExpanded, setIsBottomMenuExpanded] = useState(true);
   const { logout, dbUser } = useAuth();
   const { isInstallable, installApp } = usePWAInstall();
 
-  const handleNavClick = () => {
+  const handleNavClick = (e, path) => {
     if (window.innerWidth < 768) {
-      setIsSidebarOpen(false);
+      e.preventDefault();
+      closeSidebarSafely(() => navigate(path));
     }
   };
 
@@ -71,7 +73,7 @@ export function AdminLayout() {
       {isSidebarOpen && (
         <div 
           className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-          onClick={() => setIsSidebarOpen(false)}
+          onClick={() => closeSidebarSafely()}
         />
       )}
 
@@ -107,7 +109,7 @@ export function AdminLayout() {
                 key={item.name}
                 to={item.path}
                 end={item.exact}
-                onClick={handleNavClick}
+                onClick={(e) => handleNavClick(e, item.path)}
                 className={({ isActive }) =>
                   cn(
                     "flex items-center rounded-2xl transition-all duration-300",
@@ -170,7 +172,7 @@ export function AdminLayout() {
           >
             <NavLink
               to="/admin/profile"
-              onClick={handleNavClick}
+              onClick={(e) => handleNavClick(e, '/admin/profile')}
               className={({ isActive }) =>
                 cn(
                   "flex items-center rounded-2xl transition-all duration-300 w-full",
@@ -191,7 +193,7 @@ export function AdminLayout() {
             </NavLink>
             <NavLink 
               to="developer-profile"
-              onClick={handleNavClick}
+              onClick={(e) => handleNavClick(e, 'developer-profile')}
               className={({ isActive }) =>
                 cn(
                   "flex items-center rounded-xl transition-all duration-300 w-full",
@@ -211,7 +213,7 @@ export function AdminLayout() {
               )}
             </NavLink>
             <button 
-              onClick={logout}
+              onClick={() => closeSidebarSafely(logout)}
               className={cn(
                 "flex items-center rounded-xl text-white/70 hover:bg-adminAccent1 hover:text-white transition-all duration-300 w-full font-medium",
                 isSidebarOpen ? "gap-3 px-4 py-3.5" : "justify-center p-3.5 mx-auto w-12"

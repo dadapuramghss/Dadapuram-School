@@ -16,6 +16,13 @@ export default function Login() {
   const [selectedStudentName, setSelectedStudentName] = useState('');
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    const token = localStorage.getItem('studentToken');
+    if (token) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -78,7 +85,7 @@ export default function Login() {
       
       if (response.data.token) {
         localStorage.setItem('studentToken', response.data.token);
-        navigate('/dashboard');
+        navigate('/dashboard', { replace: true });
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid password');
