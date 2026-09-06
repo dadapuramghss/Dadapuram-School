@@ -16,6 +16,7 @@ export function AdminUsers() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [assignedClasses, setAssignedClasses] = useState([]);
   const [newClass, setNewClass] = useState({ standard: '6', section: 'A', accessLevel: 'full' });
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -68,56 +69,73 @@ export function AdminUsers() {
   };
 
   const handleReject = async (uid) => {
+    if (isProcessing) return;
     if (!window.confirm('Are you sure you want to reject and delete this request?')) return;
     
+    setIsProcessing(true);
     try {
       await api.delete(`/auth/users/${uid}`);
       setUsers(users.filter(u => u.uid !== uid));
     } catch (err) {
       console.error('Failed to reject user', err);
       alert('Failed to reject user');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleDelete = async (uid) => {
+    if (isProcessing) return;
     if (!window.confirm('Delete this teacher account permanently?\n\nThis action permanently removes the teacher account and cannot be undone.')) return;
     
+    setIsProcessing(true);
     try {
       await api.delete(`/auth/users/${uid}`);
       setUsers(users.filter(u => u.uid !== uid));
     } catch (err) {
       console.error('Failed to delete user', err);
       alert(err.response?.data?.message || 'Failed to delete user');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleDeactivate = async (uid) => {
+    if (isProcessing) return;
     if (!window.confirm('Are you sure you want to deactivate this teacher?')) return;
     
+    setIsProcessing(true);
     try {
       const res = await api.patch(`/auth/users/${uid}/deactivate`);
       setUsers(users.map(u => u.uid === uid ? { ...u, isActive: false } : u));
     } catch (err) {
       console.error('Failed to deactivate user', err);
       alert(err.response?.data?.message || 'Failed to deactivate user');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleActivate = async (uid) => {
+    if (isProcessing) return;
     if (!window.confirm('Activate this teacher account?')) return;
     
+    setIsProcessing(true);
     try {
       const res = await api.patch(`/auth/users/${uid}/activate`);
       setUsers(users.map(u => u.uid === uid ? { ...u, isActive: true } : u));
     } catch (err) {
       console.error('Failed to activate user', err);
       alert(err.response?.data?.message || 'Failed to activate user');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleSave = async () => {
-    if (!selectedUser) return;
+    if (!selectedUser || isProcessing) return;
     
+    setIsProcessing(true);
     try {
       // If user is pending, we are approving them. If approved, we are just updating classes.
       const payload = {
@@ -134,6 +152,8 @@ export function AdminUsers() {
     } catch (err) {
       console.error('Failed to update user', err);
       alert('Failed to update user');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -207,11 +227,12 @@ export function AdminUsers() {
                       <td className="p-4 text-right space-x-2">
                         <button 
                           onClick={() => handleReject(user.uid)}
-                          className="px-3 py-1.5 rounded-lg text-sm font-medium text-red-400 hover:text-gray-900 hover:bg-red-500/20 transition-colors border border-red-500/30"
+                          disabled={isProcessing}
+                          className="px-3 py-1.5 rounded-lg text-sm font-medium text-red-400 hover:text-gray-900 hover:bg-red-500/20 transition-colors border border-red-500/30 disabled:opacity-50"
                         >
                           Reject
                         </button>
-                        <NeonButton onClick={() => openModal(user)} variant="primary" className="py-1.5 px-4 text-sm">
+                        <NeonButton onClick={() => openModal(user)} variant="primary" className="py-1.5 px-4 text-sm" disabled={isProcessing}>
                           Approve & Assign Classes
                         </NeonButton>
                       </td>
@@ -257,19 +278,19 @@ export function AdminUsers() {
                         </span>
                       </td>
                       <td className="p-4 text-right space-x-2">
-                        <NeonButton onClick={() => openModal(user)} variant="secondary" className="py-1.5 px-4 text-sm">
+                        <NeonButton onClick={() => openModal(user)} variant="secondary" className="py-1.5 px-4 text-sm" disabled={isProcessing}>
                           Edit Classes
                         </NeonButton>
                         {user.isActive !== false ? (
-                          <button onClick={() => handleDeactivate(user.uid)} className="px-3 py-1.5 rounded-lg text-sm font-medium text-orange-600 hover:text-white hover:bg-orange-500 transition-colors border border-orange-200 hover:border-transparent">
+                          <button onClick={() => handleDeactivate(user.uid)} disabled={isProcessing} className="px-3 py-1.5 rounded-lg text-sm font-medium text-orange-600 hover:text-white hover:bg-orange-500 transition-colors border border-orange-200 hover:border-transparent disabled:opacity-50">
                             Deactivate
                           </button>
                         ) : (
-                          <button onClick={() => handleActivate(user.uid)} className="px-3 py-1.5 rounded-lg text-sm font-medium text-green-600 hover:text-white hover:bg-green-500 transition-colors border border-green-200 hover:border-transparent">
+                          <button onClick={() => handleActivate(user.uid)} disabled={isProcessing} className="px-3 py-1.5 rounded-lg text-sm font-medium text-green-600 hover:text-white hover:bg-green-500 transition-colors border border-green-200 hover:border-transparent disabled:opacity-50">
                             Activate
                           </button>
                         )}
-                        <button onClick={() => handleDelete(user.uid)} className="px-3 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:text-white hover:bg-red-600 transition-colors border border-red-200 hover:border-transparent">
+                        <button onClick={() => handleDelete(user.uid)} disabled={isProcessing} className="px-3 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:text-white hover:bg-red-600 transition-colors border border-red-200 hover:border-transparent disabled:opacity-50">
                           Delete
                         </button>
                       </td>
@@ -364,12 +385,13 @@ export function AdminUsers() {
             <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
               <button 
                 onClick={closeModal}
-                className="px-4 py-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                disabled={isProcessing}
+                className="px-4 py-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
-              <NeonButton onClick={handleSave} variant="primary">
-                {selectedUser.status === 'pending' ? 'Approve User' : 'Save Changes'}
+              <NeonButton onClick={handleSave} variant="primary" disabled={isProcessing}>
+                {selectedUser.status === 'pending' ? (isProcessing ? 'Approving...' : 'Approve User') : (isProcessing ? 'Saving...' : 'Save Changes')}
               </NeonButton>
             </div>
           </GlassCard>
