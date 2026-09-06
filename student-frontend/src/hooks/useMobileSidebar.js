@@ -41,13 +41,15 @@ export function useMobileSidebar(initialState = false, breakpoint = 768) {
 
   const closeSidebarSafely = useCallback((callback) => {
     if (isOpenRef.current && window.innerWidth < breakpoint) {
-      if (window.history.state?.__sidebarOpen) {
-        window.history.back();
-      } else {
-        setIsSidebarOpenState(false);
-      }
       if (callback) {
-        setTimeout(callback, 10);
+        setIsSidebarOpenState(false);
+        callback();
+      } else {
+        if (window.history.state?.__sidebarOpen) {
+          window.history.back();
+        } else {
+          setIsSidebarOpenState(false);
+        }
       }
     } else {
       setIsSidebarOpenState(false);

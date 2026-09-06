@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { GlassCard } from '../components/ui/GlassCard';
 import { NeonButton } from '../components/ui/NeonButton';
 import { api } from '../lib/api';
@@ -14,13 +14,19 @@ export function Login() {
   const [resetting, setResetting] = useState(false);
   const [selectedRole, setSelectedRole] = useState('admin');
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentUser, login, loginWithGoogle, logout, resetPassword } = useAuth();
 
   React.useEffect(() => {
     if (currentUser) {
       navigate('/', { replace: true });
     }
-  }, [currentUser, navigate]);
+    const params = new URLSearchParams(location.search);
+    const urlError = params.get('error');
+    if (urlError) {
+      setError(urlError);
+    }
+  }, [currentUser, navigate, location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

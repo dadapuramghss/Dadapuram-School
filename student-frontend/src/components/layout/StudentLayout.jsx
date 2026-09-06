@@ -304,7 +304,7 @@ export default function StudentLayout() {
                   onClick={(e) => {
                     if (window.innerWidth < 1024) {
                       e.preventDefault();
-                      closeSidebarSafely(() => navigate(item.path));
+                      closeSidebarSafely(() => navigate(item.path, { replace: true }));
                     }
                   }}
                   className={({ isActive }) =>
@@ -345,7 +345,7 @@ export default function StudentLayout() {
               onClick={(e) => {
                 if (window.innerWidth < 1024) {
                   e.preventDefault();
-                  closeSidebarSafely(() => navigate('/developer-profile'));
+                  closeSidebarSafely(() => navigate('/developer-profile', { replace: true }));
                 }
               }}
               className={({ isActive }) =>

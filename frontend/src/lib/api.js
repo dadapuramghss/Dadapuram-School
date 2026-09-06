@@ -34,6 +34,12 @@ async function fetchWithAuth(endpoint, options = {}) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      
+      if (response.status === 403 && errorData.error && errorData.error.includes('deactivated')) {
+        await auth.signOut();
+        window.location.href = '/login?error=' + encodeURIComponent(errorData.error);
+      }
+
       const err = new Error(errorData.error || `HTTP error! status: ${response.status}`);
       if (errorData.validationErrors) {
         err.validationErrors = errorData.validationErrors;
@@ -131,6 +137,7 @@ export const api = {
   post: (url, data) => fetchWithAuth(url, { method: 'POST', body: JSON.stringify(data || {}) }),
   get: (url) => fetchWithAuth(url),
   put: (url, data) => fetchWithAuth(url, { method: 'PUT', body: JSON.stringify(data || {}) }),
+  patch: (url, data) => fetchWithAuth(url, { method: 'PATCH', body: JSON.stringify(data || {}) }),
   delete: (url) => fetchWithAuth(url, { method: 'DELETE' }),
   getMe: () => fetchWithAuth('/auth/me'),
   updateProfile: (data) => fetchWithAuth('/auth/me', {
