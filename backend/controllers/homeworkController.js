@@ -1,4 +1,5 @@
 const Homework = require('../models/Homework');
+const ClassConfig = require('../models/ClassConfig');
 
 // Check authorization (using similar logic to studentController)
 const isAuthorizedForClass = (user, standard, section, requireFullAccess = false) => {
@@ -16,10 +17,30 @@ const isAuthorizedForClass = (user, standard, section, requireFullAccess = false
 // Add homework
 const addHomework = async (req, res) => {
   try {
-    const { title, description, subject, standard, section, dueDate, photoUrl, photoUrls, voiceUrl, link } = req.body;
+    const { title, description, subject, standard, section, sections, dueDate, photoUrl, photoUrls, voiceUrl, link } = req.body;
 
-    if (!isAuthorizedForClass(req.dbUser, standard, section, true)) {
-      return res.status(403).json({ error: 'Not authorized for full access to this class and section' });
+    let targetSections = [];
+    if (sections && Array.isArray(sections)) {
+      targetSections = [...new Set(sections.map(s => String(s).trim()).filter(Boolean))];
+    } else if (section) {
+      targetSections = [String(section).trim()];
+    }
+
+    if (targetSections.length === 0) {
+      return res.status(400).json({ error: 'At least one section is required' });
+    }
+
+    // Validate sections against ClassConfig
+    const validConfigs = await ClassConfig.find({ standard, section: { $in: targetSections } });
+    const validSectionNames = validConfigs.map(c => c.section);
+    
+    for (const sec of targetSections) {
+      if (!validSectionNames.includes(sec)) {
+        return res.status(400).json({ error: `Section ${sec} does not exist for Standard ${standard}` });
+      }
+      if (!isAuthorizedForClass(req.dbUser, standard, sec, true)) {
+        return res.status(403).json({ error: `Not authorized for full access to class ${standard} section ${sec}` });
+      }
     }
 
     const newHomework = new Homework({
@@ -27,7 +48,7 @@ const addHomework = async (req, res) => {
       description,
       subject,
       standard,
-      section,
+      sections: targetSections, // New array format
       dueDate,
       photoUrl,
       photoUrls,
@@ -40,6 +61,72 @@ const addHomework = async (req, res) => {
     res.status(201).json({ success: true, data: newHomework });
   } catch (error) {
     console.error('Error adding homework:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Update homework
+const updateHomework = async (req, res) => {
+  try {
+    const { homeworkId } = req.params;
+    const { title, description, subject, standard, section, sections, dueDate, photoUrl, photoUrls, voiceUrl, link } = req.body;
+
+    const homework = await Homework.findById(homeworkId);
+    if (!homework) {
+      return res.status(404).json({ error: 'Homework not found' });
+    }
+
+    // Verify existing authorization first
+    const existingSections = homework.sections && homework.sections.length > 0 
+      ? homework.sections 
+      : [homework.section];
+      
+    for (const sec of existingSections) {
+      if (sec && !isAuthorizedForClass(req.dbUser, homework.standard, sec, true)) {
+        return res.status(403).json({ error: 'Not authorized to modify this homework' });
+      }
+    }
+
+    let targetSections = [];
+    if (sections && Array.isArray(sections)) {
+      targetSections = [...new Set(sections.map(s => String(s).trim()).filter(Boolean))];
+    } else if (section) {
+      targetSections = [String(section).trim()];
+    }
+
+    if (targetSections.length === 0) {
+      return res.status(400).json({ error: 'At least one section is required' });
+    }
+
+    const validConfigs = await ClassConfig.find({ standard, section: { $in: targetSections } });
+    const validSectionNames = validConfigs.map(c => c.section);
+
+    for (const sec of targetSections) {
+      if (!validSectionNames.includes(sec)) {
+        return res.status(400).json({ error: `Section ${sec} does not exist for Standard ${standard}` });
+      }
+      if (!isAuthorizedForClass(req.dbUser, standard, sec, true)) {
+        return res.status(403).json({ error: `Not authorized for full access to class ${standard} section ${sec}` });
+      }
+    }
+
+    homework.title = title;
+    homework.description = description;
+    homework.subject = subject;
+    homework.standard = standard;
+    homework.sections = targetSections;
+    homework.section = undefined; // Clear legacy section to prefer sections array
+    homework.dueDate = dueDate;
+    
+    if (photoUrl !== undefined) homework.photoUrl = photoUrl;
+    if (photoUrls !== undefined) homework.photoUrls = photoUrls;
+    if (voiceUrl !== undefined) homework.voiceUrl = voiceUrl;
+    if (link !== undefined) homework.link = link;
+
+    await homework.save();
+    res.status(200).json({ success: true, data: homework });
+  } catch (error) {
+    console.error('Error updating homework:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -58,7 +145,13 @@ const getHomeworkByClass = async (req, res) => {
 
     const query = {};
     if (standard !== 'All') query.standard = standard;
-    if (section !== 'All') query.section = section;
+    
+    if (section !== 'All') {
+      query.$or = [
+        { section: section },
+        { sections: section }
+      ];
+    }
 
     const homeworkList = await Homework.find(query).sort({ dueDate: 1 });
     res.status(200).json({ success: true, data: homeworkList });
@@ -78,8 +171,12 @@ const deleteHomework = async (req, res) => {
       return res.status(404).json({ error: 'Homework not found' });
     }
 
-    if (!isAuthorizedForClass(req.dbUser, homework.standard, homework.section, true)) {
-      return res.status(403).json({ error: 'Not authorized to delete this homework' });
+    const targetSections = homework.sections && homework.sections.length > 0 ? homework.sections : [homework.section];
+
+    for (const sec of targetSections) {
+      if (sec && !isAuthorizedForClass(req.dbUser, homework.standard, sec, true)) {
+        return res.status(403).json({ error: 'Not authorized to delete this homework' });
+      }
     }
 
     await Homework.findByIdAndDelete(homeworkId);
@@ -92,6 +189,7 @@ const deleteHomework = async (req, res) => {
 
 module.exports = {
   addHomework,
+  updateHomework,
   getHomeworkByClass,
   deleteHomework
 };

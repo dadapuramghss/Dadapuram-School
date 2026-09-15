@@ -99,7 +99,11 @@ export const api = {
   getHomeworkByClass: (standard, section) => fetchWithAuth(`/homework?standard=${standard}&section=${section}`),
   addHomework: (data) => fetchWithAuth('/homework', {
     method: 'POST',
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
+  }),
+  updateHomework: (id, data) => fetchWithAuth(`/homework/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
   }),
   deleteHomework: (id) => fetchWithAuth(`/homework/${id}`, {
     method: 'DELETE'

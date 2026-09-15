@@ -16,6 +16,7 @@ export function Homework() {
   const [homeworkList, setHomeworkList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [editingHomeworkId, setEditingHomeworkId] = useState(null);
 
   const { classConfigs } = useClassConfig();
   
@@ -204,14 +205,28 @@ export function Homework() {
         voiceUrl = await blobToBase64(audioBlob);
       }
 
-      await api.addHomework({
+      const payload = {
         ...newHomework,
         standard: selectedClass,
-        section: selectedSection,
-        photoUrl: photoUrls.length > 0 ? photoUrls[0] : null, // keep the first as photoUrl for backward compatibility
-        photoUrls, // send the array of all photos
+        photoUrl: photoUrls.length > 0 ? photoUrls[0] : null,
+        photoUrls,
         voiceUrl
-      });
+      };
+      
+      // Ensure at least one section is selected if form supports sections
+      if (newHomework.sections && newHomework.sections.length > 0) {
+        payload.sections = newHomework.sections;
+      } else {
+        payload.sections = [selectedSection];
+      }
+
+      if (editingHomeworkId) {
+        await api.updateHomework(editingHomeworkId, payload);
+      } else {
+        await api.addHomework(payload);
+      }
+      
+      setIsAdding(false);
       
       setIsAdding(false);
       resetForm();
@@ -236,6 +251,24 @@ export function Homework() {
     setPreviewUrls([]);
     setAudioBlob(null);
     setAudioUrl(null);
+  };
+
+  const handleEdit = (hw) => {
+    setEditingHomeworkId(hw._id);
+    setNewHomework({
+      title: hw.title || '',
+      description: hw.description || '',
+      subject: hw.subject || currentSubjects[0] || '',
+      dueDate: hw.dueDate ? new Date(hw.dueDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      link: hw.link || '',
+      sections: hw.sections?.length > 0 ? hw.sections : (hw.section ? [hw.section] : [selectedSection])
+    });
+    
+    setPreviewUrls(hw.photoUrls?.length > 0 ? hw.photoUrls : (hw.photoUrl ? [hw.photoUrl] : []));
+    setFiles([]); // We don't load files back, they are already on server, user can add new ones or clear.
+    setAudioUrl(hw.voiceUrl || null);
+    setIsAdding(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (id) => {
@@ -301,9 +334,36 @@ export function Homework() {
 
       {isAdding && (
         <GlassCard className="border border-adminSidebar shadow-[0_0_15px_rgba(98,212,202,0.3)]">
-          <h2 className="text-xl font-bold text-[#2E1C40] dark:text-gray-900 mb-4">Assign New Homework</h2>
+          <h2 className="text-xl font-bold text-[#2E1C40] dark:text-gray-900 mb-4">{editingHomeworkId ? 'Edit Homework' : 'Assign New Homework'}</h2>
           <form onSubmit={handleAddSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-bold text-[#4C677C] dark:text-[#E5D9C4] mb-2">Assign to Sections</label>
+                <div className="flex flex-wrap gap-3">
+                  {availableSections.map(sec => (
+                    <label key={sec} className="flex items-center gap-2 cursor-pointer bg-white dark:bg-[#1A1A24] px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:border-adminSidebar/50 transition-colors">
+                      <input 
+                        type="checkbox"
+                        checked={newHomework.sections?.includes(sec)}
+                        onChange={(e) => {
+                          const currentSections = newHomework.sections || [];
+                          if (e.target.checked) {
+                            setNewHomework({...newHomework, sections: [...currentSections, sec]});
+                          } else {
+                            setNewHomework({...newHomework, sections: currentSections.filter(s => s !== sec)});
+                          }
+                        }}
+                        className="rounded text-adminSidebar focus:ring-adminSidebar"
+                      />
+                      <span className="text-[#2E1C40] dark:text-gray-200 font-medium text-sm">Section {sec}</span>
+                    </label>
+                  ))}
+                </div>
+                {(!newHomework.sections || newHomework.sections.length === 0) && (
+                  <p className="text-red-500 text-xs mt-1">Please select at least one section.</p>
+                )}
+              </div>
               <div>
                 <label className="block text-sm font-bold text-[#4C677C] dark:text-[#E5D9C4] mb-1">Title</label>
                 <input 
@@ -444,7 +504,7 @@ export function Homework() {
                 Cancel
               </button>
               <NeonButton type="submit" disabled={loading} className="bg-adminSidebar text-white text-[#2E1C40]">
-                {loading ? 'Assigning...' : 'Assign Homework'}
+                {loading ? (editingHomeworkId ? 'Updating...' : 'Assigning...') : (editingHomeworkId ? 'Update Homework' : 'Assign Homework')}
               </NeonButton>
             </div>
           </form>
@@ -468,17 +528,33 @@ export function Homework() {
             <GlassCard key={hw._id} className="flex flex-col relative overflow-hidden group">
               <div className="absolute top-0 left-0 w-1 h-full bg-adminSidebar text-white"></div>
               <div className="flex justify-between items-start mb-2">
-                <span className="bg-adminSidebar/20 text-[#2E1C40] dark:text-adminSidebar px-3 py-1 rounded-full text-xs font-bold">
-                  {hw.subject}
-                </span>
+                <div className="flex gap-2 items-center">
+                  <span className="bg-adminSidebar/20 text-[#2E1C40] dark:text-adminSidebar px-3 py-1 rounded-full text-xs font-bold">
+                    {hw.subject}
+                  </span>
+                  <span className="text-xs text-gray-500 font-medium">
+                    {hw.sections && hw.sections.length > 0 
+                      ? (hw.sections.length > 1 ? 'Sections: ' : 'Section: ') + hw.sections.join(', ')
+                      : (hw.section ? 'Section: ' + hw.section : '')}
+                  </span>
+                </div>
                 {hasFullAccess && (
-                  <button 
-                    onClick={() => handleDelete(hw._id)}
-                    className="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 bg-white/80 dark:bg-gray-900/50 p-1 rounded-md"
-                    title="Delete Homework"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => handleEdit(hw)}
+                      className="text-blue-400 hover:text-blue-600 transition-colors opacity-0 group-hover:opacity-100 bg-white/80 dark:bg-gray-900/50 p-1 rounded-md"
+                      title="Edit Homework"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(hw._id)}
+                      className="text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 bg-white/80 dark:bg-gray-900/50 p-1 rounded-md"
+                      title="Delete Homework"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 )}
               </div>
               <h3 className="text-xl font-bold text-[#2E1C40] dark:text-gray-900 mb-2">{hw.title}</h3>

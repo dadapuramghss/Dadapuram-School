@@ -392,7 +392,10 @@ router.get('/homework', verifyStudentToken, async (req, res) => {
     const Homework = require('../models/Homework');
     const homeworkList = await Homework.find({
       standard: student.standard,
-      section: student.section
+      $or: [
+        { section: student.section },
+        { sections: student.section }
+      ]
     }).sort({ dueDate: 1 });
 
     res.json({ success: true, data: homeworkList });

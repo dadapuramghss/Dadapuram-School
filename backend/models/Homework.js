@@ -21,7 +21,11 @@ const homeworkSchema = new mongoose.Schema({
   },
   section: {
     type: String,
-    required: true
+    required: false
+  },
+  sections: {
+    type: [String],
+    default: []
   },
   dueDate: {
     type: Date,
