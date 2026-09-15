@@ -52,13 +52,13 @@ export function Gradebook() {
   );
 
   React.useEffect(() => {
-    if (availableStandards.length > 0 && !availableStandards.includes(selectedClass)) {
+    if (availableStandards.length > 0 && selectedClass !== 'All' && !availableStandards.includes(selectedClass)) {
       setSelectedClass(availableStandards[0]);
     }
   }, [availableStandards, selectedClass]);
 
   React.useEffect(() => {
-    if (availableSections.length > 0 && !availableSections.includes(selectedSection)) {
+    if (availableSections.length > 0 && selectedSection !== 'All' && !availableSections.includes(selectedSection)) {
       setSelectedSection(availableSections[0]);
     }
   }, [availableSections, selectedSection, selectedClass]);
