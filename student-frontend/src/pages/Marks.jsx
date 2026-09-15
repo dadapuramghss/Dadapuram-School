@@ -71,13 +71,9 @@ export default function Marks() {
               return termOrder.indexOf(a.termName) - termOrder.indexOf(b.termName);
             })
             .map((term, index) => {
-            let totalScore = 0;
-            subjects.forEach(subj => {
-              const mark = term.marks.find(m => m.subject.toLowerCase() === subj.toLowerCase());
-              if (mark) totalScore += mark.score;
-            });
-            const maxScore = subjects.length * 100;
-            const percentage = maxScore > 0 ? ((totalScore / maxScore) * 100).toFixed(1) : 0;
+            const totalScore = term.totalScore || 0;
+            const maxScore = term.maximumMarks || (subjects.length * 100);
+            const percentage = term.percentage ? term.percentage.toFixed(1) : (maxScore > 0 ? ((totalScore / maxScore) * 100).toFixed(1) : 0);
             
             return (
               <div key={index} className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">

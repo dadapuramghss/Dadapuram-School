@@ -494,11 +494,27 @@ const updateStudent = async (req, res) => {
 const getStudentById = async (req, res) => {
   try {
     const { studentId } = req.params;
-    const student = await Student.findById(studentId);
+    const student = await Student.findById(studentId).lean();
     if (!student) {
       return res.status(404).json({ error: 'Student not found' });
     }
-    // Optional: check if authorized for this class, but maybe allow any teacher to view profile if they can see top 3
+    
+    // Deduplicate marks to prevent frontend inflation
+    if (student.terms) {
+      student.terms = student.terms.map(term => {
+        if (!term.marks) return term;
+        const uniqueMarks = [];
+        const seen = new Set();
+        term.marks.forEach(m => {
+          if (!seen.has(m.subject)) {
+            seen.add(m.subject);
+            uniqueMarks.push(m);
+          }
+        });
+        return { ...term, marks: uniqueMarks };
+      });
+    }
+
     res.status(200).json(student);
   } catch (error) {
     console.error('Error fetching student:', error);
