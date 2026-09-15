@@ -77,20 +77,20 @@ export function Leaderboard() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <h1 className="text-3xl font-bold text-[#2E1C40] dark:text-gray-900 drop-shadow-sm">
+    <div className="space-y-6 max-w-4xl mx-auto px-1 sm:px-0">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <h1 className="text-3xl font-bold text-[#2E1C40] dark:text-gray-900 drop-shadow-sm whitespace-nowrap">
           {getTitle()}
         </h1>
         
-        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto mt-4 md:mt-0">
+        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto mt-2 lg:mt-0 justify-start lg:justify-end">
           <select 
             value={selectedClass} 
             onChange={e => {
               setSelectedClass(e.target.value);
               setSelectedSection('All');
             }}
-            className="glass-input w-full sm:w-auto dark:!text-gray-900 dark:bg-transparent [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
+            className="glass-input flex-1 sm:flex-none min-w-[140px] dark:!text-gray-900 dark:bg-transparent [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
           >
             <option value="All">All Standards (Whole School)</option>
             <option value="6">Standard 6</option>
@@ -104,7 +104,7 @@ export function Leaderboard() {
           <select 
             value={selectedSection} 
             onChange={e => setSelectedSection(e.target.value)}
-            className="glass-input w-full sm:w-auto dark:!text-gray-900 dark:bg-transparent [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
+            className="glass-input flex-1 sm:flex-none min-w-[120px] dark:!text-gray-900 dark:bg-transparent [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
             disabled={selectedClass === 'All'}
           >
             <option value="All">All Sections</option>
@@ -120,7 +120,7 @@ export function Leaderboard() {
           <select 
             value={rankBy} 
             onChange={e => setRankBy(e.target.value)}
-            className="glass-input w-full sm:w-auto dark:!text-gray-900 dark:bg-transparent [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
+            className="glass-input flex-1 sm:flex-none min-w-[140px] dark:!text-gray-900 dark:bg-transparent [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
           >
             <option value="Marks">Rank by Marks</option>
             <option value="Percentage">Rank by Percentage</option>
@@ -146,7 +146,7 @@ export function Leaderboard() {
                   student.rank > 3 ? "border-[#E5D9C4] bg-[#FAF8F5] dark:bg-[#121212]/60" : ""
                 )}
               >
-                <div className="flex flex-row items-center gap-3 sm:gap-6 w-full sm:w-auto flex-1 min-w-0">
+                <div className="flex flex-row items-center gap-3 sm:gap-6 flex-1 min-w-0">
                   {/* Left section: POS & RANK */}
                   <div className="flex flex-row items-center gap-2 sm:gap-5 shrink-0 pl-1 sm:pl-2">
                     <div className="flex flex-col items-center justify-center min-w-[25px] sm:min-w-[40px]">
