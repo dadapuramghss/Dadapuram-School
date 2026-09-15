@@ -48,18 +48,38 @@ const getClassLeaderboard = async (req, res) => {
           totalMarks: {
             $sum: "$terms.marks.score"
           },
-          subjectsCount: {
-            $sum: { $cond: [ { $gt: ["$terms.marks.score", -1] }, 1, 0 ] }
+          termsSet: {
+            $addToSet: {
+              $cond: [ { $ne: ["$terms.termName", null] }, "$terms.termName", "$$REMOVE" ]
+            }
           }
         }
       },
-      // 5. Add percentage and maximumMarks
+      // 5. Add percentage and maximumMarks based on number of terms and standard
       {
         $addFields: {
-          maximumMarks: { $multiply: ["$subjectsCount", 100] },
+          termsCount: { $size: "$termsSet" },
+          standardMaxMarks: {
+            $switch: {
+              branches: [
+                { case: { $in: ["$standard", ["11", "12"]] }, then: 600 },
+                { case: { $in: ["$standard", ["6", "7", "8", "9", "10"]] }, then: 500 }
+              ],
+              default: 500
+            }
+          }
+        }
+      },
+      {
+        $addFields: {
+          maximumMarks: { $multiply: ["$termsCount", "$standardMaxMarks"] }
+        }
+      },
+      {
+        $addFields: {
           percentage: {
             $round: [
-              { $cond: [ { $gt: ["$subjectsCount", 0] }, { $divide: ["$totalMarks", "$subjectsCount"] }, 0 ] },
+              { $cond: [ { $gt: ["$maximumMarks", 0] }, { $multiply: [ { $divide: ["$totalMarks", "$maximumMarks"] }, 100 ] }, 0 ] },
               2
             ]
           }
