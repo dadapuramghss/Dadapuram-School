@@ -50,29 +50,65 @@ const getClassLeaderboard = async (req, res) => {
           },
           termsSet: {
             $addToSet: {
-              $cond: [ { $ne: ["$terms.termName", null] }, "$terms.termName", "$$REMOVE" ]
+              $cond: [ { $ne: ["$terms.termName", null] }, "$terms.termName", "$REMOVE" ]
             }
           }
         }
       },
-      // 5. Add percentage and maximumMarks based on number of terms and standard
+      // 5. Lookup ClassConfig to dynamically determine expected subjects
+      {
+        $lookup: {
+          from: "classconfigs",
+          let: { std: "$standard", sec: "$section" },
+          pipeline: [
+            { $match:
+               { $expr:
+                  { $and:
+                     [
+                       { $eq: [ "$standard",  "$std" ] },
+                       { $eq: [ "$section", "$sec" ] }
+                     ]
+                  }
+               }
+            }
+          ],
+          as: "config"
+        }
+      },
       {
         $addFields: {
-          termsCount: { $size: "$termsSet" },
-          standardMaxMarks: {
-            $switch: {
-              branches: [
-                { case: { $in: ["$standard", ["11", "12"]] }, then: 600 },
-                { case: { $in: ["$standard", ["6", "7", "8", "9", "10"]] }, then: 500 }
-              ],
-              default: 500
-            }
+          config: { $arrayElemAt: ["$config", 0] },
+          termsCount: { $size: "$termsSet" }
+        }
+      },
+      {
+        $addFields: {
+          expectedSubjectsCount: { $size: { $ifNull: ["$config.subjects", []] } }
+        }
+      },
+      // Fallback to standard assumptions if config is missing or empty
+      {
+        $addFields: {
+          expectedSubjectsCount: {
+            $cond: [
+              { $gt: ["$expectedSubjectsCount", 0] },
+              "$expectedSubjectsCount",
+              {
+                $switch: {
+                  branches: [
+                    { case: { $in: ["$standard", ["11", "12"]] }, then: 6 },
+                    { case: { $in: ["$standard", ["6", "7", "8", "9", "10"]] }, then: 5 }
+                  ],
+                  default: 5
+                }
+              }
+            ]
           }
         }
       },
       {
         $addFields: {
-          maximumMarks: { $multiply: ["$termsCount", "$standardMaxMarks"] }
+          maximumMarks: { $multiply: ["$termsCount", "$expectedSubjectsCount", 100] }
         }
       },
       {
@@ -163,7 +199,12 @@ const getDashboardStats = async (req, res) => {
           standard: { $first: "$standard" },
           section: { $first: "$section" },
           gender: { $first: "$gender" },
-          totalMarks: { $sum: "$terms.marks.score" }
+          totalMarks: { $sum: "$terms.marks.score" },
+          termsSet: {
+            $addToSet: {
+              $cond: [ { $ne: ["$terms.termName", null] }, "$terms.termName", "$$REMOVE" ]
+            }
+          }
         }
       },
       {
@@ -172,15 +213,62 @@ const getDashboardStats = async (req, res) => {
         }
       },
       {
+        $lookup: {
+          from: "classconfigs",
+          let: { std: "$standard", sec: "$section" },
+          pipeline: [
+            { $match:
+               { $expr:
+                  { $and:
+                     [
+                       { $eq: [ "$standard",  "$$std" ] },
+                       { $eq: [ "$section", "$$sec" ] }
+                     ]
+                  }
+               }
+            }
+          ],
+          as: "config"
+        }
+      },
+      {
+        $addFields: {
+          config: { $arrayElemAt: ["$config", 0] },
+          termsCount: { $size: "$termsSet" }
+        }
+      },
+      {
+        $addFields: {
+          expectedSubjectsCount: { $size: { $ifNull: ["$config.subjects", []] } }
+        }
+      },
+      {
+        $addFields: {
+          expectedSubjectsCount: {
+            $cond: [
+              { $gt: ["$expectedSubjectsCount", 0] },
+              "$expectedSubjectsCount",
+              {
+                $switch: {
+                  branches: [
+                    { case: { $in: ["$standard", ["11", "12"]] }, then: 6 },
+                    { case: { $in: ["$standard", ["6", "7", "8", "9", "10"]] }, then: 5 }
+                  ],
+                  default: 5
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
         $addFields: {
           maximumMarks: {
-            $switch: {
-              branches: [
-                { case: { $in: ["$standard", ["11", "12"]] }, then: 600 },
-                { case: { $in: ["$standard", ["6", "7", "8", "9", "10"]] }, then: 500 }
-              ],
-              default: null
-            }
+            $cond: [
+              { $gt: ["$termsCount", 0] },
+              { $multiply: ["$termsCount", "$expectedSubjectsCount", 100] },
+              null
+            ]
           }
         }
       },
@@ -238,7 +326,12 @@ const getDashboardStats = async (req, res) => {
           standard: { $first: "$standard" },
           section: { $first: "$section" },
           gender: { $first: "$gender" },
-          totalMarks: { $sum: "$terms.marks.score" }
+          totalMarks: { $sum: "$terms.marks.score" },
+          termsSet: {
+            $addToSet: {
+              $cond: [ { $ne: ["$terms.termName", null] }, "$terms.termName", "$$REMOVE" ]
+            }
+          }
         }
       },
       {
@@ -247,15 +340,62 @@ const getDashboardStats = async (req, res) => {
         }
       },
       {
+        $lookup: {
+          from: "classconfigs",
+          let: { std: "$standard", sec: "$section" },
+          pipeline: [
+            { $match:
+               { $expr:
+                  { $and:
+                     [
+                       { $eq: [ "$standard",  "$$std" ] },
+                       { $eq: [ "$section", "$$sec" ] }
+                     ]
+                  }
+               }
+            }
+          ],
+          as: "config"
+        }
+      },
+      {
+        $addFields: {
+          config: { $arrayElemAt: ["$config", 0] },
+          termsCount: { $size: "$termsSet" }
+        }
+      },
+      {
+        $addFields: {
+          expectedSubjectsCount: { $size: { $ifNull: ["$config.subjects", []] } }
+        }
+      },
+      {
+        $addFields: {
+          expectedSubjectsCount: {
+            $cond: [
+              { $gt: ["$expectedSubjectsCount", 0] },
+              "$expectedSubjectsCount",
+              {
+                $switch: {
+                  branches: [
+                    { case: { $in: ["$standard", ["11", "12"]] }, then: 6 },
+                    { case: { $in: ["$standard", ["6", "7", "8", "9", "10"]] }, then: 5 }
+                  ],
+                  default: 5
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
         $addFields: {
           maximumMarks: {
-            $switch: {
-              branches: [
-                { case: { $in: ["$standard", ["11", "12"]] }, then: 600 },
-                { case: { $in: ["$standard", ["6", "7", "8", "9", "10"]] }, then: 500 }
-              ],
-              default: null
-            }
+            $cond: [
+              { $gt: ["$termsCount", 0] },
+              { $multiply: ["$termsCount", "$expectedSubjectsCount", 100] },
+              null
+            ]
           }
         }
       },
@@ -313,7 +453,12 @@ const getDashboardStats = async (req, res) => {
           standard: { $first: "$standard" },
           section: { $first: "$section" },
           gender: { $first: "$gender" },
-          totalMarks: { $sum: "$terms.marks.score" }
+          totalMarks: { $sum: "$terms.marks.score" },
+          termsSet: {
+            $addToSet: {
+              $cond: [ { $ne: ["$terms.termName", null] }, "$terms.termName", "$$REMOVE" ]
+            }
+          }
         }
       },
       {
@@ -322,15 +467,62 @@ const getDashboardStats = async (req, res) => {
         }
       },
       {
+        $lookup: {
+          from: "classconfigs",
+          let: { std: "$standard", sec: "$section" },
+          pipeline: [
+            { $match:
+               { $expr:
+                  { $and:
+                     [
+                       { $eq: [ "$standard",  "$$std" ] },
+                       { $eq: [ "$section", "$$sec" ] }
+                     ]
+                  }
+               }
+            }
+          ],
+          as: "config"
+        }
+      },
+      {
+        $addFields: {
+          config: { $arrayElemAt: ["$config", 0] },
+          termsCount: { $size: "$termsSet" }
+        }
+      },
+      {
+        $addFields: {
+          expectedSubjectsCount: { $size: { $ifNull: ["$config.subjects", []] } }
+        }
+      },
+      {
+        $addFields: {
+          expectedSubjectsCount: {
+            $cond: [
+              { $gt: ["$expectedSubjectsCount", 0] },
+              "$expectedSubjectsCount",
+              {
+                $switch: {
+                  branches: [
+                    { case: { $in: ["$standard", ["11", "12"]] }, then: 6 },
+                    { case: { $in: ["$standard", ["6", "7", "8", "9", "10"]] }, then: 5 }
+                  ],
+                  default: 5
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
         $addFields: {
           maximumMarks: {
-            $switch: {
-              branches: [
-                { case: { $in: ["$standard", ["11", "12"]] }, then: 600 },
-                { case: { $in: ["$standard", ["6", "7", "8", "9", "10"]] }, then: 500 }
-              ],
-              default: null
-            }
+            $cond: [
+              { $gt: ["$termsCount", 0] },
+              { $multiply: ["$termsCount", "$expectedSubjectsCount", 100] },
+              null
+            ]
           }
         }
       },
@@ -468,19 +660,71 @@ const getDashboardStats = async (req, res) => {
             section: "$section",
             name: "$name"
           },
-          totalScore: { $sum: "$terms.marks.score" }
+          totalScore: { $sum: "$terms.marks.score" },
+          termsSet: {
+            $addToSet: {
+              $cond: [ { $ne: ["$terms.termName", null] }, "$terms.termName", "$REMOVE" ]
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: "classconfigs",
+          let: { std: "$_id.standard", sec: "$_id.section" },
+          pipeline: [
+            { $match:
+               { $expr:
+                  { $and:
+                     [
+                       { $eq: [ "$standard",  "$std" ] },
+                       { $eq: [ "$section", "$sec" ] }
+                     ]
+                  }
+               }
+            }
+          ],
+          as: "config"
+        }
+      },
+      {
+        $addFields: {
+          config: { $arrayElemAt: ["$config", 0] },
+          termsCount: { $size: "$termsSet" }
+        }
+      },
+      {
+        $addFields: {
+          expectedSubjectsCount: { $size: { $ifNull: ["$config.subjects", []] } }
+        }
+      },
+      {
+        $addFields: {
+          expectedSubjectsCount: {
+            $cond: [
+              { $gt: ["$expectedSubjectsCount", 0] },
+              "$expectedSubjectsCount",
+              {
+                $switch: {
+                  branches: [
+                    { case: { $in: ["$_id.standard", ["11", "12"]] }, then: 6 },
+                    { case: { $in: ["$_id.standard", ["6", "7", "8", "9", "10"]] }, then: 5 }
+                  ],
+                  default: 5
+                }
+              }
+            ]
+          }
         }
       },
       {
         $addFields: {
           maximumMarks: {
-            $switch: {
-              branches: [
-                { case: { $in: ["$_id.standard", ["11", "12"]] }, then: 600 },
-                { case: { $in: ["$_id.standard", ["6", "7", "8", "9", "10"]] }, then: 500 }
-              ],
-              default: null
-            }
+            $cond: [
+              { $gt: ["$termsCount", 0] },
+              { $multiply: ["$termsCount", "$expectedSubjectsCount", 100] },
+              null
+            ]
           }
         }
       },
