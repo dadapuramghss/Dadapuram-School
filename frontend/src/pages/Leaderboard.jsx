@@ -93,13 +93,9 @@ export function Leaderboard() {
             className="glass-input flex-1 sm:flex-none min-w-[140px] dark:!text-gray-900 dark:bg-transparent [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
           >
             <option value="All">All Standards (Whole School)</option>
-            <option value="6">Standard 6</option>
-            <option value="7">Standard 7</option>
-            <option value="8">Standard 8</option>
-            <option value="9">Standard 9</option>
-            <option value="10">Standard 10</option>
-            <option value="11">Standard 11</option>
-            <option value="12">Standard 12</option>
+            {[...new Set(classConfigs.map(c => c.standard))].sort((a,b) => Number(a) - Number(b)).map(std => (
+              <option key={std} value={std}>Standard {std}</option>
+            ))}
           </select>
           <select 
             value={selectedSection} 

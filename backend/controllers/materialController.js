@@ -1,14 +1,25 @@
 const Material = require('../models/Material');
 
 // Check authorization
-const isAuthorizedForClass = (user, standard, section, requireFullAccess = false) => {
+const isAuthorizedForClass = (user, standard, section, requireFullAccess = false, subject = null) => {
   if (!user) return false;
   if (user.role === 'admin') return true;
+  
   if (user.role === 'teacher' && user.assignedClasses) {
-    const classAssignment = user.assignedClasses.find(c => c.standard === standard && c.section === section);
-    if (!classAssignment) return false;
-    if (requireFullAccess && classAssignment.accessLevel === 'view') return false;
-    return true;
+    const assignments = user.assignedClasses.filter(c => c.standard === standard && c.section === section);
+    if (assignments.length === 0) return false;
+    
+    for (const assignment of assignments) {
+      if (requireFullAccess && assignment.accessLevel === 'view') continue;
+      
+      if (subject) {
+        if (!assignment.subject || assignment.subject === subject) {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    }
   }
   return false;
 };
@@ -18,7 +29,7 @@ const addMaterial = async (req, res) => {
   try {
     const { title, description, subject, standard, section, link } = req.body;
 
-    if (!isAuthorizedForClass(req.dbUser, standard, section, true)) {
+    if (!isAuthorizedForClass(req.dbUser, standard, section, true, subject)) {
       return res.status(403).json({ error: 'Not authorized for full access to this class and section' });
     }
 
@@ -75,7 +86,7 @@ const updateMaterial = async (req, res) => {
       return res.status(404).json({ error: 'Material not found' });
     }
 
-    if (!isAuthorizedForClass(req.dbUser, material.standard, material.section, true)) {
+    if (!isAuthorizedForClass(req.dbUser, material.standard, material.section, true, material.subject)) {
       return res.status(403).json({ error: 'Not authorized to update this material' });
     }
 
@@ -104,7 +115,7 @@ const deleteMaterial = async (req, res) => {
       return res.status(404).json({ error: 'Material not found' });
     }
 
-    if (!isAuthorizedForClass(req.dbUser, material.standard, material.section, true)) {
+    if (!isAuthorizedForClass(req.dbUser, material.standard, material.section, true, material.subject)) {
       return res.status(403).json({ error: 'Not authorized to delete this material' });
     }
 

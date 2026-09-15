@@ -883,12 +883,14 @@ export function AdminReports() {
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Standard</label>
               <select value={attFilters.standard} onChange={e => setAttFilters({...attFilters, standard: e.target.value, section: 'All'})} className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none">
+                <option value="All">All Standards (Whole School)</option>
                 {standards.map(std => <option key={std} value={std}>{std}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Section</label>
               <select value={attFilters.section} onChange={e => setAttFilters({...attFilters, section: e.target.value})} className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none">
+                <option value="All">All Sections</option>
                 {sections.map(sec => <option key={sec} value={sec}>{sec}</option>)}
               </select>
             </div>

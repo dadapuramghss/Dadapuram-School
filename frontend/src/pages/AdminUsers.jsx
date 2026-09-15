@@ -15,7 +15,8 @@ export function AdminUsers() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [assignedClasses, setAssignedClasses] = useState([]);
-  const [newClass, setNewClass] = useState({ standard: '6', section: 'A', accessLevel: 'full' });
+  const [newClass, setNewClass] = useState({ standard: '6', section: 'A', subject: '', accessLevel: 'full' });
+  const [editingAssignmentIndex, setEditingAssignmentIndex] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const fetchUsers = async () => {
@@ -48,20 +49,40 @@ export function AdminUsers() {
     setAssignedClasses([]);
   };
 
-  const addClass = () => {
-    const existingIndex = assignedClasses.findIndex(
-      c => c.standard === newClass.standard && c.section === newClass.section
+  const saveAssignment = () => {
+    // Check for exact duplicate in other indices
+    const duplicateIndex = assignedClasses.findIndex(
+      (c, idx) => idx !== editingAssignmentIndex && c.standard === newClass.standard && c.section === newClass.section && (c.subject || '') === (newClass.subject || '')
     );
     
-    if (existingIndex >= 0) {
-      // Update existing class with new access level
+    if (duplicateIndex >= 0) {
+      alert("This assignment already exists.");
+      return;
+    }
+
+    if (editingAssignmentIndex !== null) {
+      // Update existing assignment at editing index
       const updatedClasses = [...assignedClasses];
-      updatedClasses[existingIndex] = { ...newClass };
+      updatedClasses[editingAssignmentIndex] = { ...newClass };
       setAssignedClasses(updatedClasses);
+      setEditingAssignmentIndex(null);
     } else {
       // Add new class
       setAssignedClasses([...assignedClasses, { ...newClass }]);
     }
+
+    // Reset form to default Add mode but keep class/section selected for speed
+    setNewClass({ standard: newClass.standard, section: newClass.section, subject: '', accessLevel: 'full' });
+  };
+
+  const startEditAssignment = (index) => {
+    setEditingAssignmentIndex(index);
+    setNewClass({ ...assignedClasses[index] });
+  };
+
+  const cancelEdit = () => {
+    setEditingAssignmentIndex(null);
+    setNewClass({ standard: newClass.standard, section: newClass.section, subject: '', accessLevel: 'full' });
   };
 
   const removeClass = (index) => {
@@ -268,7 +289,7 @@ export function AdminUsers() {
                       <td className="p-4 text-gray-600">{user.email}</td>
                       <td className="p-4 text-gray-500 text-sm">
                         {user.assignedClasses?.length > 0 
-                          ? user.assignedClasses.map(c => `${c.standard}-${c.section}`).join(', ') 
+                          ? user.assignedClasses.map(c => `${c.standard}-${c.section}${c.subject ? ' (' + c.subject + ')' : ''}`).join(', ') 
                           : 'None'}
                       </td>
                       <td className="p-4 text-center">
@@ -326,7 +347,8 @@ export function AdminUsers() {
                       setNewClass({
                         ...newClass, 
                         standard: newStandard,
-                        section: validSections.includes(newClass.section) ? newClass.section : (validSections[0] || '')
+                        section: validSections.includes(newClass.section) ? newClass.section : (validSections[0] || ''),
+                        subject: ''
                       });
                     }}
                     className="w-full bg-white border border-gray-200 rounded-lg p-2 text-gray-900 [&>option]:bg-white"
@@ -348,6 +370,18 @@ export function AdminUsers() {
                   </select>
                 </div>
                 <div className="flex-1 space-y-1">
+                  <label className="text-sm text-gray-600">Subject</label>
+                  <select 
+                    value={newClass.subject || ''}
+                    onChange={(e) => setNewClass({...newClass, subject: e.target.value})}
+                    className="w-full bg-white border border-gray-200 rounded-lg p-2 text-gray-900 [&>option]:bg-white"
+                    disabled={!newClass.standard || !newClass.section}
+                  >
+                    <option value="">All Subjects</option>
+                    {(classConfigs.find(c => c.standard === newClass.standard && c.section === newClass.section)?.subjects || []).sort().map(sub => <option key={sub} value={sub}>{sub}</option>)}
+                  </select>
+                </div>
+                <div className="flex-1 space-y-1">
                   <label className="text-sm text-gray-600">Access Level</label>
                   <select 
                     value={newClass.accessLevel}
@@ -358,9 +392,16 @@ export function AdminUsers() {
                     <option value="view">View Only</option>
                   </select>
                 </div>
-                <NeonButton onClick={addClass} variant="secondary" className="py-2 px-4 whitespace-nowrap">
-                  Add
-                </NeonButton>
+                <div className="flex items-center gap-2">
+                  <NeonButton onClick={saveAssignment} variant="secondary" className="h-[42px] px-4 whitespace-nowrap">
+                    {editingAssignmentIndex !== null ? 'Update' : 'Add'}
+                  </NeonButton>
+                  {editingAssignmentIndex !== null && (
+                    <button onClick={cancelEdit} className="h-[42px] px-3 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors whitespace-nowrap">
+                      Cancel
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="mt-4 p-4 bg-gray-50 rounded-lg min-h-[100px] border border-gray-100">
@@ -371,7 +412,10 @@ export function AdminUsers() {
                   <div className="flex flex-wrap gap-2">
                     {assignedClasses.map((cls, idx) => (
                       <div key={idx} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border ${cls.accessLevel === 'view' ? 'bg-adminAccent2/10 text-adminAccent2 border-adminAccent2/20' : 'bg-adminSidebar/10 text-adminSidebar border-adminSidebar/20'}`}>
-                        {cls.standard} - {cls.section} ({cls.accessLevel === 'view' ? 'View' : 'Full'})
+                        {cls.standard}-{cls.section} • {cls.subject || 'All Subjects'} ({cls.accessLevel === 'view' ? 'View' : 'Full'})
+                        <button onClick={() => startEditAssignment(idx)} className="hover:text-blue-600 transition-colors ml-1" title="Edit">
+                          ✎
+                        </button>
                         <button onClick={() => removeClass(idx)} className={`hover:text-gray-900 transition-colors`}>
                           &times;
                         </button>

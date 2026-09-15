@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const ClassConfig = require('../models/ClassConfig');
 
 // POST /api/auth/sync
 // Called after Firebase login/register to sync user to MongoDB
@@ -131,7 +132,34 @@ exports.approveUser = async (req, res) => {
       role: role || 'teacher' 
     };
     if (assignedClasses !== undefined) {
-      updateData.assignedClasses = assignedClasses;
+      const validatedClasses = [];
+      const uniqueMap = new Map();
+      
+      for (const c of assignedClasses) {
+        if (!c.standard || !c.section) {
+          return res.status(400).json({ message: 'Standard and section are required for each assignment.' });
+        }
+        
+        const config = await ClassConfig.findOne({ standard: c.standard, section: c.section });
+        if (!config) {
+          return res.status(400).json({ message: `Invalid class assignment: ${c.standard}-${c.section} does not exist.` });
+        }
+        
+        const subject = c.subject ? c.subject.trim() : null;
+        if (subject) {
+          if (!config.subjects || !config.subjects.includes(subject)) {
+            return res.status(400).json({ message: `Invalid subject ${subject} for ${c.standard}-${c.section}.` });
+          }
+        }
+        
+        const key = `${c.standard}-${c.section}-${subject || 'ALL'}`;
+        if (!uniqueMap.has(key)) {
+          uniqueMap.set(key, { ...c, subject });
+          validatedClasses.push({ ...c, subject });
+        }
+      }
+      
+      updateData.assignedClasses = validatedClasses;
     }
 
     const user = await User.findOneAndUpdate(

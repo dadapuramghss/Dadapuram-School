@@ -2,14 +2,25 @@ const Student = require('../models/Student');
 const ClassConfig = require('../models/ClassConfig');
 const { sortStudentsByGenderAndName } = require('../utils/sortUtils');
 
-const isAuthorizedForClass = (user, standard, section, requireFullAccess = false) => {
+const isAuthorizedForClass = (user, standard, section, requireFullAccess = false, subject = null) => {
   if (!user) return false;
   if (user.role === 'admin') return true;
+  
   if (user.role === 'teacher' && user.assignedClasses) {
-    const classAssignment = user.assignedClasses.find(c => c.standard === standard && c.section === section);
-    if (!classAssignment) return false;
-    if (requireFullAccess && classAssignment.accessLevel === 'view') return false;
-    return true;
+    const assignments = user.assignedClasses.filter(c => c.standard === standard && c.section === section);
+    if (assignments.length === 0) return false;
+    
+    for (const assignment of assignments) {
+      if (requireFullAccess && assignment.accessLevel === 'view') continue;
+      
+      if (subject) {
+        if (!assignment.subject || assignment.subject === subject) {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    }
   }
   return false;
 };
@@ -190,6 +201,13 @@ const updateStudentMarks = async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to modify this student' });
     }
 
+    // Verify subject authorization for each mark
+    for (const m of marks) {
+      if (!isAuthorizedForClass(req.dbUser, student.standard, student.section, true, m.subject)) {
+        return res.status(403).json({ error: `Not authorized to update marks for subject: ${m.subject}` });
+      }
+    }
+
     // Atomic Upsert Logic
     let action = 'updated';
 
@@ -261,6 +279,16 @@ const bulkUpdateMarks = async (req, res) => {
         results.errors.push(`Not authorized to update EMIS: ${emisNumber}`);
         continue;
       }
+      
+      let subjectAuthFailed = false;
+      for (const m of marks) {
+        if (!isAuthorizedForClass(req.dbUser, standard, section, true, m.subject)) {
+          results.errors.push(`Not authorized for subject ${m.subject} (EMIS: ${emisNumber})`);
+          subjectAuthFailed = true;
+          break;
+        }
+      }
+      if (subjectAuthFailed) continue;
 
       // Find student
       const student = await Student.findOne({ emisNumber, standard, section });
@@ -385,6 +413,9 @@ const universalBulkUpdateMarks = async (req, res) => {
 
       // Validate Marks
       for (const m of marks) {
+        if (!isAuthorizedForClass(req.dbUser, student.standard, student.section, true, m.subject)) {
+           validationErrors.push(`Row ${i + 2}: Not authorized for subject ${m.subject} (EMIS: ${emisNumber}).`);
+        }
         if (typeof m.score !== 'number' || isNaN(m.score) || m.score < 0 || m.score > 100) {
           validationErrors.push(`Row ${i + 2}: Invalid mark '${m.score}' for subject '${m.subject}' (EMIS: ${emisNumber}). Must be between 0 and 100.`);
         }

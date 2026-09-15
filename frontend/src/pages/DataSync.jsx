@@ -1034,7 +1034,7 @@ export function DataSync() {
                 onChange={(e) => { setAttStandard(e.target.value); setAttSection('All'); }}
                 className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none"
               >
-                <option value="All">All Standards</option>
+                <option value="All">All Standards (Whole School)</option>
                 {standards.map(std => <option key={std} value={std}>{std}</option>)}
               </select>
             </div>

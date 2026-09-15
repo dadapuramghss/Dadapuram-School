@@ -260,10 +260,10 @@ export function Students() {
           <label className="block text-sm font-medium text-[#4C677C] dark:text-[#E5D9C4] font-semibold ">Class / Standard</label>
           <select 
             value={listStandard}
-            onChange={(e) => setListStandard(e.target.value)}
+            onChange={(e) => { setListStandard(e.target.value); setListSection('All'); }}
             className="glass-input w-full dark:!text-gray-900 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
           >
-            <option value="All">All Standards</option>
+            <option value="All">All Standards (Whole School)</option>
             {availableStandards.map(std => (
               <option key={std} value={std}>Standard {std}</option>
             ))}

@@ -2,14 +2,25 @@ const Homework = require('../models/Homework');
 const ClassConfig = require('../models/ClassConfig');
 
 // Check authorization (using similar logic to studentController)
-const isAuthorizedForClass = (user, standard, section, requireFullAccess = false) => {
+const isAuthorizedForClass = (user, standard, section, requireFullAccess = false, subject = null) => {
   if (!user) return false;
   if (user.role === 'admin') return true;
+  
   if (user.role === 'teacher' && user.assignedClasses) {
-    const classAssignment = user.assignedClasses.find(c => c.standard === standard && c.section === section);
-    if (!classAssignment) return false;
-    if (requireFullAccess && classAssignment.accessLevel === 'view') return false;
-    return true;
+    const assignments = user.assignedClasses.filter(c => c.standard === standard && c.section === section);
+    if (assignments.length === 0) return false;
+    
+    for (const assignment of assignments) {
+      if (requireFullAccess && assignment.accessLevel === 'view') continue;
+      
+      if (subject) {
+        if (!assignment.subject || assignment.subject === subject) {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    }
   }
   return false;
 };
@@ -38,7 +49,7 @@ const addHomework = async (req, res) => {
       if (!validSectionNames.includes(sec)) {
         return res.status(400).json({ error: `Section ${sec} does not exist for Standard ${standard}` });
       }
-      if (!isAuthorizedForClass(req.dbUser, standard, sec, true)) {
+      if (!isAuthorizedForClass(req.dbUser, standard, sec, true, subject)) {
         return res.status(403).json({ error: `Not authorized for full access to class ${standard} section ${sec}` });
       }
     }
@@ -105,7 +116,7 @@ const updateHomework = async (req, res) => {
       if (!validSectionNames.includes(sec)) {
         return res.status(400).json({ error: `Section ${sec} does not exist for Standard ${standard}` });
       }
-      if (!isAuthorizedForClass(req.dbUser, standard, sec, true)) {
+      if (!isAuthorizedForClass(req.dbUser, standard, sec, true, subject)) {
         return res.status(403).json({ error: `Not authorized for full access to class ${standard} section ${sec}` });
       }
     }
