@@ -7,7 +7,7 @@ const User = require('../models/User');
  */
 const getClassLeaderboard = async (req, res) => {
   try {
-    const { standard, section } = req.query;
+    const { standard, section, rankBy = 'Marks' } = req.query;
     
     if (!standard || !section) {
       return res.status(400).json({ error: 'Standard and section are required parameters' });
@@ -47,13 +47,28 @@ const getClassLeaderboard = async (req, res) => {
           section: { $first: "$section" },
           totalMarks: {
             $sum: "$terms.marks.score"
+          },
+          subjectsCount: {
+            $sum: { $cond: [ { $gt: ["$terms.marks.score", -1] }, 1, 0 ] }
           }
         }
       },
-      // 5. Use $setWindowFields to calculate rank based on totalMarks (highest to lowest)
+      // 5. Add percentage and maximumMarks
+      {
+        $addFields: {
+          maximumMarks: { $multiply: ["$subjectsCount", 100] },
+          percentage: {
+            $round: [
+              { $cond: [ { $gt: ["$subjectsCount", 0] }, { $divide: ["$totalMarks", "$subjectsCount"] }, 0 ] },
+              2
+            ]
+          }
+        }
+      },
+      // 6. Use $setWindowFields to calculate rank
       {
         $setWindowFields: {
-          sortBy: { totalMarks: -1 },
+          sortBy: rankBy === 'Percentage' ? { percentage: -1, totalMarks: -1 } : { totalMarks: -1, percentage: -1 },
           output: {
             rank: {
               $denseRank: {}
@@ -61,10 +76,11 @@ const getClassLeaderboard = async (req, res) => {
           }
         }
       },
-      // 6. Sort by rank to return leaderboard top-to-bottom
+      // 7. Sort by rank to return leaderboard top-to-bottom
       {
         $sort: {
-          rank: 1
+          rank: 1,
+          name: 1
         }
       }
     ]);

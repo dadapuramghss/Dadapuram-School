@@ -9,6 +9,8 @@ router.get('/report', attendanceController.getAttendanceReport);
 router.get('/export', attendanceController.exportDailyAttendance);
 router.post('/bulk', attendanceController.bulkImportDailyAttendance);
 router.get('/summary', attendanceController.getAttendanceSummary);
+router.get('/monthly', attendanceController.getMonthlyAttendance);
+router.post('/monthly/bulk', attendanceController.bulkImportMonthlyAttendance);
 router.get('/', attendanceController.getAttendance);
 router.post('/', attendanceController.saveAttendance);
 router.delete('/', attendanceController.deleteAttendance);

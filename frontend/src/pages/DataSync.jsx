@@ -22,6 +22,11 @@ export function DataSync() {
   const [attToDate, setAttToDate] = useState('');
   const [attStandard, setAttStandard] = useState('All');
   const [attSection, setAttSection] = useState('All');
+  const [attendanceMode, setAttendanceMode] = useState('daily'); // 'daily' or 'monthly'
+  const [attMonthlyMonth, setAttMonthlyMonth] = useState('');
+  const [attMonthlyYear, setAttMonthlyYear] = useState(new Date().getFullYear().toString());
+  const [attMonthlyStandard, setAttMonthlyStandard] = useState('');
+  const [attMonthlySection, setAttMonthlySection] = useState('');
 
   const [classConfigs, setClassConfigs] = useState([]);
 
@@ -494,6 +499,240 @@ export function DataSync() {
   };
 
   // --- ATTENDANCE LOGIC ---
+  const handleExportMonthlyAttendance = async () => {
+    if (!attMonthlyStandard || !attMonthlySection || !attMonthlyMonth || !attMonthlyYear) {
+      setError('Please select Standard, Section, Month, and Year for exporting monthly attendance.');
+      return;
+    }
+    try {
+      setExporting(true);
+      setError(null);
+      
+      const response = await api.getMonthlyAttendance(
+        attMonthlyStandard, 
+        attMonthlySection, 
+        attMonthlyYear,
+        attMonthlyMonth
+      );
+      
+      if (!response.data || response.data.length === 0) {
+        setError('No monthly attendance records found for the selected criteria.');
+        return;
+      }
+
+      // Format data
+      const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
+      
+      const studentsMap = {};
+      response.data.forEach(att => {
+        const day = parseInt(att.date.split('-')[2]);
+        att.records.forEach(r => {
+          if (!r.student) return;
+          const stuId = r.student._id || r.student;
+          if (!studentsMap[stuId]) {
+            studentsMap[stuId] = {
+              'EMIS Number': r.student.emisNumber,
+              'Student Name': r.student.name,
+              'Gender': r.student.gender,
+              sortGender: r.student.gender,
+              sortName: r.student.name
+            };
+            for(let i=1; i<=daysInMonth; i++) {
+              studentsMap[stuId][String(i).padStart(2, '0')] = '-';
+            }
+          }
+          let statusMap = {
+            'Present': 'P', 'Absent': 'A', 'Late': 'L', 'Homebased': 'H', 'IE Center': 'I', 'On Duty': 'OD'
+          };
+          studentsMap[stuId][String(day).padStart(2, '0')] = statusMap[r.status] || r.status;
+        });
+      });
+
+      const exportData = Object.values(studentsMap);
+      exportData.sort((a, b) => {
+        const priority = { 'Male': 1, 'Female': 2 };
+        const pA = priority[a.sortGender] || 3;
+        const pB = priority[b.sortGender] || 3;
+        if (pA !== pB) return pA - pB;
+        return (a.sortName || '').localeCompare(b.sortName || '', 'en', { sensitivity: 'base' });
+      });
+
+      exportData.forEach(row => {
+        delete row.sortGender;
+        delete row.sortName;
+      });
+      
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Monthly Attendance");
+      
+      const monthName = new Date(2020, parseInt(attMonthlyMonth)-1, 1).toLocaleString('default', { month: 'long' });
+      XLSX.writeFile(workbook, `DGHSS360_Attendance_${attMonthlyStandard}_${attMonthlySection}_${monthName}_${attMonthlyYear}.xlsx`);
+    } catch (err) {
+      console.error('Export error:', err);
+      setError('Failed to export monthly attendance.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const downloadMonthlyAttendanceTemplate = async () => {
+    if (!attMonthlyStandard || !attMonthlySection || !attMonthlyMonth || !attMonthlyYear) {
+      setError('Please select Standard, Section, Month, and Year to download the template.');
+      return;
+    }
+
+    try {
+      setExporting(true);
+      setError(null);
+      
+      const response = await api.getStudents(attMonthlyStandard, attMonthlySection);
+      let students = response.data || [];
+      if (students.length === 0) {
+        setError('No students found for the selected class.');
+        setExporting(false);
+        return;
+      }
+      
+      students.sort((a, b) => {
+        const priority = { 'Male': 1, 'Female': 2 };
+        const pA = priority[a.gender] || 3;
+        const pB = priority[b.gender] || 3;
+        if (pA !== pB) return pA - pB;
+        return (a.name || '').localeCompare(b.name || '', 'en', { sensitivity: 'base' });
+      });
+
+      const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
+      
+      const templateData = students.map(s => {
+        const row = {
+          'EMIS Number': s.emisNumber,
+          'Student Name': s.name,
+          'Gender': s.gender
+        };
+        for(let i=1; i<=daysInMonth; i++) {
+          row[String(i).padStart(2, '0')] = '-';
+        }
+        return row;
+      });
+      
+      const instructionsData = [
+        { 'Instruction': 'P = Present' },
+        { 'Instruction': 'A = Absent' },
+        { 'Instruction': 'L = Late' },
+        { 'Instruction': 'H = Homebased' },
+        { 'Instruction': 'I = IE Center' },
+        { 'Instruction': 'OD = On Duty' },
+        { 'Instruction': '- = No attendance record' },
+        { 'Instruction': '' },
+        { 'Instruction': 'Do not alter the columns. Only edit the day columns.' }
+      ];
+
+      const workbook = XLSX.utils.book_new();
+      const dataSheet = XLSX.utils.json_to_sheet(templateData);
+      const instructionsSheet = XLSX.utils.json_to_sheet(instructionsData);
+
+      XLSX.utils.book_append_sheet(workbook, dataSheet, "Attendance Data");
+      XLSX.utils.book_append_sheet(workbook, instructionsSheet, "Instructions");
+      
+      const monthName = new Date(2020, parseInt(attMonthlyMonth)-1, 1).toLocaleString('default', { month: 'long' });
+      XLSX.writeFile(workbook, `DGHSS360_Attendance_Template_${attMonthlyStandard}_${attMonthlySection}_${monthName}_${attMonthlyYear}.xlsx`);
+    } catch(err) {
+      console.error(err);
+      setError('Failed to generate template.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleMonthlyAttendanceUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!attMonthlyStandard || !attMonthlySection || !attMonthlyMonth || !attMonthlyYear) {
+      setError('Please select Standard, Section, Month, and Year before importing.');
+      event.target.value = '';
+      return;
+    }
+
+    setImporting(true);
+    setError(null);
+    setImportResults(null);
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          
+          const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
+          const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
+
+          const recordsToImport = [];
+
+          rawData.forEach((row, index) => {
+            const emisNumber = String(row['EMIS Number'] || row['emisnumber'] || row['emisno'] || row['EMIS'] || '').trim();
+            if (!emisNumber) return;
+
+            for(let i=1; i<=daysInMonth; i++) {
+              const dayStr = String(i).padStart(2, '0');
+              const cellVal = String(row[dayStr] || '').trim();
+              if (cellVal && cellVal !== '-') {
+                recordsToImport.push({
+                  date: `${attMonthlyYear}-${attMonthlyMonth.padStart(2, '0')}-${dayStr}`,
+                  emisNumber: emisNumber,
+                  standard: attMonthlyStandard,
+                  section: attMonthlySection,
+                  status: cellVal
+                });
+              }
+            }
+          });
+
+          if (recordsToImport.length === 0) {
+            setError('No valid records found in the Excel file.');
+            setImporting(false);
+            return;
+          }
+
+          const response = await api.importMonthlyAttendance(recordsToImport);
+          if (response.success) {
+            setImportResults({
+              added: response.data.created,
+              updated: response.data.updated,
+              errors: []
+            });
+          } else {
+            setError('Import failed on the server.');
+          }
+        } catch (err) {
+          console.error('Import parse error:', err);
+          if (err.validationErrors) {
+            setImportResults({
+               added: 0,
+               updated: 0,
+               errors: err.validationErrors
+            });
+            setError('Validation failed. Please check the error log below.');
+          } else {
+            setError(err.message || 'Failed to process Excel file.');
+          }
+        } finally {
+          setImporting(false);
+          event.target.value = '';
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } catch (err) {
+      setImporting(false);
+      setError(`Failed to read file: ${err.message}`);
+      event.target.value = '';
+    }
+  };
+
   const handleExportAttendance = async () => {
     try {
       setExporting(true);
@@ -742,8 +981,29 @@ export function DataSync() {
         </>
       )}
 
-      {/* ATTENDANCE FILTERS (For Export) */}
+      {/* ATTENDANCE MODE SELECTOR & FILTERS */}
       {syncType === 'attendance' && (
+        <>
+          <div className="flex bg-white/50 dark:bg-gray-900/50 p-1 rounded-xl w-full max-w-sm mb-4 border border-gray-200 shadow-sm backdrop-blur-xl">
+            <button
+              onClick={() => { setAttendanceMode('daily'); setError(null); setImportResults(null); }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                attendanceMode === 'daily' ? 'bg-[#2E1C40] text-white shadow-md' : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              Daily Attendance
+            </button>
+            <button
+              onClick={() => { setAttendanceMode('monthly'); setError(null); setImportResults(null); }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                attendanceMode === 'monthly' ? 'bg-[#2E1C40] text-white shadow-md' : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              Monthly Attendance
+            </button>
+          </div>
+
+        {attendanceMode === 'daily' && (
         <div className="mb-8 p-6 glass-card border border-[#FCA311]/30">
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             Export Filters
@@ -791,6 +1051,75 @@ export function DataSync() {
             </div>
           </div>
         </div>
+        )}
+        
+        {attendanceMode === 'monthly' && (
+        <div className="mb-8 p-6 glass-card border border-[#FCA311]/30">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            Monthly Attendance Filters
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Standard</label>
+              <select
+                value={attMonthlyStandard}
+                onChange={(e) => { setAttMonthlyStandard(e.target.value); setAttMonthlySection(''); }}
+                className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none"
+              >
+                <option value="">Select</option>
+                {standards.map(std => <option key={std} value={std}>{std}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Section</label>
+              <select
+                value={attMonthlySection}
+                onChange={(e) => setAttMonthlySection(e.target.value)}
+                className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none"
+              >
+                <option value="">Select</option>
+                {sections.map(sec => <option key={sec} value={sec}>{sec}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Month</label>
+              <select
+                value={attMonthlyMonth}
+                onChange={(e) => setAttMonthlyMonth(e.target.value)}
+                className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none"
+              >
+                <option value="">Select</option>
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Year</label>
+              <select
+                value={attMonthlyYear}
+                onChange={(e) => setAttMonthlyYear(e.target.value)}
+                className="w-full bg-white/50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none"
+              >
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        )}
+        </>
       )}
 
       {error && (
@@ -855,17 +1184,17 @@ export function DataSync() {
           </div>
           
           <h2 className="text-2xl font-bold text-gray-900 mb-3">
-            {syncType === 'profiles' ? 'Export Profiles' : syncType === 'marks' ? 'Export Marks' : 'Export Daily Attendance'}
+            {syncType === 'profiles' ? 'Export Profiles' : syncType === 'marks' ? 'Export Marks' : (attendanceMode === 'monthly' ? 'Export Monthly Attendance' : 'Export Daily Attendance')}
           </h2>
           <p className="text-[#4C677C] mb-8 max-w-sm">
             {syncType === 'profiles' 
               ? 'Download a complete backup of all student records in Excel format.'
               : syncType === 'marks' ? 'Download an Excel spreadsheet containing students and their subject marks.' 
-              : 'Download Daily Attendance records in Excel format based on filters.'}
+              : (attendanceMode === 'monthly' ? 'Download Monthly Attendance records in Excel format.' : 'Download Daily Attendance records in Excel format based on filters.')}
           </p>
           
           <button 
-            onClick={syncType === 'profiles' ? handleExportProfiles : (syncType === 'marks' && marksMode === 'universal' ? downloadUniversalMarksTemplate : syncType === 'attendance' ? handleExportAttendance : handleExportMarks)}
+            onClick={syncType === 'profiles' ? handleExportProfiles : (syncType === 'marks' && marksMode === 'universal' ? downloadUniversalMarksTemplate : (syncType === 'attendance' ? (attendanceMode === 'monthly' ? handleExportMonthlyAttendance : handleExportAttendance) : handleExportMarks))}
             disabled={exporting || (syncType === 'marks' && marksMode === 'universal' ? false : false)}
             className="glass-button-primary bg-blue-600 hover:bg-blue-700 text-white w-full max-w-xs flex items-center justify-center gap-2 py-3 relative z-10"
           >
@@ -887,13 +1216,13 @@ export function DataSync() {
           </div>
           
           <h2 className="text-2xl font-bold text-gray-900 mb-3">
-            {syncType === 'profiles' ? 'Import Profiles' : syncType === 'marks' ? 'Import Marks' : 'Import Daily Attendance'}
+            {syncType === 'profiles' ? 'Import Profiles' : syncType === 'marks' ? 'Import Marks' : (attendanceMode === 'monthly' ? 'Import Monthly Attendance' : 'Import Daily Attendance')}
           </h2>
           <p className="text-[#4C677C] mb-6 max-w-sm">
             {syncType === 'profiles'
               ? 'Upload a CSV file to add new students or update existing ones.'
               : syncType === 'marks' ? 'Upload an Excel/CSV file containing subject marks for the selected term.'
-              : 'Upload an Excel file containing Daily Attendance records.'}
+              : (attendanceMode === 'monthly' ? 'Upload an Excel file containing Monthly Attendance records.' : 'Upload an Excel file containing Daily Attendance records.')}
           </p>
           
           <div className="flex flex-col gap-4 w-full max-w-xs relative z-10">
@@ -910,13 +1239,13 @@ export function DataSync() {
                 type="file" 
                 accept={syncType === 'profiles' ? '.csv' : '.xlsx,.xls'} 
                 className="hidden" 
-                onChange={syncType === 'profiles' ? handleProfileUpload : (syncType === 'marks' && marksMode === 'universal' ? handleUniversalMarksUpload : syncType === 'attendance' ? handleAttendanceUpload : handleMarksUpload)}
+                onChange={syncType === 'profiles' ? handleProfileUpload : (syncType === 'marks' && marksMode === 'universal' ? handleUniversalMarksUpload : syncType === 'attendance' ? (attendanceMode === 'monthly' ? handleMonthlyAttendanceUpload : handleAttendanceUpload) : handleMarksUpload)}
                 disabled={importing || (syncType === 'marks' && (marksMode === 'legacy' && (!selectedStandard || !selectedSection || !selectedTerm)))}
               />
             </label>
             
             <button 
-              onClick={syncType === 'profiles' ? downloadProfileTemplate : (syncType === 'marks' && marksMode === 'universal' ? downloadUniversalMarksTemplate : syncType === 'attendance' ? downloadAttendanceTemplate : downloadMarksTemplate)}
+              onClick={syncType === 'profiles' ? downloadProfileTemplate : (syncType === 'marks' && marksMode === 'universal' ? downloadUniversalMarksTemplate : syncType === 'attendance' ? (attendanceMode === 'monthly' ? downloadMonthlyAttendanceTemplate : downloadAttendanceTemplate) : downloadMarksTemplate)}
               className="text-sm text-[#4C677C] hover:text-gray-900 underline transition-colors"
             >
               {syncType === 'profiles' ? 'Download CSV Template' : syncType === 'attendance' ? 'Download Attendance Excel Template' : 'Download Excel Template'}

@@ -534,3 +534,209 @@ exports.exportDailyAttendance = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to export attendance' });
   }
 };
+
+exports.getMonthlyAttendance = async (req, res) => {
+  try {
+    const { standard, section, year, month } = req.query;
+    if (!standard || !section || !year || !month) {
+      return res.status(400).json({ error: 'Missing required query parameters' });
+    }
+
+    const monthStr = month.padStart(2, '0');
+    const datePrefix = `${year}-${monthStr}-`;
+
+    const attendances = await Attendance.find({
+      standard,
+      section,
+      attendanceType: 'daily',
+      date: { $regex: `^${datePrefix}` }
+    }).populate('records.student', 'name emisNumber gender').lean();
+
+    res.json({ success: true, data: attendances });
+  } catch (error) {
+    console.error('Error fetching monthly attendance:', error);
+    res.status(500).json({ error: 'Failed to fetch monthly attendance' });
+  }
+};
+
+exports.bulkImportMonthlyAttendance = async (req, res) => {
+  try {
+    const records = req.body; // array of { emisNumber, standard, section, date, status }
+
+    if (!Array.isArray(records) || records.length === 0) {
+      return res.status(400).json({ success: false, message: 'No records provided' });
+    }
+
+    // 1. Validation phase
+    const errors = [];
+    const emisNumbers = [...new Set(records.map(r => String(r.emisNumber).trim()))];
+    const students = await Student.find({ emisNumber: { $in: emisNumbers } });
+    const studentMap = {};
+    students.forEach(s => {
+      studentMap[s.emisNumber] = s;
+    });
+
+    const duplicateCheckMap = new Set();
+    const validStatuses = ['Present', 'Absent', 'Late', 'Homebased', 'IE Center', 'On Duty'];
+
+    for (let i = 0; i < records.length; i++) {
+      const row = records[i];
+      const rowNum = i + 1;
+
+      const emis = String(row.emisNumber).trim();
+      const date = String(row.date).trim();
+      const std = String(row.standard).trim();
+      const sec = String(row.section).trim().toUpperCase();
+      let status = String(row.status).trim();
+
+      if (!emis) { errors.push(`Row ${rowNum}: EMIS Number is missing.`); continue; }
+      if (!date) { errors.push(`Row ${rowNum}: Date is missing.`); continue; }
+
+      // Normalize status
+      const sMap = {
+        'P': 'Present', 'PRESENT': 'Present',
+        'A': 'Absent', 'ABSENT': 'Absent',
+        'L': 'Late', 'LATE': 'Late',
+        'H': 'Homebased', 'HOMEBASED': 'Homebased',
+        'I': 'IE Center', 'IE CENTER': 'IE Center', 'IECENTER': 'IE Center',
+        'OD': 'On Duty', 'ON DUTY': 'On Duty', 'ONDUTY': 'On Duty'
+      };
+      
+      const normalizedStatus = sMap[status.toUpperCase()];
+      if (normalizedStatus) {
+        status = normalizedStatus;
+        records[i].status = status; // update record
+      }
+
+      if (!validStatuses.includes(status)) { 
+        errors.push(`Row ${rowNum}: Invalid status "${status}". Allowed: P, A, L, H, I, OD.`); 
+        continue; 
+      }
+
+      const student = studentMap[emis];
+      if (!student) {
+        errors.push(`Row ${rowNum}: Student with EMIS ${emis} not found.`);
+        continue;
+      }
+
+      if (student.standard !== std) {
+        errors.push(`Row ${rowNum}: EMIS ${emis} belongs to Standard ${student.standard}, but Excel says ${std}.`);
+        continue;
+      }
+
+      if (student.section !== sec) {
+        errors.push(`Row ${rowNum}: EMIS ${emis} belongs to Section ${student.section}, but Excel says ${sec}.`);
+        continue;
+      }
+
+      const dupKey = `${emis}-${date}-${std}-${sec}`;
+      if (duplicateCheckMap.has(dupKey)) {
+        errors.push(`Row ${rowNum}: Duplicate attendance entry for EMIS ${emis} on Date ${date}.`);
+        continue;
+      }
+      duplicateCheckMap.add(dupKey);
+
+      row.studentId = student._id;
+    }
+
+    if (errors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed. No records were imported.',
+        validationErrors: errors
+      });
+    }
+
+    // 2. Processing phase - group by Date + Standard + Section
+    const grouped = {};
+    records.forEach(row => {
+      const key = `${row.date}_${row.standard}_${row.section.toUpperCase()}`;
+      if (!grouped[key]) {
+        grouped[key] = {
+          date: row.date,
+          standard: row.standard,
+          section: row.section.toUpperCase(),
+          studentStatuses: []
+        };
+      }
+      grouped[key].studentStatuses.push({
+        student: row.studentId,
+        status: row.status
+      });
+    });
+
+    let createdCount = 0;
+    let updatedCount = 0;
+
+    for (const key in grouped) {
+      const group = grouped[key];
+
+      // Process Daily Attendance
+      const query = {
+        date: group.date,
+        standard: group.standard,
+        section: group.section,
+        attendanceType: 'daily'
+      };
+
+      let dailyAttendance = await Attendance.findOne(query);
+      if (dailyAttendance) {
+        const recordMap = new Map();
+        dailyAttendance.records.forEach(r => recordMap.set(r.student.toString(), r.status));
+
+        group.studentStatuses.forEach(ss => {
+          recordMap.set(ss.student.toString(), ss.status);
+        });
+
+        dailyAttendance.records = Array.from(recordMap.entries()).map(([studentId, status]) => ({
+          student: studentId,
+          status
+        }));
+
+        await dailyAttendance.save();
+        updatedCount++;
+      } else {
+        dailyAttendance = new Attendance({
+          ...query,
+          isSubmitted: true,
+          submittedBy: req.dbUser ? req.dbUser._id : null,
+          records: group.studentStatuses
+        });
+        await dailyAttendance.save();
+        createdCount++;
+      }
+
+      // Process Period 1 Sync
+      const p1Query = { ...query, attendanceType: 'period', period: 1 };
+      let p1Attendance = await Attendance.findOne(p1Query);
+      if (p1Attendance) {
+        const p1RecordMap = new Map();
+        p1Attendance.records.forEach(r => p1RecordMap.set(r.student.toString(), r.status));
+        group.studentStatuses.forEach(ss => p1RecordMap.set(ss.student.toString(), ss.status));
+        p1Attendance.records = Array.from(p1RecordMap.entries()).map(([studentId, status]) => ({
+          student: studentId,
+          status
+        }));
+        await p1Attendance.save();
+      } else {
+        p1Attendance = new Attendance({
+          ...p1Query,
+          isSubmitted: true,
+          submittedBy: req.dbUser ? req.dbUser._id : null,
+          records: group.studentStatuses
+        });
+        await p1Attendance.save();
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Monthly attendance imported successfully',
+      data: { created: createdCount, updated: updatedCount }
+    });
+
+  } catch (error) {
+    console.error('Error in bulk import monthly attendance:', error);
+    res.status(500).json({ success: false, message: 'Internal server error during monthly bulk import' });
+  }
+};

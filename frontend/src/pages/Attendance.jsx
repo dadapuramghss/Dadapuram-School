@@ -31,6 +31,10 @@ export function Attendance() {
   const [successMsg, setSuccessMsg] = useState('');
 
   const [activeTab, setActiveTab] = useState('take');
+  const [monthlyYear, setMonthlyYear] = useState(new Date().getFullYear().toString());
+  const [monthlyMonth, setMonthlyMonth] = useState((new Date().getMonth() + 1).toString());
+  const [monthlySearch, setMonthlySearch] = useState('');
+  const [monthlyData, setMonthlyData] = useState([]);
   const [summaryData, setSummaryData] = useState([]);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
 
@@ -134,6 +138,63 @@ export function Attendance() {
       setError('Failed to fetch summary data.');
     } finally {
       setIsSummaryLoading(false);
+    }
+  };
+
+  const fetchMonthlyData = async () => {
+    if (!standard || !section || !monthlyYear || !monthlyMonth) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const stuRes = await api.getStudents(standard, section);
+      let students = stuRes.data || [];
+
+      const attRes = await api.getMonthlyAttendance(standard, section, monthlyYear, monthlyMonth);
+      
+      const daysInMonth = new Date(parseInt(monthlyYear), parseInt(monthlyMonth), 0).getDate();
+      
+      const studentsMap = {};
+      students.forEach(s => {
+        studentsMap[s._id] = {
+          studentId: s._id,
+          emisNumber: s.emisNumber,
+          name: s.name,
+          gender: s.gender || 'Other',
+          attendance: {}
+        };
+        for(let i=1; i<=daysInMonth; i++) {
+          studentsMap[s._id].attendance[i] = '-';
+        }
+      });
+      
+      if (attRes.data) {
+        attRes.data.forEach(att => {
+          const day = parseInt(att.date.split('-')[2]);
+          att.records.forEach(r => {
+            const stuId = r.student._id || r.student;
+            if (studentsMap[stuId]) {
+              let statusMap = { 'Present': 'P', 'Absent': 'A', 'Late': 'L', 'Homebased': 'H', 'IE Center': 'I', 'On Duty': 'OD' };
+              studentsMap[stuId].attendance[day] = statusMap[r.status] || r.status;
+            }
+          });
+        });
+      }
+      
+      const studentsList = Object.values(studentsMap);
+      studentsList.sort((a, b) => {
+        const priority = { 'Male': 1, 'Female': 2, 'Other': 3 };
+        const pA = priority[a.gender] || 3;
+        const pB = priority[b.gender] || 3;
+        if (pA !== pB) return pA - pB;
+        return (a.name || '').localeCompare(b.name || '', 'en', { sensitivity: 'base' });
+      });
+      
+      setMonthlyData(studentsList);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to fetch monthly attendance.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -365,7 +426,7 @@ export function Attendance() {
                     <td className="px-6 py-3">{student.name}</td>
                     <td className="px-6 py-3">
                       <div className="flex items-center justify-center gap-2">
-                        {['Present', 'Absent', 'Late'].map(status => (
+                        {['Present', 'Absent', 'Late', 'Homebased', 'IE Center', 'On Duty'].map(status => (
                           <button
                             key={status}
                             disabled={isLocked}

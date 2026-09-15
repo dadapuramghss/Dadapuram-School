@@ -124,7 +124,7 @@ export const api = {
   }),
 
   // Analytics Leaderboard
-  getLeaderboard: (standard, section) => fetchWithAuth(`/analytics/leaderboard?standard=${standard}&section=${section}`),
+  getLeaderboard: (standard, section, rankBy = 'Marks') => fetchWithAuth(`/analytics/leaderboard?standard=${standard}&section=${section}&rankBy=${rankBy}`),
   getDashboardStats: () => fetchWithAuth('/analytics/dashboard'),
 
   // AI Assistant
@@ -173,6 +173,13 @@ export const api = {
     if (percentage) url += `&percentage=${encodeURIComponent(percentage)}`;
     return fetchWithAuth(url);
   },
+  getMonthlyAttendance: (standard, section, year, month) => {
+    return fetchWithAuth(`/attendance/monthly?standard=${standard}&section=${section}&year=${year}&month=${month}`);
+  },
+  importMonthlyAttendance: (records) => fetchWithAuth('/attendance/monthly/bulk', {
+    method: 'POST',
+    body: JSON.stringify(records)
+  }),
   exportDailyAttendance: (fromDate, toDate, standard, section) => {
     let url = `/attendance/export?standard=${standard}&section=${section}`;
     if (fromDate) url += `&fromDate=${fromDate}`;

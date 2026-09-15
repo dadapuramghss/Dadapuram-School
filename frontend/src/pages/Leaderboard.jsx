@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { NeonButton } from '../components/ui/NeonButton';
-import { Trophy, Medal, X } from 'lucide-react';
+import { Trophy, Medal, Award, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { api } from '../lib/api';
 
 export function Leaderboard() {
   const [selectedClass, setSelectedClass] = useState('All');
   const [selectedSection, setSelectedSection] = useState('All');
+  const [rankBy, setRankBy] = useState('Marks');
   const [loading, setLoading] = useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
@@ -33,7 +34,7 @@ export function Leaderboard() {
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
-      const res = await api.getLeaderboard(selectedClass, selectedSection);
+      const res = await api.getLeaderboard(selectedClass, selectedSection, rankBy);
       setLeaderboard(res.data || []);
     } catch (err) {
       console.error('Failed to fetch leaderboard:', err);
@@ -58,13 +59,13 @@ export function Leaderboard() {
   useEffect(() => {
     fetchLeaderboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedClass, selectedSection]);
+  }, [selectedClass, selectedSection, rankBy]);
 
   const renderRankIcon = (rank) => {
     switch(rank) {
-      case 1: return <Trophy className="w-8 h-8 text-[#AE634A] drop-shadow-sm" />;
-      case 2: return <Medal className="w-8 h-8 text-adminSidebar drop-shadow-sm" />;
-      case 3: return <Medal className="w-8 h-8 text-[#732A26] drop-shadow-sm" />;
+      case 1: return <span className="text-3xl sm:text-4xl drop-shadow-md" role="img" aria-label="Gold Trophy">🏆</span>;
+      case 2: return <span className="text-3xl sm:text-4xl drop-shadow-md" role="img" aria-label="Silver Medal">🥈</span>;
+      case 3: return <span className="text-3xl sm:text-4xl drop-shadow-md" role="img" aria-label="Bronze Medal">🥉</span>;
       default: return <div className="w-8 h-8 flex items-center justify-center font-bold text-xl text-[#4C677C]/60  ">{rank}</div>;
     }
   };
@@ -116,6 +117,14 @@ export function Leaderboard() {
                 <option key={sec} value={sec}>Section {sec}</option>
               ))}
           </select>
+          <select 
+            value={rankBy} 
+            onChange={e => setRankBy(e.target.value)}
+            className="glass-input w-full sm:w-auto dark:!text-gray-900 dark:bg-transparent [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
+          >
+            <option value="Marks">Rank by Marks</option>
+            <option value="Percentage">Rank by Percentage</option>
+          </select>
         </div>
       </div>
 
@@ -123,52 +132,86 @@ export function Leaderboard() {
         {loading ? (
           <div className="text-center py-10 text-[#4C677C] dark:text-gray-400">Calculating Ranks...</div>
         ) : (
-          leaderboard.map((student) => (
-            <div 
-              key={student._id} 
-              onClick={() => fetchStudentDetails(student._id)}
-              className={cn(
-                "glass-card p-4 flex flex-row items-center gap-3 sm:gap-6 transition-all duration-300 hover:scale-[1.02] cursor-pointer",
-                student.rank === 1 ? "border-[#AE634A]/50 shadow-md bg-[#FDF9F7] dark:bg-[#AE634A]/10" : "",
-                student.rank === 2 ? "border-adminSidebar/50 bg-[#F2FCFA] dark:bg-adminSidebar/10" : "",
-                student.rank === 3 ? "border-[#732A26]/50 bg-[#FCF9F9] dark:bg-[#732A26]/10" : "",
-                student.rank > 3 ? "border-[#E5D9C4] dark:border-[#4C677C]/30" : ""
-              )}
-            >
-              <div className="w-10 sm:w-16 flex justify-center shrink-0">
-                {renderRankIcon(student.rank)}
-              </div>
-              
-              <img 
-                src={student.photoUrl || 'https://placehold.co/150'} 
-                alt={student.name}
-                className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-white/20 shrink-0"
-              />
-              
-              <div className="flex-1 min-w-0">
-                <h3 className="text-xl font-bold truncate text-[#2E1C40] dark:text-gray-900">{student.name}</h3>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[#4C677C] dark:text-gray-300 text-xs sm:text-sm mt-1">
-                  <span className="whitespace-nowrap">EMIS No: {student.emisNumber}</span>
-                  {(selectedClass === 'All' || selectedSection === 'All') && (
-                    <span className="bg-[#D8FDF6]/40 dark:bg-white text-[#2E1C40] dark:text-gray-900 px-2 py-0.5 rounded-full text-xs font-bold whitespace-nowrap inline-block">
+          leaderboard.map((student, index) => {
+            const isFirstOfRank = index === 0 || leaderboard[index - 1].rank !== student.rank;
+            return (
+              <div 
+                key={`${student._id}-${rankBy}-${student.rank}`}
+                onClick={() => fetchStudentDetails(student._id)}
+                className={cn(
+                  "glass-card p-3 sm:p-5 flex flex-row items-center gap-3 sm:gap-6 transition-all duration-300 hover:scale-[1.01] cursor-pointer rounded-2xl border shadow-sm",
+                  student.rank === 1 ? "border-[#F6DEC6] bg-[#FFFBF0] dark:bg-[#FFFBF0]/10" : "",
+                  student.rank === 2 ? "border-[#C6E7E7] bg-[#F0FCFC] dark:bg-[#F0FCFC]/10" : "",
+                  student.rank === 3 ? "border-[#EBCBCA] bg-[#FFF6F5] dark:bg-[#FFF6F5]/10" : "",
+                  student.rank > 3 ? "border-[#E5D9C4] bg-[#FAF8F5] dark:bg-[#121212]/60" : ""
+                )}
+              >
+                {/* Left section: POS & RANK */}
+                <div className="flex flex-row items-center gap-3 sm:gap-5 shrink-0 pl-2">
+                  <div className="flex flex-col items-center justify-center min-w-[30px] sm:min-w-[40px]">
+                    {isFirstOfRank ? (
+                      <>
+                        <span className="text-[10px] sm:text-xs font-bold text-[#4C677C] uppercase tracking-wider mb-1">POS</span>
+                        <span className="text-2xl sm:text-4xl font-black text-[#2E1C40] dark:text-gray-100 leading-none">{student.rank}</span>
+                      </>
+                    ) : (
+                      <span className="w-full h-full opacity-0 select-none flex flex-col items-center justify-center">
+                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1">POS</span>
+                        <span className="text-2xl sm:text-4xl font-black leading-none">{student.rank}</span>
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Vertical divider */}
+                  <div className={cn("w-px h-10 sm:h-14 bg-black/10 dark:bg-white/10", isFirstOfRank ? "opacity-100" : "opacity-0")}></div>
+                  
+                  <div className="flex flex-col items-center justify-center min-w-[40px] sm:min-w-[50px]">
+                    <span className="text-[10px] sm:text-xs font-bold text-[#1E5D8F] uppercase tracking-wider mb-1">RANK</span>
+                    <div className="mt-1">{renderRankIcon(student.rank)}</div>
+                  </div>
+                </div>
+                
+                {/* Profile Image */}
+                <img 
+                  src={student.photoUrl || 'https://placehold.co/150'} 
+                  alt={student.name}
+                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-black/5 dark:border-white/10 shrink-0 bg-gray-200"
+                />
+                
+                {/* Name & Details */}
+                <div className="flex-1 min-w-0 py-1">
+                  <h3 className="text-base sm:text-2xl font-bold truncate text-[#2E1C40] dark:text-gray-100">{student.name}</h3>
+                  <div className="flex flex-wrap items-center gap-2 mt-1 sm:mt-1.5">
+                    <span className="text-[11px] sm:text-sm text-[#4C677C] dark:text-gray-400 font-medium">EMIS: {student.emisNumber}</span>
+                    <span className="bg-[#EAE4DD] dark:bg-white/10 text-[#2E1C40] dark:text-gray-200 px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold whitespace-nowrap">
                       Std {student.standard} - {student.section}
                     </span>
-                  )}
+                  </div>
+                </div>
+                
+                {/* Right section: MARKS & % */}
+                <div className="flex flex-row items-center gap-6 sm:gap-10 shrink-0 pr-2 sm:pr-6">
+                  <div className="flex flex-col items-end justify-center">
+                    <span className="text-[10px] sm:text-xs font-bold text-[#4C677C] uppercase tracking-wider mb-1">MARKS</span>
+                    <div className={`text-lg sm:text-2xl font-black leading-none ${
+                      student.rank === 1 ? 'text-[#AE634A]' : 
+                      student.rank === 2 ? 'text-[#1E9AA7]' : 
+                      student.rank === 3 ? 'text-[#793A36]' : 'text-[#2E1C40] dark:text-gray-100'
+                    }`}>
+                      {student.totalMarks} <span className="text-sm sm:text-xl opacity-70">/ {student.maximumMarks || 500}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col items-end justify-center">
+                    <span className="text-[10px] sm:text-xs font-bold text-[#4C677C] uppercase tracking-wider mb-1">%</span>
+                    <div className="text-lg sm:text-2xl font-black leading-none text-[#4C677C] dark:text-gray-300">
+                      {student.percentage}%
+                    </div>
+                  </div>
                 </div>
               </div>
-              
-              <div className="text-right shrink-0">
-                <div className="text-xs sm:text-sm text-[#4C677C] dark:text-gray-300 mb-1 whitespace-nowrap">Total Marks</div>
-                <div className={`text-xl sm:text-2xl font-black ${
-                  student.rank === 1 ? 'text-[#AE634A]' : 
-                  student.rank === 2 ? 'text-adminSidebar' : 
-                  student.rank === 3 ? 'text-[#732A26]' : 'text-[#2E1C40] dark:text-gray-900'
-                }`}>
-                  {student.totalMarks}
-                </div>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
       {selectedStudentId && (
