@@ -59,13 +59,37 @@ const getMaterialsByClass = async (req, res) => {
       return res.status(400).json({ error: 'Standard and section are required parameters' });
     }
 
-    if (standard !== 'All' && section !== 'All' && !isAuthorizedForClass(req.dbUser, standard, section)) {
-      return res.status(403).json({ error: 'Not authorized for this class and section' });
-    }
-
     const query = {};
-    if (standard !== 'All') query.standard = standard;
-    if (section !== 'All') query.section = section;
+
+    if (req.dbUser && req.dbUser.role !== 'admin') {
+      if (!req.dbUser.assignedClasses || req.dbUser.assignedClasses.length === 0) {
+        return res.json({ success: true, data: [] });
+      }
+
+      if (standard !== 'All' && section !== 'All') {
+        if (!isAuthorizedForClass(req.dbUser, standard, section)) {
+          return res.status(403).json({ error: 'Not authorized for this class and section' });
+        }
+        query.standard = standard;
+        query.section = section;
+      } else {
+        let validClasses = req.dbUser.assignedClasses;
+        if (standard !== 'All') validClasses = validClasses.filter(c => c.standard === standard);
+        if (section !== 'All') validClasses = validClasses.filter(c => c.section === section);
+        
+        if (validClasses.length === 0) {
+           return res.json({ success: true, data: [] });
+        }
+        
+        query.$or = validClasses.map(c => ({ 
+          standard: c.standard, 
+          section: c.section
+        }));
+      }
+    } else {
+      if (standard !== 'All') query.standard = standard;
+      if (section !== 'All') query.section = section;
+    }
 
     const materials = await Material.find(query).sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: materials });

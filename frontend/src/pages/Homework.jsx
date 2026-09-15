@@ -97,7 +97,7 @@ export function Homework() {
   }, [availableSections, selectedSection, selectedClass]);
 
   const loadHomework = async () => {
-    if (!isClassSelected) return;
+    // if (!isClassSelected) return;
     try {
       setLoading(true);
       const res = await api.getHomeworkByClass(selectedClass, selectedSection);
@@ -511,11 +511,7 @@ export function Homework() {
         </GlassCard>
       )}
 
-      {!isClassSelected ? (
-        <div className="text-center py-12 text-[#4C677C] dark:text-[#E5D9C4]/60">
-          Select a class and section to view homework
-        </div>
-      ) : loading ? (
+      {loading ? (
         <div className="text-center py-12">Loading...</div>
       ) : homeworkList.length === 0 ? (
         <div className="text-center py-12 text-[#4C677C] dark:text-[#E5D9C4]/60 bg-white/30 dark:bg-[#1A1A24]/30 rounded-xl">

@@ -69,7 +69,7 @@ export function Materials() {
   }, [availableSections, selectedSection, selectedClass]);
 
   const loadMaterials = async () => {
-    if (!isClassSelected) return;
+    // if (!isClassSelected) return;
     try {
       setLoading(true);
       const res = await api.getMaterialsByClass(selectedClass, selectedSection);
@@ -273,11 +273,7 @@ export function Materials() {
         </GlassCard>
       )}
 
-      {!isClassSelected ? (
-        <div className="text-center py-12 text-[#4C677C] dark:text-[#E5D9C4]/60">
-          Select a class and section to view materials
-        </div>
-      ) : loading ? (
+      {loading ? (
         <div className="text-center py-12">Loading...</div>
       ) : materialsList.length === 0 ? (
         <div className="text-center py-12 text-[#4C677C] dark:text-[#E5D9C4]/60 bg-white/30 dark:bg-[#1A1A24]/30 rounded-xl">
