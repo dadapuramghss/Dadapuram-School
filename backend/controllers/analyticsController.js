@@ -391,6 +391,24 @@ const getDashboardStats = async (req, res) => {
     const classwiseFirstMarks = await Student.aggregate([
       { $match: query },
       { $unwind: { path: "$terms", preserveNullAndEmptyArrays: false } },
+      // Deduplicate subject marks within each term (keep first occurrence)
+      {
+        $addFields: {
+          "terms.marks": {
+            $reduce: {
+              input: { $ifNull: ["$terms.marks", []] },
+              initialValue: [],
+              in: {
+                $cond: [
+                  { $in: ["$$this.subject", "$$value.subject"] },
+                  "$$value",
+                  { $concatArrays: ["$$value", ["$$this"]] }
+                ]
+              }
+            }
+          }
+        }
+      },
       { $unwind: { path: "$terms.marks", preserveNullAndEmptyArrays: false } },
       {
         $group: {
@@ -423,6 +441,24 @@ const getDashboardStats = async (req, res) => {
     const allExamsFirstMarks = await Student.aggregate([
       { $match: query },
       { $unwind: { path: "$terms", preserveNullAndEmptyArrays: false } },
+      // Deduplicate subject marks within each term (keep first occurrence)
+      {
+        $addFields: {
+          "terms.marks": {
+            $reduce: {
+              input: { $ifNull: ["$terms.marks", []] },
+              initialValue: [],
+              in: {
+                $cond: [
+                  { $in: ["$$this.subject", "$$value.subject"] },
+                  "$$value",
+                  { $concatArrays: ["$$value", ["$$this"]] }
+                ]
+              }
+            }
+          }
+        }
+      },
       { $unwind: { path: "$terms.marks", preserveNullAndEmptyArrays: false } },
       {
         $group: {
