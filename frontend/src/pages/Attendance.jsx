@@ -3,8 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import { appState } from '../lib/appState';
 import { useClassConfig } from '../context/ClassConfigContext';
 import { api } from '../lib/api';
-import { Calendar, Save, CheckCircle, Clock, Search, ShieldAlert, BarChart2, Edit3 } from 'lucide-react';
+import { Calendar, Save, CheckCircle, Clock, Search, ShieldAlert, BarChart2, Edit3, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '../lib/utils';
+import * as XLSX from 'xlsx';
 import { io } from 'socket.io-client';
 
 export function Attendance() {
@@ -35,6 +36,8 @@ export function Attendance() {
   const [monthlyMonth, setMonthlyMonth] = useState((new Date().getMonth() + 1).toString());
   const [monthlySearch, setMonthlySearch] = useState('');
   const [monthlyData, setMonthlyData] = useState([]);
+  const [monthlyPage, setMonthlyPage] = useState(1);
+  const itemsPerPage = 10;
   const [summaryData, setSummaryData] = useState([]);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
 
@@ -259,6 +262,72 @@ export function Attendance() {
 
   const isLocked = isSubmitted && !isAdmin;
 
+  // Monthly Attendance Logic
+  const daysInMonthlyMonth = new Date(parseInt(monthlyYear), parseInt(monthlyMonth), 0).getDate();
+  const monthlyFilteredData = monthlyData.filter(student => 
+    student.name.toLowerCase().includes(monthlySearch.toLowerCase()) || 
+    student.emisNumber.toLowerCase().includes(monthlySearch.toLowerCase())
+  );
+  
+  const monthlyTotalPages = Math.ceil(monthlyFilteredData.length / itemsPerPage);
+  const monthlyPaginatedData = monthlyFilteredData.slice((monthlyPage - 1) * itemsPerPage, monthlyPage * itemsPerPage);
+
+  // Math for Monthly Statistics (Total Present, Absent, Average)
+  let totalPresent = 0;
+  let totalAbsent = 0;
+  monthlyData.forEach(student => {
+    Object.values(student.attendance || {}).forEach(status => {
+      if (status === 'P') {
+        totalPresent++;
+      } else if (status === 'A' || status === 'L' || status === 'H' || status === 'I' || status === 'OD') {
+        totalAbsent++;
+      }
+    });
+  });
+  const totalDaysRecorded = totalPresent + totalAbsent;
+  const averageAttendance = totalDaysRecorded > 0 ? ((totalPresent / totalDaysRecorded) * 100).toFixed(1) + '%' : '0%';
+
+  const handleExportMonthly = () => {
+    const workbook = XLSX.utils.book_new();
+    const sheetData = [];
+    
+    // Header row
+    const header = ['S.No', 'EMIS Number', 'Student Name', 'Gender', 'Standard', 'Section'];
+    for(let i=1; i<=daysInMonthlyMonth; i++) {
+      header.push(i.toString().padStart(2, '0'));
+    }
+    sheetData.push(header);
+
+    // Data rows (export ALL filtered data, not just paginated)
+    monthlyFilteredData.forEach((student, index) => {
+      const row = [
+        index + 1,
+        student.emisNumber,
+        student.name,
+        student.gender || '',
+        standard,
+        section
+      ];
+      for(let i=1; i<=daysInMonthlyMonth; i++) {
+        row.push(student.attendance?.[i] || '-');
+      }
+      sheetData.push(row);
+    });
+
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+    
+    // Column widths
+    const wscols = [
+      {wch: 5}, {wch: 15}, {wch: 25}, {wch: 10}, {wch: 10}, {wch: 10},
+      ...Array(daysInMonthlyMonth).fill({wch: 4})
+    ];
+    worksheet['!cols'] = wscols;
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Monthly Attendance");
+    const monthName = new Date(2020, parseInt(monthlyMonth)-1, 1).toLocaleString('default', { month: 'long' });
+    XLSX.writeFile(workbook, `DGHSS360_Attendance_${standard}_${section}_${monthName}_${monthlyYear}.xlsx`);
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -278,6 +347,12 @@ export function Attendance() {
             className={cn("px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors", activeTab === 'summary' ? "bg-[#2E1C40] text-white" : "text-gray-500 hover:bg-gray-50")}
           >
             <BarChart2 className="w-4 h-4" /> Summary Report
+          </button>
+          <button
+            onClick={() => setActiveTab('monthly')}
+            className={cn("px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors", activeTab === 'monthly' ? "bg-[#2E1C40] text-white" : "text-gray-500 hover:bg-gray-50")}
+          >
+            <Calendar className="w-4 h-4" /> Monthly Attendance
           </button>
         </div>
       </div>
@@ -316,18 +391,47 @@ export function Attendance() {
 
       {/* Filters */}
       <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Date</label>
-          <div className="relative">
-            <Calendar className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input 
-              type="date" 
-              value={date} 
-              onChange={e => setDate(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-[#4C677C] focus:border-transparent"
-            />
+        {activeTab === 'monthly' ? (
+          <>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Month</label>
+              <select 
+                value={monthlyMonth} 
+                onChange={e => setMonthlyMonth(e.target.value)}
+                className="w-full px-3 py-2 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-[#4C677C]"
+              >
+                {Array.from({length: 12}, (_, i) => i + 1).map(m => (
+                  <option key={m} value={m}>{new Date(2020, m-1, 1).toLocaleString('default', { month: 'short' })}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Year</label>
+              <select 
+                value={monthlyYear} 
+                onChange={e => setMonthlyYear(e.target.value)}
+                className="w-full px-3 py-2 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-[#4C677C]"
+              >
+                {Array.from({length: 5}, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
+          </>
+        ) : (
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Date</label>
+            <div className="relative">
+              <Calendar className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input 
+                type="date" 
+                value={date} 
+                onChange={e => setDate(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-[#4C677C] focus:border-transparent"
+              />
+            </div>
           </div>
-        </div>
+        )}
         
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Standard</label>
@@ -381,7 +485,7 @@ export function Attendance() {
               {isLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Search className="w-4 h-4" />}
               Fetch
             </button>
-          ) : (
+          ) : activeTab === 'summary' ? (
             <button 
               onClick={fetchSummaryData}
               disabled={!standard || !section || !date || isSummaryLoading}
@@ -389,6 +493,15 @@ export function Attendance() {
             >
               {isSummaryLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <BarChart2 className="w-4 h-4" />}
               Get Summary
+            </button>
+          ) : (
+            <button 
+              onClick={fetchMonthlyData}
+              disabled={!standard || !section || !monthlyYear || !monthlyMonth || isLoading}
+              className="w-full bg-[#2E1C40] text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#4C677C] transition-colors disabled:opacity-50"
+            >
+              {isLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Search className="w-4 h-4" />}
+              View Month
             </button>
           )}
         </div>
@@ -540,6 +653,133 @@ export function Attendance() {
           <BarChart2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <h3 className="text-lg font-bold text-gray-600">No Summary Found</h3>
           <p className="text-gray-400 text-sm">There is no submitted attendance for this class yet.</p>
+        </div>
+      )}
+
+      {/* Monthly Attendance View */}
+      {activeTab === 'monthly' && monthlyData.length > 0 && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col">
+              <span className="text-sm font-semibold text-gray-500">Total Students</span>
+              <span className="text-2xl font-bold text-[#2E1C40]">{monthlyData.length}</span>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col">
+              <span className="text-sm font-semibold text-gray-500">Total Present</span>
+              <span className="text-2xl font-bold text-green-600">{totalPresent}</span>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col">
+              <span className="text-sm font-semibold text-gray-500">Total Absent</span>
+              <span className="text-2xl font-bold text-red-600">{totalAbsent}</span>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col">
+              <span className="text-sm font-semibold text-gray-500">Average Attendance</span>
+              <span className="text-2xl font-bold text-blue-600">{averageAttendance}</span>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 flex-wrap gap-4">
+              <div>
+                <h3 className="font-bold text-[#2E1C40]">Monthly Record</h3>
+                <p className="text-xs text-gray-500">{new Date(2020, parseInt(monthlyMonth)-1, 1).toLocaleString('default', { month: 'long' })} {monthlyYear}</p>
+              </div>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <div className="relative flex-1 sm:min-w-[250px]">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by name or EMIS..."
+                    value={monthlySearch}
+                    onChange={(e) => { setMonthlySearch(e.target.value); setMonthlyPage(1); }}
+                    className="w-full pl-9 pr-3 py-2 text-sm border rounded-xl bg-white focus:ring-2 focus:ring-[#4C677C] focus:border-transparent outline-none"
+                  />
+                </div>
+                <button
+                  onClick={handleExportMonthly}
+                  className="px-4 py-2 bg-[#2E1C40] text-white rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-[#4C677C] transition-colors whitespace-nowrap"
+                >
+                  <Download className="w-4 h-4" /> Download
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-gray-500 uppercase bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold sticky left-0 bg-gray-50 z-10 border-r min-w-[200px]">Student Details</th>
+                    {Array.from({ length: daysInMonthlyMonth }, (_, i) => i + 1).map(day => (
+                      <th key={day} className="px-2 py-3 font-semibold text-center min-w-[40px]">{day.toString().padStart(2, '0')}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {monthlyPaginatedData.map(student => (
+                    <tr key={student._id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-4 py-2 sticky left-0 bg-white border-r">
+                        <div className="font-medium text-gray-900">{student.name}</div>
+                        <div className="text-xs text-gray-500">{student.emisNumber}</div>
+                      </td>
+                      {Array.from({ length: daysInMonthlyMonth }, (_, i) => i + 1).map(day => {
+                        const status = student.attendance?.[day];
+                        return (
+                          <td key={day} className="px-2 py-2 text-center text-xs font-bold">
+                            {status === 'P' && <span className="text-green-600">P</span>}
+                            {status === 'A' && <span className="text-red-600">A</span>}
+                            {status === 'L' && <span className="text-yellow-600">L</span>}
+                            {status === 'H' && <span className="text-purple-600">H</span>}
+                            {status === 'I' && <span className="text-blue-600">I</span>}
+                            {status === 'OD' && <span className="text-indigo-600">OD</span>}
+                            {(!status || status === '-') && <span className="text-gray-300">-</span>}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                  {monthlyPaginatedData.length === 0 && (
+                    <tr>
+                      <td colSpan={daysInMonthlyMonth + 1} className="px-6 py-8 text-center text-gray-500">
+                        No students found matching your search.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {monthlyTotalPages > 1 && (
+              <div className="p-4 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+                <span className="text-sm text-gray-500">
+                  Showing <span className="font-bold text-gray-900">{(monthlyPage - 1) * itemsPerPage + 1}</span> to <span className="font-bold text-gray-900">{Math.min(monthlyPage * itemsPerPage, monthlyFilteredData.length)}</span> of <span className="font-bold text-gray-900">{monthlyFilteredData.length}</span> students
+                </span>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => setMonthlyPage(p => Math.max(1, p - 1))}
+                    disabled={monthlyPage === 1}
+                    className="p-1.5 rounded-lg border bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setMonthlyPage(p => Math.min(monthlyTotalPages, p + 1))}
+                    disabled={monthlyPage === monthlyTotalPages}
+                    className="p-1.5 rounded-lg border bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {activeTab === 'monthly' && monthlyData.length === 0 && !isLoading && !error && standard && section && (
+        <div className="text-center py-12 bg-white rounded-2xl border border-gray-100">
+          <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-gray-600">No Monthly Records</h3>
+          <p className="text-gray-400 text-sm">There are no submitted attendance records for this month.</p>
         </div>
       )}
     </div>
