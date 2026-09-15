@@ -592,9 +592,9 @@ const getDashboardStats = async (req, res) => {
               initialValue: [],
               in: {
                 $cond: [
-                  { $in: ["$this.subject", "$value.subject"] },
-                  "$value",
-                  { $concatArrays: ["$value", ["$this"]] }
+                  { $in: ["$$this.subject", { $ifNull: ["$$value.subject", []] }] },
+                  "$$value",
+                  { $concatArrays: ["$$value", ["$$this"]] }
                 ]
               }
             }
@@ -714,7 +714,7 @@ const getDashboardStats = async (req, res) => {
               initialValue: [],
               in: {
                 $cond: [
-                  { $in: ["$$this.subject", "$$value.subject"] },
+                  { $in: ["$$this.subject", { $ifNull: ["$$value.subject", []] }] },
                   "$$value",
                   { $concatArrays: ["$$value", ["$$this"]] }
                 ]
