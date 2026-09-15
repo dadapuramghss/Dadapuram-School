@@ -68,7 +68,7 @@ const getClassLeaderboard = async (req, res) => {
       // 6. Use $setWindowFields to calculate rank
       {
         $setWindowFields: {
-          sortBy: rankBy === 'Percentage' ? { percentage: -1, totalMarks: -1 } : { totalMarks: -1, percentage: -1 },
+          sortBy: rankBy === 'Percentage' ? { percentage: -1 } : { totalMarks: -1 },
           output: {
             rank: {
               $denseRank: {}
