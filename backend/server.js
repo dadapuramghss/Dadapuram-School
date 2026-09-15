@@ -5,7 +5,9 @@ const cors = require('cors');
 const dns = require('dns');
 
 // Override DNS to use Google's DNS to bypass local SRV block on Windows
-dns.setServers(['8.8.8.8', '8.8.4.4']);
+if (process.platform === 'win32') {
+  dns.setServers(['8.8.8.8', '8.8.4.4']);
+}
 
 const studentRoutes = require('./routes/studentRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');

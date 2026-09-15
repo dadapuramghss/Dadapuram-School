@@ -198,7 +198,7 @@ export function Leaderboard() {
                       student.rank === 2 ? 'text-[#1E9AA7]' : 
                       student.rank === 3 ? 'text-[#793A36]' : 'text-[#2E1C40] dark:text-gray-100'
                     }`}>
-                      {student.totalMarks} <span className="text-sm sm:text-xl opacity-70">/ {student.maximumMarks || 500}</span>
+                      {student.totalMarks} <span className="text-sm sm:text-xl opacity-70">/ {student.maximumMarks}</span>
                     </div>
                   </div>
                   
