@@ -82,11 +82,7 @@ export function Materials() {
   };
 
   useEffect(() => {
-    if (isClassSelected) {
-      loadMaterials();
-    } else {
-      setMaterialsList([]);
-    }
+    loadMaterials();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClass, selectedSection]);
 
@@ -278,7 +274,7 @@ export function Materials() {
       ) : materialsList.length === 0 ? (
         <div className="text-center py-12 text-[#4C677C] dark:text-[#E5D9C4]/60 bg-white/30 dark:bg-[#1A1A24]/30 rounded-xl">
           <LinkIcon className="w-12 h-12 mx-auto opacity-50 mb-3" />
-          <p>No study materials assigned for this class yet.</p>
+          <p>No study materials assigned yet.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

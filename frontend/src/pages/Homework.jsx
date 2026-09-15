@@ -110,11 +110,7 @@ export function Homework() {
   };
 
   useEffect(() => {
-    if (isClassSelected) {
-      loadHomework();
-    } else {
-      setHomeworkList([]);
-    }
+    loadHomework();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClass, selectedSection]);
 
