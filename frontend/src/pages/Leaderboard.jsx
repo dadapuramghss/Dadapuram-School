@@ -139,72 +139,74 @@ export function Leaderboard() {
                 key={`${student._id}-${rankBy}-${student.rank}`}
                 onClick={() => fetchStudentDetails(student._id)}
                 className={cn(
-                  "glass-card p-3 sm:p-5 flex flex-row items-center gap-3 sm:gap-6 transition-all duration-300 hover:scale-[1.01] cursor-pointer rounded-2xl border shadow-sm",
+                  "glass-card p-3 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 transition-all duration-300 hover:scale-[1.01] cursor-pointer rounded-2xl border shadow-sm",
                   student.rank === 1 ? "border-[#F6DEC6] bg-[#FFFBF0] dark:bg-[#FFFBF0]/10" : "",
                   student.rank === 2 ? "border-[#C6E7E7] bg-[#F0FCFC] dark:bg-[#F0FCFC]/10" : "",
                   student.rank === 3 ? "border-[#EBCBCA] bg-[#FFF6F5] dark:bg-[#FFF6F5]/10" : "",
                   student.rank > 3 ? "border-[#E5D9C4] bg-[#FAF8F5] dark:bg-[#121212]/60" : ""
                 )}
               >
-                {/* Left section: POS & RANK */}
-                <div className="flex flex-row items-center gap-3 sm:gap-5 shrink-0 pl-2">
-                  <div className="flex flex-col items-center justify-center min-w-[30px] sm:min-w-[40px]">
-                    {isFirstOfRank ? (
-                      <>
-                        <span className="text-[10px] sm:text-xs font-bold text-[#4C677C] uppercase tracking-wider mb-1">POS</span>
-                        <span className="text-2xl sm:text-4xl font-black text-[#2E1C40] dark:text-gray-100 leading-none">{student.rank}</span>
-                      </>
-                    ) : (
-                      <span className="w-full h-full opacity-0 select-none flex flex-col items-center justify-center">
-                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1">POS</span>
-                        <span className="text-2xl sm:text-4xl font-black leading-none">{student.rank}</span>
+                <div className="flex flex-row items-center gap-3 sm:gap-6 w-full sm:w-auto flex-1 min-w-0">
+                  {/* Left section: POS & RANK */}
+                  <div className="flex flex-row items-center gap-2 sm:gap-5 shrink-0 pl-1 sm:pl-2">
+                    <div className="flex flex-col items-center justify-center min-w-[25px] sm:min-w-[40px]">
+                      {isFirstOfRank ? (
+                        <>
+                          <span className="text-[9px] sm:text-xs font-bold text-[#4C677C] uppercase tracking-wider mb-1">POS</span>
+                          <span className="text-xl sm:text-4xl font-black text-[#2E1C40] dark:text-gray-100 leading-none">{student.rank}</span>
+                        </>
+                      ) : (
+                        <span className="w-full h-full opacity-0 select-none flex flex-col items-center justify-center">
+                          <span className="text-[9px] sm:text-xs font-bold uppercase tracking-wider mb-1">POS</span>
+                          <span className="text-xl sm:text-4xl font-black leading-none">{student.rank}</span>
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Vertical divider */}
+                    <div className={cn("w-px h-8 sm:h-14 bg-black/10 dark:bg-white/10", isFirstOfRank ? "opacity-100" : "opacity-0")}></div>
+                    
+                    <div className="flex flex-col items-center justify-center min-w-[35px] sm:min-w-[50px]">
+                      <span className="text-[9px] sm:text-xs font-bold text-[#1E5D8F] uppercase tracking-wider mb-0.5 sm:mb-1">RANK</span>
+                      <div className="mt-0.5 sm:mt-1 scale-75 sm:scale-100 origin-top">{renderRankIcon(student.rank)}</div>
+                    </div>
+                  </div>
+                  
+                  {/* Profile Image */}
+                  <img 
+                    src={student.photoUrl || 'https://placehold.co/150'} 
+                    alt={student.name}
+                    className="w-10 h-10 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-black/5 dark:border-white/10 shrink-0 bg-gray-200"
+                  />
+                  
+                  {/* Name & Details */}
+                  <div className="flex-1 min-w-0 py-0 sm:py-1">
+                    <h3 className="text-sm sm:text-2xl font-bold truncate text-[#2E1C40] dark:text-gray-100">{student.name}</h3>
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1.5">
+                      <span className="text-[10px] sm:text-sm text-[#4C677C] dark:text-gray-400 font-medium">EMIS: {student.emisNumber}</span>
+                      <span className="bg-[#EAE4DD] dark:bg-white/10 text-[#2E1C40] dark:text-gray-200 px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-xs font-bold whitespace-nowrap">
+                        Std {student.standard} - {student.section}
                       </span>
-                    )}
-                  </div>
-                  
-                  {/* Vertical divider */}
-                  <div className={cn("w-px h-10 sm:h-14 bg-black/10 dark:bg-white/10", isFirstOfRank ? "opacity-100" : "opacity-0")}></div>
-                  
-                  <div className="flex flex-col items-center justify-center min-w-[40px] sm:min-w-[50px]">
-                    <span className="text-[10px] sm:text-xs font-bold text-[#1E5D8F] uppercase tracking-wider mb-1">RANK</span>
-                    <div className="mt-1">{renderRankIcon(student.rank)}</div>
-                  </div>
-                </div>
-                
-                {/* Profile Image */}
-                <img 
-                  src={student.photoUrl || 'https://placehold.co/150'} 
-                  alt={student.name}
-                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-black/5 dark:border-white/10 shrink-0 bg-gray-200"
-                />
-                
-                {/* Name & Details */}
-                <div className="flex-1 min-w-0 py-1">
-                  <h3 className="text-base sm:text-2xl font-bold truncate text-[#2E1C40] dark:text-gray-100">{student.name}</h3>
-                  <div className="flex flex-wrap items-center gap-2 mt-1 sm:mt-1.5">
-                    <span className="text-[11px] sm:text-sm text-[#4C677C] dark:text-gray-400 font-medium">EMIS: {student.emisNumber}</span>
-                    <span className="bg-[#EAE4DD] dark:bg-white/10 text-[#2E1C40] dark:text-gray-200 px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold whitespace-nowrap">
-                      Std {student.standard} - {student.section}
-                    </span>
+                    </div>
                   </div>
                 </div>
                 
                 {/* Right section: MARKS & % */}
-                <div className="flex flex-row items-center gap-6 sm:gap-10 shrink-0 pr-2 sm:pr-6">
-                  <div className="flex flex-col items-end justify-center">
-                    <span className="text-[10px] sm:text-xs font-bold text-[#4C677C] uppercase tracking-wider mb-1">MARKS</span>
-                    <div className={`text-lg sm:text-2xl font-black leading-none ${
+                <div className="flex flex-row items-center justify-between sm:justify-end w-full sm:w-auto gap-4 sm:gap-10 shrink-0 pt-2 sm:pt-0 mt-2 sm:mt-0 border-t sm:border-0 border-black/5 dark:border-white/5 pr-2 sm:pr-6">
+                  <div className="flex flex-col items-start sm:items-end justify-center">
+                    <span className="text-[9px] sm:text-xs font-bold text-[#4C677C] uppercase tracking-wider mb-0.5 sm:mb-1">MARKS</span>
+                    <div className={`text-base sm:text-2xl font-black leading-none ${
                       student.rank === 1 ? 'text-[#AE634A]' : 
                       student.rank === 2 ? 'text-[#1E9AA7]' : 
                       student.rank === 3 ? 'text-[#793A36]' : 'text-[#2E1C40] dark:text-gray-100'
                     }`}>
-                      {student.totalMarks} <span className="text-sm sm:text-xl opacity-70">/ {student.maximumMarks}</span>
+                      {student.totalMarks} <span className="text-xs sm:text-xl opacity-70">/ {student.maximumMarks}</span>
                     </div>
                   </div>
                   
                   <div className="flex flex-col items-end justify-center">
-                    <span className="text-[10px] sm:text-xs font-bold text-[#4C677C] uppercase tracking-wider mb-1">%</span>
-                    <div className="text-lg sm:text-2xl font-black leading-none text-[#4C677C] dark:text-gray-300">
+                    <span className="text-[9px] sm:text-xs font-bold text-[#4C677C] uppercase tracking-wider mb-0.5 sm:mb-1">%</span>
+                    <div className="text-base sm:text-2xl font-black leading-none text-[#4C677C] dark:text-gray-300">
                       {student.percentage}%
                     </div>
                   </div>
