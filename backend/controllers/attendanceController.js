@@ -542,15 +542,56 @@ exports.getMonthlyAttendance = async (req, res) => {
       return res.status(400).json({ error: 'Missing required query parameters' });
     }
 
-    const monthStr = month.padStart(2, '0');
-    const datePrefix = `${year}-${monthStr}-`;
+    // Authorization
+    let allowedClasses = null;
+    if (req.dbUser && req.dbUser.role !== 'admin') {
+      if (!req.dbUser.assignedClasses || req.dbUser.assignedClasses.length === 0) {
+        return res.status(403).json({ error: 'Not authorized for any classes' });
+      }
+      allowedClasses = req.dbUser.assignedClasses;
+    }
 
-    const attendances = await Attendance.find({
-      standard,
-      section,
-      attendanceType: 'daily',
-      date: { $regex: `^${datePrefix}` }
-    }).populate('records.student', 'name emisNumber gender').lean();
+    const matchStage = { attendanceType: 'daily' };
+
+    if (allowedClasses) {
+      if (standard === 'All' && section === 'All') {
+        matchStage.$or = allowedClasses.map(c => ({ standard: c.standard, section: c.section }));
+      } else if (standard !== 'All' && section === 'All') {
+        const matchingClasses = allowedClasses.filter(c => c.standard === standard);
+        if (matchingClasses.length === 0) return res.status(403).json({ error: 'Not authorized for this standard' });
+        matchStage.$or = matchingClasses.map(c => ({ standard: c.standard, section: c.section }));
+      } else if (standard !== 'All' && section !== 'All') {
+        const isAllowed = allowedClasses.some(c => c.standard === standard && c.section === section);
+        if (!isAllowed) return res.status(403).json({ error: 'Not authorized for this class section' });
+        matchStage.standard = standard;
+        matchStage.section = section;
+      } else {
+        return res.status(400).json({ error: 'Invalid standard/section combination' });
+      }
+    } else {
+      if (standard !== 'All') matchStage.standard = standard;
+      if (section !== 'All') matchStage.section = section;
+    }
+
+    const yr = parseInt(year);
+    if (month === 'All') {
+      const startDate = `${yr}-01-01`;
+      const endDate = `${yr + 1}-01-01`;
+      matchStage.date = { $gte: startDate, $lt: endDate };
+    } else {
+      const mn = parseInt(month);
+      const startDate = `${yr}-${String(mn).padStart(2, '0')}-01`;
+      let nextYr = yr;
+      let nextMn = mn + 1;
+      if (nextMn > 12) {
+        nextMn = 1;
+        nextYr++;
+      }
+      const endDate = `${nextYr}-${String(nextMn).padStart(2, '0')}-01`;
+      matchStage.date = { $gte: startDate, $lt: endDate };
+    }
+
+    const attendances = await Attendance.find(matchStage).populate('records.student', 'name emisNumber gender').lean();
 
     res.json({ success: true, data: attendances });
   } catch (error) {
@@ -565,6 +606,15 @@ exports.bulkImportMonthlyAttendance = async (req, res) => {
 
     if (!Array.isArray(records) || records.length === 0) {
       return res.status(400).json({ success: false, message: 'No records provided' });
+    }
+
+    // Authorization Check
+    let allowedClasses = null;
+    if (req.dbUser && req.dbUser.role !== 'admin') {
+      if (!req.dbUser.assignedClasses || req.dbUser.assignedClasses.length === 0) {
+        return res.status(403).json({ success: false, message: 'Not authorized for any classes' });
+      }
+      allowedClasses = req.dbUser.assignedClasses;
     }
 
     // 1. Validation phase
@@ -591,6 +641,10 @@ exports.bulkImportMonthlyAttendance = async (req, res) => {
 
       if (!emis) { errors.push(`Row ${rowNum}: EMIS Number is missing.`); continue; }
       if (!date) { errors.push(`Row ${rowNum}: Date is missing.`); continue; }
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        errors.push(`Row ${rowNum}: Date ${date} is invalid. Must be YYYY-MM-DD.`);
+        continue;
+      }
 
       // Normalize status
       const sMap = {
@@ -627,6 +681,14 @@ exports.bulkImportMonthlyAttendance = async (req, res) => {
       if (student.section !== sec) {
         errors.push(`Row ${rowNum}: EMIS ${emis} belongs to Section ${student.section}, but Excel says ${sec}.`);
         continue;
+      }
+
+      if (allowedClasses) {
+        const isAllowed = allowedClasses.some(c => c.standard === std && c.section === sec);
+        if (!isAllowed) {
+          errors.push(`Row ${rowNum}: Not authorized to import attendance for Standard ${std} Section ${sec}.`);
+          continue;
+        }
       }
 
       const dupKey = `${emis}-${date}-${std}-${sec}`;
@@ -738,5 +800,174 @@ exports.bulkImportMonthlyAttendance = async (req, res) => {
   } catch (error) {
     console.error('Error in bulk import monthly attendance:', error);
     res.status(500).json({ success: false, message: 'Internal server error during monthly bulk import' });
+  }
+};
+
+exports.getDateRangeAttendance = async (req, res) => {
+  try {
+    const { fromDate, toDate, standard, section, percentageCondition, percentageValue } = req.query;
+
+    if (!fromDate || !toDate || fromDate > toDate) {
+      return res.status(400).json({ error: 'Invalid date range' });
+    }
+
+    // 1. Authorization
+    let allowedClasses = null;
+    if (req.dbUser && req.dbUser.role !== 'admin') {
+      if (!req.dbUser.assignedClasses || req.dbUser.assignedClasses.length === 0) {
+        return res.status(403).json({ error: 'Not authorized for any classes' });
+      }
+      allowedClasses = req.dbUser.assignedClasses;
+    }
+
+    // 2. Build match queries for Student and Attendance
+    const matchStage = { attendanceType: 'daily', isSubmitted: true, date: { $gte: fromDate, $lte: toDate } };
+    const studentQuery = {};
+
+    if (allowedClasses) {
+      if (standard === 'All' && section === 'All') {
+        studentQuery.$or = allowedClasses.map(c => ({ standard: c.standard, section: c.section }));
+        matchStage.$or = allowedClasses.map(c => ({ standard: c.standard, section: c.section }));
+      } else if (standard !== 'All' && section === 'All') {
+        const matchingClasses = allowedClasses.filter(c => c.standard === standard);
+        if (matchingClasses.length === 0) return res.status(403).json({ error: 'Not authorized for this standard' });
+        studentQuery.$or = matchingClasses.map(c => ({ standard: c.standard, section: c.section }));
+        matchStage.$or = matchingClasses.map(c => ({ standard: c.standard, section: c.section }));
+      } else if (standard !== 'All' && section !== 'All') {
+        const isAllowed = allowedClasses.some(c => c.standard === standard && c.section === section);
+        if (!isAllowed) return res.status(403).json({ error: 'Not authorized for this class section' });
+        studentQuery.standard = standard;
+        studentQuery.section = section;
+        matchStage.standard = standard;
+        matchStage.section = section;
+      } else {
+        return res.status(400).json({ error: 'Invalid standard/section combination' });
+      }
+    } else {
+      if (standard && standard !== 'All') {
+        studentQuery.standard = standard;
+        matchStage.standard = standard;
+      }
+      if (section && section !== 'All') {
+        studentQuery.section = section;
+        matchStage.section = section;
+      }
+    }
+
+    // 3. Fetch students and attendances
+    let students = await Student.find(studentQuery).lean();
+    students = sortStudentsByGenderAndName(students);
+    const attendances = await Attendance.find(matchStage).lean();
+
+    // 4. Generate all dates in the range
+    const generatedDates = [];
+    let curr = new Date(fromDate);
+    const end = new Date(toDate);
+    // Safety limit to prevent infinite loop or huge arrays on bad input (max 366 days)
+    let safetyCounter = 0;
+    while (curr <= end && safetyCounter < 366) {
+      generatedDates.push(curr.toISOString().split('T')[0]);
+      curr.setDate(curr.getDate() + 1);
+      safetyCounter++;
+    }
+
+    const reportMap = {};
+    students.forEach(s => {
+      reportMap[s._id.toString()] = {
+        studentId: s._id,
+        emisNumber: s.emisNumber,
+        name: s.name,
+        gender: s.gender,
+        standard: s.standard,
+        section: s.section,
+        attendanceByDate: {},
+        presentDays: 0,
+        absentDays: 0,
+        totalDays: 0,
+        percentage: 0
+      };
+      
+      // Initialize all generated dates with '-'
+      generatedDates.forEach(d => {
+        reportMap[s._id.toString()].attendanceByDate[d] = '-';
+      });
+    });
+
+    // Populate attendance records
+    attendances.forEach(att => {
+      att.records.forEach(r => {
+        const sId = r.student.toString();
+        if (reportMap[sId] && reportMap[sId].attendanceByDate.hasOwnProperty(att.date)) {
+          reportMap[sId].totalDays += 1;
+          const status = r.status;
+          
+          let statusChar = status;
+          if (status === 'Present') statusChar = 'P';
+          else if (status === 'Absent') statusChar = 'A';
+          else if (status === 'Late') statusChar = 'L';
+          else if (status === 'Homebased') statusChar = 'H';
+          else if (status === 'IE Center') statusChar = 'I';
+          else if (status === 'On Duty') statusChar = 'OD';
+          
+          reportMap[sId].attendanceByDate[att.date] = statusChar;
+          
+          if (status === 'Present') {
+            reportMap[sId].presentDays += 1;
+          } else {
+            reportMap[sId].absentDays += 1;
+          }
+        }
+      });
+    });
+
+    let reportArray = Object.values(reportMap);
+    
+    // 5. Calculate unfiltered summary
+    let totalPresent = 0;
+    let totalAbsent = 0;
+    let totalStudentsCount = reportArray.length;
+
+    reportArray.forEach(row => {
+      if (row.totalDays > 0) {
+        row.percentage = Number(((row.presentDays / row.totalDays) * 100).toFixed(2));
+      } else {
+        row.percentage = 0;
+      }
+      totalPresent += row.presentDays;
+      totalAbsent += row.absentDays;
+    });
+
+    const totalDaysRecorded = totalPresent + totalAbsent;
+    const averageAttendance = totalDaysRecorded > 0 ? ((totalPresent / totalDaysRecorded) * 100).toFixed(1) + '%' : '0%';
+    
+    const summary = {
+      totalStudents: totalStudentsCount,
+      totalPresent,
+      totalAbsent,
+      averageAttendance
+    };
+
+    // 6. Apply Percentage Filter
+    if (percentageCondition && percentageCondition !== 'No Filter' && percentageValue) {
+      const pVal = parseFloat(percentageValue);
+      if (!isNaN(pVal)) {
+        if (percentageCondition === 'Above / Equal') {
+          reportArray = reportArray.filter(r => r.percentage >= pVal);
+        } else if (percentageCondition === 'Below / Equal') {
+          reportArray = reportArray.filter(r => r.percentage <= pVal);
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      summary,
+      dates: generatedDates,
+      students: reportArray
+    });
+
+  } catch (error) {
+    console.error('Error in getDateRangeAttendance:', error);
+    res.status(500).json({ error: 'Failed to generate date range report' });
   }
 };

@@ -180,6 +180,12 @@ export const api = {
   getMonthlyAttendance: (standard, section, year, month) => {
     return fetchWithAuth(`/attendance/monthly?standard=${standard}&section=${section}&year=${year}&month=${month}`);
   },
+  getAttendanceRangeReport: (fromDate, toDate, standard, section, percentageCondition, percentageValue) => {
+    let url = `/attendance/range-report?standard=${standard}&section=${section}&fromDate=${fromDate}&toDate=${toDate}`;
+    if (percentageCondition) url += `&percentageCondition=${encodeURIComponent(percentageCondition)}`;
+    if (percentageValue) url += `&percentageValue=${encodeURIComponent(percentageValue)}`;
+    return fetchWithAuth(url);
+  },
   importMonthlyAttendance: (records) => fetchWithAuth('/attendance/monthly/bulk', {
     method: 'POST',
     body: JSON.stringify(records)

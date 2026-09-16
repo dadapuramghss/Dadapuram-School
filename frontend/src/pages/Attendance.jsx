@@ -32,10 +32,19 @@ export function Attendance() {
   const [successMsg, setSuccessMsg] = useState('');
 
   const [activeTab, setActiveTab] = useState('take');
-  const [monthlyYear, setMonthlyYear] = useState(new Date().getFullYear().toString());
-  const [monthlyMonth, setMonthlyMonth] = useState((new Date().getMonth() + 1).toString());
+  const [fromDate, setFromDate] = useState(() => {
+    const d = new Date();
+    d.setDate(1);
+    return d.toISOString().split('T')[0];
+  });
+  const [toDate, setToDate] = useState(today);
+  const [percentageCondition, setPercentageCondition] = useState('No Filter');
+  const [percentageValue, setPercentageValue] = useState('');
+  
   const [monthlySearch, setMonthlySearch] = useState('');
   const [monthlyData, setMonthlyData] = useState([]);
+  const [rangeDates, setRangeDates] = useState([]);
+  const [monthlySummary, setMonthlySummary] = useState(null);
   const [monthlyPage, setMonthlyPage] = useState(1);
   const itemsPerPage = 10;
   const [summaryData, setSummaryData] = useState([]);
@@ -145,57 +154,23 @@ export function Attendance() {
   };
 
   const fetchMonthlyData = async () => {
-    if (!standard || !section || !monthlyYear || !monthlyMonth) return;
+    if (!standard || !section || !fromDate || !toDate) return;
+    if (fromDate > toDate) {
+      setError('From Date cannot be later than To Date');
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {
-      const stuRes = await api.getStudents(standard, section);
-      let students = stuRes.data || [];
-
-      const attRes = await api.getMonthlyAttendance(standard, section, monthlyYear, monthlyMonth);
-      
-      const daysInMonth = new Date(parseInt(monthlyYear), parseInt(monthlyMonth), 0).getDate();
-      
-      const studentsMap = {};
-      students.forEach(s => {
-        studentsMap[s._id] = {
-          studentId: s._id,
-          emisNumber: s.emisNumber,
-          name: s.name,
-          gender: s.gender || 'Other',
-          attendance: {}
-        };
-        for(let i=1; i<=daysInMonth; i++) {
-          studentsMap[s._id].attendance[i] = '-';
-        }
-      });
-      
-      if (attRes.data) {
-        attRes.data.forEach(att => {
-          const day = parseInt(att.date.split('-')[2]);
-          att.records.forEach(r => {
-            const stuId = r.student._id || r.student;
-            if (studentsMap[stuId]) {
-              let statusMap = { 'Present': 'P', 'Absent': 'A', 'Late': 'L', 'Homebased': 'H', 'IE Center': 'I', 'On Duty': 'OD' };
-              studentsMap[stuId].attendance[day] = statusMap[r.status] || r.status;
-            }
-          });
-        });
+      const attRes = await api.getAttendanceRangeReport(fromDate, toDate, standard, section, percentageCondition, percentageValue);
+      if (attRes.success) {
+        setMonthlyData(attRes.students || []);
+        setRangeDates(attRes.dates || []);
+        setMonthlySummary(attRes.summary || null);
       }
-      
-      const studentsList = Object.values(studentsMap);
-      studentsList.sort((a, b) => {
-        const priority = { 'Male': 1, 'Female': 2, 'Other': 3 };
-        const pA = priority[a.gender] || 3;
-        const pB = priority[b.gender] || 3;
-        if (pA !== pB) return pA - pB;
-        return (a.name || '').localeCompare(b.name || '', 'en', { sensitivity: 'base' });
-      });
-      
-      setMonthlyData(studentsList);
     } catch (err) {
       console.error(err);
-      setError('Failed to fetch monthly attendance.');
+      setError('Failed to fetch attendance report. ' + (err.message || ''));
     } finally {
       setIsLoading(false);
     }
@@ -263,7 +238,6 @@ export function Attendance() {
   const isLocked = isSubmitted && !isAdmin;
 
   // Monthly Attendance Logic
-  const daysInMonthlyMonth = new Date(parseInt(monthlyYear), parseInt(monthlyMonth), 0).getDate();
   const monthlyFilteredData = monthlyData.filter(student => 
     student.name.toLowerCase().includes(monthlySearch.toLowerCase()) || 
     student.emisNumber.toLowerCase().includes(monthlySearch.toLowerCase())
@@ -273,19 +247,10 @@ export function Attendance() {
   const monthlyPaginatedData = monthlyFilteredData.slice((monthlyPage - 1) * itemsPerPage, monthlyPage * itemsPerPage);
 
   // Math for Monthly Statistics (Total Present, Absent, Average)
-  let totalPresent = 0;
-  let totalAbsent = 0;
-  monthlyData.forEach(student => {
-    Object.values(student.attendance || {}).forEach(status => {
-      if (status === 'P') {
-        totalPresent++;
-      } else if (status === 'A' || status === 'L' || status === 'H' || status === 'I' || status === 'OD') {
-        totalAbsent++;
-      }
-    });
-  });
-  const totalDaysRecorded = totalPresent + totalAbsent;
-  const averageAttendance = totalDaysRecorded > 0 ? ((totalPresent / totalDaysRecorded) * 100).toFixed(1) + '%' : '0%';
+  const totalStudentsStr = monthlySummary?.totalStudents || 0;
+  const totalPresent = monthlySummary?.totalPresent || 0;
+  const totalAbsent = monthlySummary?.totalAbsent || 0;
+  const averageAttendance = monthlySummary?.averageAttendance || '0%';
 
   const handleExportMonthly = () => {
     const workbook = XLSX.utils.book_new();
@@ -293,9 +258,11 @@ export function Attendance() {
     
     // Header row
     const header = ['S.No', 'EMIS Number', 'Student Name', 'Gender', 'Standard', 'Section'];
-    for(let i=1; i<=daysInMonthlyMonth; i++) {
-      header.push(i.toString().padStart(2, '0'));
-    }
+    rangeDates.forEach(d => {
+      const parts = d.split('-');
+      header.push(`${parts[2]}/${parts[1]}/${parts[0]}`);
+    });
+    header.push('Present Days', 'Absent Days', 'Attendance Percentage');
     sheetData.push(header);
 
     // Data rows (export ALL filtered data, not just paginated)
@@ -305,12 +272,15 @@ export function Attendance() {
         student.emisNumber,
         student.name,
         student.gender || '',
-        standard,
-        section
+        student.standard || standard,
+        student.section || section
       ];
-      for(let i=1; i<=daysInMonthlyMonth; i++) {
-        row.push(student.attendance?.[i] || '-');
-      }
+      rangeDates.forEach(d => {
+        row.push(student.attendanceByDate?.[d] || '-');
+      });
+      row.push(student.presentDays || 0);
+      row.push(student.absentDays || 0);
+      row.push(`${student.percentage || 0}%`);
       sheetData.push(row);
     });
 
@@ -319,13 +289,13 @@ export function Attendance() {
     // Column widths
     const wscols = [
       {wch: 5}, {wch: 15}, {wch: 25}, {wch: 10}, {wch: 10}, {wch: 10},
-      ...Array(daysInMonthlyMonth).fill({wch: 4})
+      ...Array(rangeDates.length).fill({wch: 10}),
+      {wch: 12}, {wch: 12}, {wch: 18}
     ];
     worksheet['!cols'] = wscols;
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Monthly Attendance");
-    const monthName = new Date(2020, parseInt(monthlyMonth)-1, 1).toLocaleString('default', { month: 'long' });
-    XLSX.writeFile(workbook, `DGHSS360_Attendance_${standard}_${section}_${monthName}_${monthlyYear}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance Report");
+    XLSX.writeFile(workbook, `Attendance_${fromDate}_to_${toDate}.xlsx`);
   };
 
   return (
@@ -394,28 +364,22 @@ export function Attendance() {
         {activeTab === 'monthly' ? (
           <>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Month</label>
-              <select 
-                value={monthlyMonth} 
-                onChange={e => setMonthlyMonth(e.target.value)}
+              <label className="block text-sm font-semibold text-gray-700 mb-1">From Date</label>
+              <input 
+                type="date"
+                value={fromDate}
+                onChange={e => setFromDate(e.target.value)}
                 className="w-full px-3 py-2 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-[#4C677C]"
-              >
-                {Array.from({length: 12}, (_, i) => i + 1).map(m => (
-                  <option key={m} value={m}>{new Date(2020, m-1, 1).toLocaleString('default', { month: 'short' })}</option>
-                ))}
-              </select>
+              />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Year</label>
-              <select 
-                value={monthlyYear} 
-                onChange={e => setMonthlyYear(e.target.value)}
+              <label className="block text-sm font-semibold text-gray-700 mb-1">To Date</label>
+              <input 
+                type="date"
+                value={toDate}
+                onChange={e => setToDate(e.target.value)}
                 className="w-full px-3 py-2 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-[#4C677C]"
-              >
-                {Array.from({length: 5}, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
+              />
             </div>
           </>
         ) : (
@@ -437,11 +401,12 @@ export function Attendance() {
           <label className="block text-sm font-semibold text-gray-700 mb-1">Standard</label>
           <select 
             value={standard} 
-            onChange={e => { setStandard(e.target.value); setSection(''); }}
-            disabled={!isAdmin && dbUser?.assignedClasses?.length > 0}
+            onChange={e => { setStandard(e.target.value); setSection(activeTab === 'monthly' ? 'All' : ''); }}
+            disabled={!isAdmin && dbUser?.assignedClasses?.length > 0 && activeTab !== 'monthly'}
             className="w-full px-3 py-2 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-[#4C677C] disabled:opacity-50"
           >
             <option value="">Select</option>
+            {activeTab === 'monthly' && <option value="All">All Standards (Whole School)</option>}
             {standards.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
@@ -451,14 +416,47 @@ export function Attendance() {
           <select 
             value={section} 
             onChange={e => setSection(e.target.value)}
-            disabled={!standard || (!isAdmin && dbUser?.assignedClasses?.length > 0)}
+            disabled={!standard || (!isAdmin && dbUser?.assignedClasses?.length > 0 && activeTab !== 'monthly')}
             className="w-full px-3 py-2 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-[#4C677C] disabled:opacity-50"
           >
             <option value="">Select</option>
+            {activeTab === 'monthly' && <option value="All">All Sections</option>}
             {sections.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
         
+        {activeTab === 'monthly' && (
+          <>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Percentage Condition</label>
+              <select 
+                value={percentageCondition} 
+                onChange={e => setPercentageCondition(e.target.value)}
+                className="w-full px-3 py-2 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-[#4C677C]"
+              >
+                <option value="No Filter">No Filter</option>
+                <option value="Above / Equal">Above / Equal</option>
+                <option value="Below / Equal">Below / Equal</option>
+              </select>
+            </div>
+            {percentageCondition !== 'No Filter' && (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Percentage (%)</label>
+                <input 
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="any"
+                  placeholder="e.g. 75"
+                  value={percentageValue}
+                  onChange={e => setPercentageValue(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-[#4C677C]"
+                />
+              </div>
+            )}
+          </>
+        )}
+
         {activeTab === 'take' && attendanceType === 'period' && (
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Period</label>
@@ -497,11 +495,11 @@ export function Attendance() {
           ) : (
             <button 
               onClick={fetchMonthlyData}
-              disabled={!standard || !section || !monthlyYear || !monthlyMonth || isLoading}
+              disabled={!standard || !section || !fromDate || !toDate || (percentageCondition !== 'No Filter' && !percentageValue) || isLoading}
               className="w-full bg-[#2E1C40] text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#4C677C] transition-colors disabled:opacity-50"
             >
               {isLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Search className="w-4 h-4" />}
-              View Month
+              View Report
             </button>
           )}
         </div>
@@ -681,8 +679,8 @@ export function Attendance() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 flex-wrap gap-4">
               <div>
-                <h3 className="font-bold text-[#2E1C40]">Monthly Record</h3>
-                <p className="text-xs text-gray-500">{new Date(2020, parseInt(monthlyMonth)-1, 1).toLocaleString('default', { month: 'long' })} {monthlyYear}</p>
+                <h3 className="font-bold text-[#2E1C40]">Attendance Record</h3>
+                <p className="text-xs text-gray-500">{fromDate.split('-').reverse().join('/')} to {toDate.split('-').reverse().join('/')}</p>
               </div>
               <div className="flex items-center gap-3 w-full sm:w-auto">
                 <div className="relative flex-1 sm:min-w-[250px]">
@@ -709,20 +707,22 @@ export function Attendance() {
                 <thead className="text-xs text-gray-500 uppercase bg-gray-50">
                   <tr>
                     <th className="px-4 py-3 font-semibold sticky left-0 bg-gray-50 z-10 border-r min-w-[200px]">Student Details</th>
-                    {Array.from({ length: daysInMonthlyMonth }, (_, i) => i + 1).map(day => (
-                      <th key={day} className="px-2 py-3 font-semibold text-center min-w-[40px]">{day.toString().padStart(2, '0')}</th>
-                    ))}
+                    {rangeDates.map(day => {
+                      const parts = day.split('-');
+                      return <th key={day} className="px-2 py-3 font-semibold text-center min-w-[50px]">{`${parts[2]}/${parts[1]}`}</th>;
+                    })}
+                    <th className="px-4 py-3 font-semibold text-center min-w-[100px] border-l">Attendance %</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {monthlyPaginatedData.map(student => (
-                    <tr key={student._id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={student._id || student.studentId} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-4 py-2 sticky left-0 bg-white border-r">
                         <div className="font-medium text-gray-900">{student.name}</div>
                         <div className="text-xs text-gray-500">{student.emisNumber}</div>
                       </td>
-                      {Array.from({ length: daysInMonthlyMonth }, (_, i) => i + 1).map(day => {
-                        const status = student.attendance?.[day];
+                      {rangeDates.map(day => {
+                        const status = student.attendanceByDate?.[day];
                         return (
                           <td key={day} className="px-2 py-2 text-center text-xs font-bold">
                             {status === 'P' && <span className="text-green-600">P</span>}
@@ -735,11 +735,14 @@ export function Attendance() {
                           </td>
                         );
                       })}
+                      <td className="px-4 py-2 text-center font-bold text-gray-700 border-l">
+                        {student.percentage}%
+                      </td>
                     </tr>
                   ))}
                   {monthlyPaginatedData.length === 0 && (
                     <tr>
-                      <td colSpan={daysInMonthlyMonth + 1} className="px-6 py-8 text-center text-gray-500">
+                      <td colSpan={rangeDates.length + 2} className="px-6 py-8 text-center text-gray-500">
                         No students found matching your search.
                       </td>
                     </tr>
@@ -778,8 +781,8 @@ export function Attendance() {
       {activeTab === 'monthly' && monthlyData.length === 0 && !isLoading && !error && standard && section && (
         <div className="text-center py-12 bg-white rounded-2xl border border-gray-100">
           <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-gray-600">No Monthly Records</h3>
-          <p className="text-gray-400 text-sm">There are no submitted attendance records for this month.</p>
+          <h3 className="text-lg font-bold text-gray-600">No Records</h3>
+          <p className="text-gray-400 text-sm">No students found for the selected filters.</p>
         </div>
       )}
     </div>

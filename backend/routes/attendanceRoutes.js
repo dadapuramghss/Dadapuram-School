@@ -10,6 +10,7 @@ router.get('/export', attendanceController.exportDailyAttendance);
 router.post('/bulk', attendanceController.bulkImportDailyAttendance);
 router.get('/summary', attendanceController.getAttendanceSummary);
 router.get('/monthly', attendanceController.getMonthlyAttendance);
+router.get('/range-report', attendanceController.getDateRangeAttendance);
 router.post('/monthly/bulk', attendanceController.bulkImportMonthlyAttendance);
 router.get('/', attendanceController.getAttendance);
 router.post('/', attendanceController.saveAttendance);
