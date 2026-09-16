@@ -62,7 +62,7 @@ export function TeacherLayout() {
     { name: 'Certificates', path: '/teacher/certificates', exact: false, icon: FileText },
     { name: 'Attendance', path: '/teacher/attendance', exact: false, icon: CalendarCheck },
     { name: 'AI Analyst', path: '/teacher/ai', exact: false, icon: Bot },
-  ];
+  ].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
 
   return (
     <div className="flex h-[100dvh] overflow-hidden bg-[#F4F8F7] text-[#2E1C40] font-sans relative z-10">
