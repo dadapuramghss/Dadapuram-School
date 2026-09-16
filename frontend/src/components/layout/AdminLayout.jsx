@@ -36,7 +36,11 @@ export function AdminLayout() {
     { name: 'Data Sync', path: '/admin/data-sync', exact: false, icon: Database },
     { name: 'Storage Usage', path: '/admin/storage', exact: false, icon: HardDrive },
     { name: 'AI Analyst', path: '/admin/ai', exact: false, icon: Bot },
-  ];
+  ].sort((a, b) => {
+    if (a.name === 'System Dashboard') return -1;
+    if (b.name === 'System Dashboard') return 1;
+    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+  });
 
   return (
     <div className="flex h-[100dvh] overflow-hidden bg-adminBg text-gray-900 font-sans relative z-10">
