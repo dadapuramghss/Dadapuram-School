@@ -17,6 +17,8 @@ router.get('/check-role', authController.checkRole);
 router.use(verifyToken);
 
 router.post('/sync', authController.syncUser);
+router.post('/record-login', authController.recordLogin);
+router.post('/record-logout', authController.recordLogout);
 router.get('/me', authController.getMe);
 router.put('/me', authController.updateProfile);
 router.get('/users', authController.getAllUsers);

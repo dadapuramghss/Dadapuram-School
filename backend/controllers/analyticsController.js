@@ -50,7 +50,17 @@ const getClassLeaderboard = async (req, res) => {
           },
           termsSet: {
             $addToSet: {
-              $cond: [ { $ne: ["$terms.termName", null] }, "$terms.termName", "$REMOVE" ]
+              $cond: [
+                {
+                  $and: [
+                    { $ne: ["$terms.termName", null] },
+                    { $ne: ["$terms.marks", null] },
+                    { $gt: ["$terms.marks.score", 0] }
+                  ]
+                },
+                "$terms.termName",
+                "$$REMOVE"
+              ]
             }
           }
         }
@@ -202,7 +212,17 @@ const getDashboardStats = async (req, res) => {
           totalMarks: { $sum: "$terms.marks.score" },
           termsSet: {
             $addToSet: {
-              $cond: [ { $ne: ["$terms.termName", null] }, "$terms.termName", "$$REMOVE" ]
+              $cond: [
+                {
+                  $and: [
+                    { $ne: ["$terms.termName", null] },
+                    { $ne: ["$terms.marks", null] },
+                    { $gt: ["$terms.marks.score", 0] }
+                  ]
+                },
+                "$terms.termName",
+                "$$REMOVE"
+              ]
             }
           }
         }
@@ -329,7 +349,17 @@ const getDashboardStats = async (req, res) => {
           totalMarks: { $sum: "$terms.marks.score" },
           termsSet: {
             $addToSet: {
-              $cond: [ { $ne: ["$terms.termName", null] }, "$terms.termName", "$$REMOVE" ]
+              $cond: [
+                {
+                  $and: [
+                    { $ne: ["$terms.termName", null] },
+                    { $ne: ["$terms.marks", null] },
+                    { $gt: ["$terms.marks.score", 0] }
+                  ]
+                },
+                "$terms.termName",
+                "$$REMOVE"
+              ]
             }
           }
         }
@@ -456,7 +486,17 @@ const getDashboardStats = async (req, res) => {
           totalMarks: { $sum: "$terms.marks.score" },
           termsSet: {
             $addToSet: {
-              $cond: [ { $ne: ["$terms.termName", null] }, "$terms.termName", "$$REMOVE" ]
+              $cond: [
+                {
+                  $and: [
+                    { $ne: ["$terms.termName", null] },
+                    { $ne: ["$terms.marks", null] },
+                    { $gt: ["$terms.marks.score", 0] }
+                  ]
+                },
+                "$terms.termName",
+                "$$REMOVE"
+              ]
             }
           }
         }
@@ -735,7 +775,17 @@ const getDashboardStats = async (req, res) => {
           totalScore: { $sum: "$terms.marks.score" },
           termsSet: {
             $addToSet: {
-              $cond: [ { $ne: ["$terms.termName", null] }, "$terms.termName", "$REMOVE" ]
+              $cond: [
+                {
+                  $and: [
+                    { $ne: ["$terms.termName", null] },
+                    { $ne: ["$terms.marks", null] },
+                    { $gt: ["$terms.marks.score", 0] }
+                  ]
+                },
+                "$terms.termName",
+                "$$REMOVE"
+              ]
             }
           }
         }

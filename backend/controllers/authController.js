@@ -32,6 +32,46 @@ exports.syncUser = async (req, res) => {
   }
 };
 
+// POST /api/auth/record-login
+exports.recordLogin = async (req, res) => {
+  try {
+    const { uid } = req.user;
+    const user = await User.findOneAndUpdate(
+      { uid },
+      { 
+        $inc: { loginCount: 1 },
+        $set: { lastLoginAt: new Date() }
+      },
+      { new: true }
+    );
+    res.json({ success: true, loginCount: user?.loginCount, lastLoginAt: user?.lastLoginAt });
+  } catch (error) {
+    console.error('Error recording login:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// POST /api/auth/record-logout
+exports.recordLogout = async (req, res) => {
+  try {
+    const { uid } = req.user;
+    await User.findOneAndUpdate(
+      { uid },
+      { 
+        $set: { 
+          activeStandard: null,
+          activeSection: null,
+          lastActivityAt: null 
+        } 
+      }
+    );
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error recording logout:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // GET /api/auth/check-role
 // Public endpoint to check role by email before login
 exports.checkRole = async (req, res) => {

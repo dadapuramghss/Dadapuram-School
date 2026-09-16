@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, ChevronUp, Bot, BookOpen, Database, Settings, PieChart, Download, CalendarCheck, Link as LinkIcon, MessageSquare, Code } from 'lucide-react';
+import { LayoutDashboard, Users, User, LogOut, GraduationCap, BarChart3, FileText, Backpack, Menu, X, ChevronLeft, ChevronRight, ChevronUp, Bot, BookOpen, Database, Settings, PieChart, Download, CalendarCheck, Link as LinkIcon, MessageSquare, Code, HardDrive } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 import { useMobileSidebar } from '../../hooks/useMobileSidebar';
@@ -34,6 +34,7 @@ export function AdminLayout() {
     { name: 'Class Config', path: '/admin/classes', exact: false, icon: Settings },
     { name: 'Student Feedback', path: '/admin/feedback', exact: false, icon: MessageSquare },
     { name: 'Data Sync', path: '/admin/data-sync', exact: false, icon: Database },
+    { name: 'Storage Usage', path: '/admin/storage', exact: false, icon: HardDrive },
     { name: 'AI Analyst', path: '/admin/ai', exact: false, icon: Bot },
   ];
 

@@ -23,6 +23,26 @@ const userSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'rejected'],
     default: 'pending'
   },
+  loginCount: {
+    type: Number,
+    default: 0
+  },
+  lastLoginAt: {
+    type: Date,
+    default: null
+  },
+  lastActivityAt: {
+    type: Date,
+    default: null
+  },
+  activeStandard: {
+    type: String,
+    default: null
+  },
+  activeSection: {
+    type: String,
+    default: null
+  },
   isActive: {
     type: Boolean,
     default: true

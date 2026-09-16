@@ -5,6 +5,7 @@ import { NeonButton } from '../components/ui/NeonButton';
 import { api } from '../lib/api';
 import { useClassConfig } from '../context/ClassConfigContext';
 import { Trash2, Plus, Edit, BookOpen, Link as LinkIcon, ExternalLink, Calendar } from 'lucide-react';
+import { useActivity } from '../context/ActivityContext';
 
 export function Materials() {
   const [selectedClass, setSelectedClass] = useState('All');
@@ -15,6 +16,12 @@ export function Materials() {
   const [editingId, setEditingId] = useState(null);
 
   const { classConfigs } = useClassConfig();
+  const { setActivityContext, clearActivityContext } = useActivity();
+
+  useEffect(() => {
+    setActivityContext(selectedClass, selectedSection);
+    return () => clearActivityContext();
+  }, [selectedClass, selectedSection, setActivityContext, clearActivityContext]);
   
   let currentSubjects = [];
   if (selectedClass === 'All') {

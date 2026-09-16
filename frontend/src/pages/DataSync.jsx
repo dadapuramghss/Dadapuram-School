@@ -3,6 +3,7 @@ import Papa from 'papaparse';
 import { Database, Upload, Download, FileSpreadsheet, AlertCircle, CheckCircle2, UserSquare2, GraduationCap, ClipboardCheck } from 'lucide-react';
 import { api } from '../lib/api';
 import * as XLSX from 'xlsx';
+import { useActivity } from '../context/ActivityContext';
 
 export function DataSync() {
   const [syncType, setSyncType] = useState('profiles'); // 'profiles', 'marks', 'attendance'
@@ -23,6 +24,20 @@ export function DataSync() {
   const [attStandard, setAttStandard] = useState('All');
   const [attSection, setAttSection] = useState('All');
   const [attendanceMode, setAttendanceMode] = useState('daily'); // 'daily' or 'monthly'
+
+  const { setActivityContext, clearActivityContext } = useActivity();
+
+  useEffect(() => {
+    // We update context when in marks or attendance mode and section is selected
+    if (syncType === 'marks') {
+      setActivityContext(selectedStandard || 'All', selectedSection || 'All');
+    } else if (syncType === 'attendance') {
+      setActivityContext(attStandard, attSection);
+    } else {
+      setActivityContext('All', 'All'); // Profiles doesn't have a section selector
+    }
+  }, [syncType, selectedStandard, selectedSection, attStandard, attSection, setActivityContext]);
+
   const [attMonthlyMonth, setAttMonthlyMonth] = useState('All');
   const [attMonthlyYear, setAttMonthlyYear] = useState(new Date().getFullYear().toString());
   const [attMonthlyStandard, setAttMonthlyStandard] = useState('All');
@@ -554,6 +569,7 @@ export function DataSync() {
 
       } else {
         const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
+        const monthNameUpper = new Date(2020, parseInt(attMonthlyMonth)-1, 1).toLocaleString('default', { month: 'long' }).toUpperCase();
         
         const studentsMap = {};
         response.data.forEach(att => {
@@ -563,30 +579,33 @@ export function DataSync() {
             const stuId = r.student._id || r.student;
             const uniqueKey = `${stuId}_${att.standard}_${att.section}`;
             if (!studentsMap[uniqueKey]) {
+              const genderMap = { 'Male': 'M', 'Female': 'F' };
               studentsMap[uniqueKey] = {
-                'EMIS Number': r.student.emisNumber,
+                'MONTH': monthNameUpper,
+                'Emis no': r.student.emisNumber,
+                'class': att.standard,
+                'sec': att.section,
+                'SN.o': 0, // placeholder, will be assigned after sort
                 'Student Name': r.student.name,
-                'Gender': r.student.gender,
-                'Standard': att.standard,
-                'Section': att.section,
+                'Gende': genderMap[r.student.gender] || 'O',
                 sortGender: r.student.gender,
                 sortName: r.student.name
               };
               for(let i=1; i<=daysInMonth; i++) {
-                studentsMap[uniqueKey][String(i).padStart(2, '0')] = '-';
+                studentsMap[uniqueKey][String(i)] = '-';
               }
             }
             let statusMap = {
               'Present': 'P', 'Absent': 'A', 'Late': 'L', 'Homebased': 'H', 'IE Center': 'I', 'On Duty': 'OD'
             };
-            studentsMap[uniqueKey][String(day).padStart(2, '0')] = statusMap[r.status] || r.status;
+            studentsMap[uniqueKey][String(day)] = statusMap[r.status] || r.status;
           });
         });
 
         exportData = Object.values(studentsMap);
         exportData.sort((a, b) => {
-          if (a.Standard !== b.Standard) return String(a.Standard).localeCompare(String(b.Standard));
-          if (a.Section !== b.Section) return a.Section.localeCompare(b.Section);
+          if (a.class !== b.class) return String(a.class).localeCompare(String(b.class));
+          if (a.sec !== b.sec) return a.sec.localeCompare(b.sec);
           
           const priority = { 'Male': 1, 'Female': 2 };
           const pA = priority[a.sortGender] || 3;
@@ -595,13 +614,49 @@ export function DataSync() {
           return (a.sortName || '').localeCompare(b.sortName || '', 'en', { sensitivity: 'base' });
         });
 
+        // Assign S.No and remove sort fields
+        let sNo = 1;
         exportData.forEach(row => {
+          row['SN.o'] = sNo++;
           delete row.sortGender;
           delete row.sortName;
         });
       }
       
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      let headerOrder;
+      if (isAllMonths) {
+        headerOrder = ['S.No', 'EMIS Number', 'Student Name', 'Gender', 'Standard', 'Section', 'Date', 'Status'];
+      } else {
+        headerOrder = ['MONTH', 'Emis no', 'class', 'sec', 'SN.o', 'Student Name', 'Gende'];
+        const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
+        for(let i=1; i<=daysInMonth; i++) {
+          headerOrder.push(String(i));
+        }
+      }
+      
+      const worksheet = XLSX.utils.json_to_sheet(exportData, { header: headerOrder });
+      
+      if (!isAllMonths) {
+        // Freeze first row and set column widths
+        worksheet['!freeze'] = { xSplit: 0, ySplit: 1, topLeftCell: 'A2', activePane: 'bottomRight', state: 'frozen' };
+        
+        const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
+        const cols = [
+          { wch: 14 }, // MONTH
+          { wch: 15 }, // Emis no
+          { wch: 10 }, // class
+          { wch: 8 },  // sec
+          { wch: 8 },  // SN.o
+          { wch: 24 }, // Student Name
+          { wch: 8 }   // Gende
+        ];
+        // Add widths for day columns
+        for(let i = 1; i <= daysInMonth; i++) {
+          cols.push({ wch: 5 });
+        }
+        worksheet['!cols'] = cols;
+      }
+      
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Monthly Attendance");
       
@@ -674,17 +729,22 @@ export function DataSync() {
         });
 
         const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
+        const monthNameUpper = new Date(2020, parseInt(attMonthlyMonth)-1, 1).toLocaleString('default', { month: 'long' }).toUpperCase();
         
+        let sNo = 1;
         templateData = students.map(s => {
+          const genderMap = { 'Male': 'M', 'Female': 'F' };
           const row = {
-            'EMIS Number': s.emisNumber,
+            'MONTH': monthNameUpper,
+            'Emis no': s.emisNumber,
+            'class': s.standard,
+            'sec': s.section,
+            'SN.o': sNo++,
             'Student Name': s.name,
-            'Gender': s.gender,
-            'Standard': s.standard,
-            'Section': s.section
+            'Gende': genderMap[s.gender] || 'O'
           };
           for(let i=1; i<=daysInMonth; i++) {
-            row[String(i).padStart(2, '0')] = '-';
+            row[String(i)] = '-';
           }
           return row;
         });
@@ -698,8 +758,39 @@ export function DataSync() {
         ];
       }
 
+      let headerOrder;
+      if (isAllMonths) {
+        headerOrder = ['EMIS Number', 'Student Name', 'Standard', 'Section', 'Date', 'Status'];
+      } else {
+        headerOrder = ['MONTH', 'Emis no', 'class', 'sec', 'SN.o', 'Student Name', 'Gende'];
+        const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
+        for(let i=1; i<=daysInMonth; i++) {
+          headerOrder.push(String(i));
+        }
+      }
+
       const workbook = XLSX.utils.book_new();
-      const dataSheet = XLSX.utils.json_to_sheet(templateData);
+      const dataSheet = XLSX.utils.json_to_sheet(templateData, { header: headerOrder });
+      
+      if (!isAllMonths) {
+        dataSheet['!freeze'] = { xSplit: 0, ySplit: 1, topLeftCell: 'A2', activePane: 'bottomRight', state: 'frozen' };
+        
+        const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
+        const cols = [
+          { wch: 14 }, // MONTH
+          { wch: 15 }, // Emis no
+          { wch: 10 }, // class
+          { wch: 8 },  // sec
+          { wch: 8 },  // SN.o
+          { wch: 24 }, // Student Name
+          { wch: 8 }   // Gende
+        ];
+        for(let i = 1; i <= daysInMonth; i++) {
+          cols.push({ wch: 5 });
+        }
+        dataSheet['!cols'] = cols;
+      }
+      
       const instructionsSheet = XLSX.utils.json_to_sheet(instructionsData);
 
       XLSX.utils.book_append_sheet(workbook, dataSheet, "Attendance Data");
@@ -767,18 +858,18 @@ export function DataSync() {
           } else {
             const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
             rawData.forEach((row, index) => {
-              const emisNumber = String(row['EMIS Number'] || row['emisnumber'] || row['emisno'] || row['EMIS'] || '').trim();
+              const emisNumber = String(row['Emis no'] || row['EMIS Number'] || row['emisnumber'] || row['emisno'] || row['EMIS'] || '').trim();
               if (!emisNumber) return;
               
-              const std = String(row['Standard'] || row['standard'] || (attMonthlyStandard !== 'All' ? attMonthlyStandard : '')).trim();
-              const sec = String(row['Section'] || row['section'] || (attMonthlySection !== 'All' ? attMonthlySection : '')).trim().toUpperCase();
+              const std = String(row['class'] || row['Standard'] || row['standard'] || (attMonthlyStandard !== 'All' ? attMonthlyStandard : '')).trim();
+              const sec = String(row['sec'] || row['Section'] || row['section'] || (attMonthlySection !== 'All' ? attMonthlySection : '')).trim().toUpperCase();
 
               for(let i=1; i<=daysInMonth; i++) {
-                const dayStr = String(i).padStart(2, '0');
+                const dayStr = String(i);
                 const cellVal = String(row[dayStr] || '').trim();
                 if (cellVal && cellVal !== '-') {
                   recordsToImport.push({
-                    date: `${attMonthlyYear}-${attMonthlyMonth.padStart(2, '0')}-${dayStr}`,
+                    date: `${attMonthlyYear}-${attMonthlyMonth.padStart(2, '0')}-${String(i).padStart(2, '0')}`,
                     emisNumber: emisNumber,
                     standard: std,
                     section: sec,

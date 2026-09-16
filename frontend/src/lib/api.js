@@ -127,9 +127,12 @@ export const api = {
     method: 'DELETE'
   }),
 
-  // Analytics Leaderboard
+  // Analytics Leaderboard & Dashboard
   getLeaderboard: (standard, section, rankBy = 'Marks') => fetchWithAuth(`/analytics/leaderboard?standard=${standard}&section=${section}&rankBy=${rankBy}`),
   getDashboardStats: () => fetchWithAuth('/analytics/dashboard'),
+
+  // Admin Monitoring
+  getStorageUsage: () => fetchWithAuth('/admin/storage-usage'),
 
   // AI Assistant
   askAI: (question) => fetchWithAuth('/ai/ask', {

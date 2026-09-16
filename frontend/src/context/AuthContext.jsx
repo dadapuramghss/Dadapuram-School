@@ -74,6 +74,12 @@ export function AuthProvider({ children }) {
       throw error;
     }
     
+    try {
+      await api.post('/auth/record-login', {});
+    } catch (err) {
+      console.error("Failed to record login", err);
+    }
+    
     return userCredential;
   };
 
@@ -112,6 +118,12 @@ export function AuthProvider({ children }) {
         await signOut(auth);
         setDbUser(null);
         setCurrentUser(null);
+      } else if (res && res.status !== 'pending') {
+        try {
+          await api.post('/auth/record-login', {});
+        } catch (err) {
+          console.error("Failed to record login", err);
+        }
       }
     } catch (err) {
       console.error("Failed to sync user with backend", err);
@@ -120,7 +132,14 @@ export function AuthProvider({ children }) {
     return userCredential;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      if (auth.currentUser) {
+        await api.post('/auth/record-logout', {});
+      }
+    } catch (err) {
+      console.error("Failed to record logout", err);
+    }
     setDbUser(null);
     return signOut(auth);
   };

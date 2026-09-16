@@ -5,6 +5,7 @@ import { NeonButton } from '../components/ui/NeonButton';
 import { api } from '../lib/api';
 import { appState } from '../lib/appState';
 import { useClassConfig } from '../context/ClassConfigContext';
+import { useActivity } from '../context/ActivityContext';
 
 
 
@@ -18,6 +19,12 @@ export function Gradebook() {
 
   const { dbUser } = useAuth();
   const { classConfigs } = useClassConfig();
+  const { setActivityContext, clearActivityContext } = useActivity();
+
+  useEffect(() => {
+    setActivityContext(selectedClass, selectedSection);
+    return () => clearActivityContext();
+  }, [selectedClass, selectedSection, setActivityContext, clearActivityContext]);
   
   let currentSubjects = [];
   if (selectedClass === 'All') {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ActivityProvider } from './context/ActivityContext';
 import { ClassConfigProvider } from './context/ClassConfigContext';
 import { TeacherLayout } from './components/layout/TeacherLayout';
 import { AdminLayout } from './components/layout/AdminLayout';
@@ -23,6 +24,7 @@ import { PendingApproval } from './pages/PendingApproval';
 import { AdminUsers } from './pages/AdminUsers';
 import { AdminClasses } from './pages/AdminClasses';
 import { AdminReports } from './pages/AdminReports';
+import { AdminStorage } from './pages/AdminStorage';
 import StudentFeedback from './pages/StudentFeedback';
 import { DeveloperProfile } from './components/ui/DeveloperProfile';
 import { DeploymentUpdateBanner } from './components/ui/DeploymentUpdateBanner';
@@ -126,6 +128,7 @@ function AppRoutes() {
         <Route path="leaderboard" element={<Leaderboard />} />
         <Route path="certificates" element={<Certificates />} />
         <Route path="data-sync" element={<DataSync />} />
+        <Route path="storage" element={<AdminStorage />} />
         <Route path="ai" element={<AiDashboard />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="feedback" element={<StudentFeedback />} />
@@ -138,12 +141,14 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <ClassConfigProvider>
-        <DeploymentUpdateBanner />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </ClassConfigProvider>
+      <ActivityProvider>
+        <ClassConfigProvider>
+          <DeploymentUpdateBanner />
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </ClassConfigProvider>
+      </ActivityProvider>
     </AuthProvider>
   );
 }

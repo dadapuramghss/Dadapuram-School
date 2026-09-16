@@ -19,6 +19,29 @@ export function AdminUsers() {
   const [editingAssignmentIndex, setEditingAssignmentIndex] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // User Activity state
+  const [activityUsers, setActivityUsers] = useState([]);
+  
+  const fetchActivity = async () => {
+    try {
+      const res = await api.get('/users/activity');
+      setActivityUsers(res || []);
+    } catch (err) {
+      console.error('Failed to fetch user activity', err);
+    }
+  };
+
+  useEffect(() => {
+    let interval;
+    if (activeTab === 'activity') {
+      fetchActivity();
+      interval = setInterval(fetchActivity, 60000); // refresh every minute
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [activeTab]);
+
   const fetchUsers = async () => {
     try {
       const res = await api.get('/auth/users');
@@ -218,6 +241,16 @@ export function AdminUsers() {
         >
           Approved Teachers ({approvedTeachers.length})
         </button>
+        <button
+          onClick={() => setActiveTab('activity')}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            activeTab === 'activity' 
+              ? 'bg-adminSidebar text-white shadow-sm' 
+              : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-900'
+          }`}
+        >
+          User Activity
+        </button>
       </div>
 
       <div className="overflow-hidden bg-white border border-gray-200 rounded-2xl shadow-sm">
@@ -321,6 +354,72 @@ export function AdminUsers() {
               </table>
             </div>
           )
+        )}
+
+        {activeTab === 'activity' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-gray-200 text-xs uppercase tracking-wider text-adminSidebar bg-gray-50">
+                  <th className="p-4 font-medium">User</th>
+                  <th className="p-4 font-medium">Role</th>
+                  <th className="p-4 font-medium text-center">Logins</th>
+                  <th className="p-4 font-medium">Last Login</th>
+                  <th className="p-4 font-medium">Last Activity</th>
+                  <th className="p-4 font-medium">Active Section</th>
+                  <th className="p-4 font-medium text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {activityUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="p-12 text-center text-gray-400">No activity data found.</td>
+                  </tr>
+                ) : (
+                  activityUsers.map((user) => {
+                    // Check if currently active (within last 5 mins)
+                    const lastActive = user.lastActivityAt ? new Date(user.lastActivityAt) : null;
+                    const isCurrentlyActive = lastActive && (new Date() - lastActive) < 5 * 60 * 1000;
+                    
+                    return (
+                      <tr key={user._id} className="hover:bg-gray-50 transition-colors group">
+                        <td className="p-4">
+                          <div className="font-medium text-gray-900">{user.name || 'Unknown'}</div>
+                          <div className="text-sm text-gray-500">{user.email}</div>
+                        </td>
+                        <td className="p-4 text-gray-600 capitalize">{user.role}</td>
+                        <td className="p-4 text-center text-gray-600 font-medium">{user.loginCount || 0}</td>
+                        <td className="p-4 text-gray-500 text-sm">
+                          {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'Never'}
+                        </td>
+                        <td className="p-4 text-gray-500 text-sm">
+                          {user.lastActivityAt ? new Date(user.lastActivityAt).toLocaleString() : 'None'}
+                        </td>
+                        <td className="p-4 text-gray-500 text-sm">
+                          {user.activeStandard && user.activeSection 
+                            ? `${user.activeStandard} - ${user.activeSection}` 
+                            : 'None'}
+                        </td>
+                        <td className="p-4 text-center">
+                          {isCurrentlyActive ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700">
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                              Active Now
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-600">
+                              <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                              Offline
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 

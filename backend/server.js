@@ -20,6 +20,8 @@ const classConfigRoutes = require('./routes/classConfigRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const materialRoutes = require('./routes/materialRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
+const userRoutes = require('./routes/userRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const http = require('http');
 const { Server } = require('socket.io');
@@ -63,6 +65,8 @@ app.use('/api/classes', classConfigRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/materials', materialRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Base route
 app.get('/', (req, res) => {

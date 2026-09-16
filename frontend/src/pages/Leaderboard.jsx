@@ -4,6 +4,7 @@ import { NeonButton } from '../components/ui/NeonButton';
 import { Trophy, Medal, Award, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { api } from '../lib/api';
+import { useActivity } from '../context/ActivityContext';
 
 export function Leaderboard() {
   const [selectedClass, setSelectedClass] = useState('All');
@@ -15,6 +16,12 @@ export function Leaderboard() {
   const [studentDetails, setStudentDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [classConfigs, setClassConfigs] = useState([]);
+  const { setActivityContext, clearActivityContext } = useActivity();
+
+  useEffect(() => {
+    setActivityContext(selectedClass, selectedSection);
+    return () => clearActivityContext();
+  }, [selectedClass, selectedSection, setActivityContext, clearActivityContext]);
 
   const fetchStudentDetails = async (id) => {
     try {

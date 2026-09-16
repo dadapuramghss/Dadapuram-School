@@ -5,6 +5,7 @@ import { NeonButton } from '../components/ui/NeonButton';
 import { api } from '../lib/api';
 import { appState } from '../lib/appState';
 import { useClassConfig } from '../context/ClassConfigContext';
+import { useActivity } from '../context/ActivityContext';
 import { compressImage, fileToBase64 } from '../lib/utils';
 import { Trash2, Plus, Calendar, BookOpen, Camera, Upload, Mic, Square, Play, Image as ImageIcon, FileText, Link as LinkIcon } from 'lucide-react';
 
@@ -17,8 +18,13 @@ export function Homework() {
   const [loading, setLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [editingHomeworkId, setEditingHomeworkId] = useState(null);
-
   const { classConfigs } = useClassConfig();
+  const { setActivityContext, clearActivityContext } = useActivity();
+
+  useEffect(() => {
+    setActivityContext(selectedClass, selectedSection);
+    return () => clearActivityContext();
+  }, [selectedClass, selectedSection, setActivityContext, clearActivityContext]);
   
   let currentSubjects = [];
   if (selectedClass === 'All') {
