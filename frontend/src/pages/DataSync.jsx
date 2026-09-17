@@ -539,53 +539,34 @@ export function DataSync() {
         return;
       }
 
-      let exportData = [];
       const isAllMonths = attMonthlyMonth === 'All';
+      const monthsToProcess = isAllMonths ? Array.from({length: 12}, (_, i) => i + 1) : [parseInt(attMonthlyMonth)];
+      const workbook = XLSX.utils.book_new();
 
-      if (isAllMonths) {
-        let sNo = 1;
-        response.data.forEach(att => {
-          att.records.forEach(r => {
-            if (!r.student) return;
-            exportData.push({
-              'S.No': sNo++,
-              'EMIS Number': r.student.emisNumber,
-              'Student Name': r.student.name,
-              'Gender': r.student.gender,
-              'Standard': att.standard,
-              'Section': att.section,
-              'Date': att.date,
-              'Status': r.status
-            });
-          });
-        });
+      monthsToProcess.forEach(m => {
+        const daysInMonth = new Date(parseInt(attMonthlyYear), m, 0).getDate();
+        const monthNameUpper = new Date(2020, m-1, 1).toLocaleString('default', { month: 'long' }).toUpperCase();
+        const sheetName = new Date(2020, m-1, 1).toLocaleString('default', { month: 'long' });
         
-        exportData.sort((a, b) => {
-           if (a.Date !== b.Date) return a.Date.localeCompare(b.Date);
-           if (a.Standard !== b.Standard) return String(a.Standard).localeCompare(String(b.Standard));
-           if (a.Section !== b.Section) return a.Section.localeCompare(b.Section);
-           return (a['Student Name'] || '').localeCompare(b['Student Name'] || '', 'en', { sensitivity: 'base' });
-        });
-
-      } else {
-        const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
-        const monthNameUpper = new Date(2020, parseInt(attMonthlyMonth)-1, 1).toLocaleString('default', { month: 'long' }).toUpperCase();
+        const monthStr = String(m).padStart(2, '0');
         
         const studentsMap = {};
         response.data.forEach(att => {
+          if (isAllMonths && !att.date.startsWith(`${attMonthlyYear}-${monthStr}-`)) return;
+          
           const day = parseInt(att.date.split('-')[2]);
           att.records.forEach(r => {
             if (!r.student) return;
             const stuId = r.student._id || r.student;
             const uniqueKey = `${stuId}_${att.standard}_${att.section}`;
             if (!studentsMap[uniqueKey]) {
-              const genderMap = { 'Male': 'M', 'Female': 'F' };
+              const genderMap = { 'Male': 'M', 'Female': 'F', 'Other': 'O' };
               studentsMap[uniqueKey] = {
                 'MONTH': monthNameUpper,
                 'Emis no': r.student.emisNumber,
                 'class': att.standard,
                 'sec': att.section,
-                'SN.o': 0, // placeholder, will be assigned after sort
+                'SN.o': 0,
                 'Student Name': r.student.name,
                 'Gende': genderMap[r.student.gender] || 'O',
                 sortGender: r.student.gender,
@@ -602,66 +583,54 @@ export function DataSync() {
           });
         });
 
-        exportData = Object.values(studentsMap);
-        exportData.sort((a, b) => {
-          if (a.class !== b.class) return String(a.class).localeCompare(String(b.class));
-          if (a.sec !== b.sec) return a.sec.localeCompare(b.sec);
-          
-          const priority = { 'Male': 1, 'Female': 2 };
-          const pA = priority[a.sortGender] || 3;
-          const pB = priority[b.sortGender] || 3;
-          if (pA !== pB) return pA - pB;
-          return (a.sortName || '').localeCompare(b.sortName || '', 'en', { sensitivity: 'base' });
-        });
+        if (Object.keys(studentsMap).length > 0 || !isAllMonths) {
+          let exportData = Object.values(studentsMap);
+          exportData.sort((a, b) => {
+            if (a.class !== b.class) return String(a.class).localeCompare(String(b.class));
+            if (a.sec !== b.sec) return a.sec.localeCompare(b.sec);
+            
+            const priority = { 'Male': 1, 'Female': 2 };
+            const pA = priority[a.sortGender] || 3;
+            const pB = priority[b.sortGender] || 3;
+            if (pA !== pB) return pA - pB;
+            return (a.sortName || '').localeCompare(b.sortName || '', 'en', { sensitivity: 'base' });
+          });
 
-        // Assign S.No and remove sort fields
-        let sNo = 1;
-        exportData.forEach(row => {
-          row['SN.o'] = sNo++;
-          delete row.sortGender;
-          delete row.sortName;
-        });
-      }
-      
-      let headerOrder;
-      if (isAllMonths) {
-        headerOrder = ['S.No', 'EMIS Number', 'Student Name', 'Gender', 'Standard', 'Section', 'Date', 'Status'];
-      } else {
-        headerOrder = ['MONTH', 'Emis no', 'class', 'sec', 'SN.o', 'Student Name', 'Gende'];
-        const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
-        for(let i=1; i<=daysInMonth; i++) {
-          headerOrder.push(String(i));
+          let sNo = 1;
+          exportData.forEach(row => {
+            row['SN.o'] = sNo++;
+            delete row.sortGender;
+            delete row.sortName;
+          });
+
+          const headerOrder = ['MONTH', 'Emis no', 'class', 'sec', 'SN.o', 'Student Name', 'Gende'];
+          for(let i=1; i<=daysInMonth; i++) {
+            headerOrder.push(String(i));
+          }
+
+          const worksheet = XLSX.utils.json_to_sheet(exportData, { header: headerOrder });
+          worksheet['!freeze'] = { xSplit: 0, ySplit: 1, topLeftCell: 'A2', activePane: 'bottomRight', state: 'frozen' };
+          
+          const cols = [
+            { wch: 14 },
+            { wch: 15 },
+            { wch: 10 },
+            { wch: 8 },
+            { wch: 8 },
+            { wch: 24 },
+            { wch: 8 }
+          ];
+          for(let i = 1; i <= daysInMonth; i++) {
+            cols.push({ wch: 5 });
+          }
+          worksheet['!cols'] = cols;
+          
+          XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
         }
-      }
+      });
       
-      const worksheet = XLSX.utils.json_to_sheet(exportData, { header: headerOrder });
-      
-      if (!isAllMonths) {
-        // Freeze first row and set column widths
-        worksheet['!freeze'] = { xSplit: 0, ySplit: 1, topLeftCell: 'A2', activePane: 'bottomRight', state: 'frozen' };
-        
-        const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
-        const cols = [
-          { wch: 14 }, // MONTH
-          { wch: 15 }, // Emis no
-          { wch: 10 }, // class
-          { wch: 8 },  // sec
-          { wch: 8 },  // SN.o
-          { wch: 24 }, // Student Name
-          { wch: 8 }   // Gende
-        ];
-        // Add widths for day columns
-        for(let i = 1; i <= daysInMonth; i++) {
-          cols.push({ wch: 5 });
-        }
-        worksheet['!cols'] = cols;
-      }
-      
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Monthly Attendance");
-      
-      const monthName = isAllMonths ? "All_Months" : new Date(2020, parseInt(attMonthlyMonth)-1, 1).toLocaleString('default', { month: 'long' });
-      XLSX.writeFile(workbook, `DGHSS360_Attendance_${attMonthlyStandard}_${attMonthlySection}_${monthName}_${attMonthlyYear}.xlsx`);
+      const fileNameMonth = isAllMonths ? "All_Months" : new Date(2020, parseInt(attMonthlyMonth)-1, 1).toLocaleString('default', { month: 'long' });
+      XLSX.writeFile(workbook, `DGHSS360_Attendance_${attMonthlyStandard}_${attMonthlySection}_${fileNameMonth}_${attMonthlyYear}.xlsx`);
     } catch (err) {
       console.error('Export error:', err);
       setError('Failed to export monthly attendance.');
@@ -681,59 +650,34 @@ export function DataSync() {
       setError(null);
       
       const isAllMonths = attMonthlyMonth === 'All';
+      const monthsToProcess = isAllMonths ? Array.from({length: 12}, (_, i) => i + 1) : [parseInt(attMonthlyMonth)];
+      
+      const response = await api.getStudents(attMonthlyStandard, attMonthlySection);
+      let students = response.data || [];
+      if (students.length === 0) {
+        setError('No students found for the selected class.');
+        setExporting(false);
+        return;
+      }
+      
+      students.sort((a, b) => {
+        const priority = { 'Male': 1, 'Female': 2 };
+        const pA = priority[a.gender] || 3;
+        const pB = priority[b.gender] || 3;
+        if (pA !== pB) return pA - pB;
+        return (a.name || '').localeCompare(b.name || '', 'en', { sensitivity: 'base' });
+      });
 
-      let templateData = [];
-      let instructionsData = [];
+      const workbook = XLSX.utils.book_new();
 
-      if (isAllMonths) {
-        templateData = [{
-          'EMIS Number': '1012345678',
-          'Student Name': 'Example Student',
-          'Standard': '10',
-          'Section': 'A',
-          'Date': `${attMonthlyYear}-01-15`,
-          'Status': 'P'
-        }, {
-          'EMIS Number': '1012345678',
-          'Student Name': 'Example Student',
-          'Standard': '10',
-          'Section': 'A',
-          'Date': `${attMonthlyYear}-01-16`,
-          'Status': 'A'
-        }];
-
-        instructionsData = [
-          { 'Instruction': 'LONG FORMAT INSTRUCTIONS' },
-          { 'Instruction': '1. Use this format when importing attendance for All Months.' },
-          { 'Instruction': `2. Date must be in YYYY-MM-DD format and belong to the selected year (${attMonthlyYear}).` },
-          { 'Instruction': '3. Valid Statuses: P (Present), A (Absent), L (Late), H (Homebased), I (IE Center), OD (On Duty).' },
-          { 'Instruction': '4. EMIS Number is required. Ensure Standard and Section match the database.' },
-          { 'Instruction': '5. Do not include duplicate records for the same Date + Student.' }
-        ];
-
-      } else {
-        const response = await api.getStudents(attMonthlyStandard, attMonthlySection);
-        let students = response.data || [];
-        if (students.length === 0) {
-          setError('No students found for the selected class.');
-          setExporting(false);
-          return;
-        }
-        
-        students.sort((a, b) => {
-          const priority = { 'Male': 1, 'Female': 2 };
-          const pA = priority[a.gender] || 3;
-          const pB = priority[b.gender] || 3;
-          if (pA !== pB) return pA - pB;
-          return (a.name || '').localeCompare(b.name || '', 'en', { sensitivity: 'base' });
-        });
-
-        const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
-        const monthNameUpper = new Date(2020, parseInt(attMonthlyMonth)-1, 1).toLocaleString('default', { month: 'long' }).toUpperCase();
+      monthsToProcess.forEach(m => {
+        const daysInMonth = new Date(parseInt(attMonthlyYear), m, 0).getDate();
+        const monthNameUpper = new Date(2020, m-1, 1).toLocaleString('default', { month: 'long' }).toUpperCase();
+        const sheetName = new Date(2020, m-1, 1).toLocaleString('default', { month: 'long' });
         
         let sNo = 1;
-        templateData = students.map(s => {
-          const genderMap = { 'Male': 'M', 'Female': 'F' };
+        const templateData = students.map(s => {
+          const genderMap = { 'Male': 'M', 'Female': 'F', 'Other': 'O' };
           const row = {
             'MONTH': monthNameUpper,
             'Emis no': s.emisNumber,
@@ -748,56 +692,44 @@ export function DataSync() {
           }
           return row;
         });
-        
-        instructionsData = [
-          { 'Instruction': 'WIDE FORMAT INSTRUCTIONS' },
-          { 'Instruction': 'P = Present, A = Absent, L = Late, H = Homebased, I = IE Center, OD = On Duty' },
-          { 'Instruction': '- = No attendance record' },
-          { 'Instruction': '' },
-          { 'Instruction': 'Do not alter the columns. Only edit the day columns.' }
-        ];
-      }
 
-      let headerOrder;
-      if (isAllMonths) {
-        headerOrder = ['EMIS Number', 'Student Name', 'Standard', 'Section', 'Date', 'Status'];
-      } else {
-        headerOrder = ['MONTH', 'Emis no', 'class', 'sec', 'SN.o', 'Student Name', 'Gende'];
-        const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
+        const headerOrder = ['MONTH', 'Emis no', 'class', 'sec', 'SN.o', 'Student Name', 'Gende'];
         for(let i=1; i<=daysInMonth; i++) {
           headerOrder.push(String(i));
         }
-      }
 
-      const workbook = XLSX.utils.book_new();
-      const dataSheet = XLSX.utils.json_to_sheet(templateData, { header: headerOrder });
-      
-      if (!isAllMonths) {
+        const dataSheet = XLSX.utils.json_to_sheet(templateData, { header: headerOrder });
         dataSheet['!freeze'] = { xSplit: 0, ySplit: 1, topLeftCell: 'A2', activePane: 'bottomRight', state: 'frozen' };
         
-        const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
         const cols = [
-          { wch: 14 }, // MONTH
-          { wch: 15 }, // Emis no
-          { wch: 10 }, // class
-          { wch: 8 },  // sec
-          { wch: 8 },  // SN.o
-          { wch: 24 }, // Student Name
-          { wch: 8 }   // Gende
+          { wch: 14 },
+          { wch: 15 },
+          { wch: 10 },
+          { wch: 8 },
+          { wch: 8 },
+          { wch: 24 },
+          { wch: 8 }
         ];
         for(let i = 1; i <= daysInMonth; i++) {
           cols.push({ wch: 5 });
         }
         dataSheet['!cols'] = cols;
-      }
-      
-      const instructionsSheet = XLSX.utils.json_to_sheet(instructionsData);
+        
+        XLSX.utils.book_append_sheet(workbook, dataSheet, sheetName);
+      });
 
-      XLSX.utils.book_append_sheet(workbook, dataSheet, "Attendance Data");
+      const instructionsData = [
+        { 'Instruction': 'WIDE FORMAT INSTRUCTIONS' },
+        { 'Instruction': 'P = Present, A = Absent, L = Late, H = Homebased, I = IE Center, OD = On Duty' },
+        { 'Instruction': '- = No attendance record' },
+        { 'Instruction': '' },
+        { 'Instruction': 'Do not alter the columns. Only edit the day columns.' }
+      ];
+      const instructionsSheet = XLSX.utils.json_to_sheet(instructionsData);
       XLSX.utils.book_append_sheet(workbook, instructionsSheet, "Instructions");
       
-      const monthName = isAllMonths ? "All_Months" : new Date(2020, parseInt(attMonthlyMonth)-1, 1).toLocaleString('default', { month: 'long' });
-      XLSX.writeFile(workbook, `DGHSS360_Attendance_Template_${attMonthlyStandard}_${attMonthlySection}_${monthName}_${attMonthlyYear}.xlsx`);
+      const fileNameMonth = isAllMonths ? "All_Months" : new Date(2020, parseInt(attMonthlyMonth)-1, 1).toLocaleString('default', { month: 'long' });
+      XLSX.writeFile(workbook, `DGHSS360_Attendance_Template_${attMonthlyStandard}_${attMonthlySection}_${fileNameMonth}_${attMonthlyYear}.xlsx`);
     } catch(err) {
       console.error(err);
       setError('Failed to generate template.');
@@ -826,40 +758,40 @@ export function DataSync() {
         try {
           const data = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: 'array' });
-          const firstSheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[firstSheetName];
-          
-          const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
           const recordsToImport = [];
 
-          if (attMonthlyMonth === 'All') {
-            rawData.forEach((row, index) => {
-              const emisNumber = String(row['EMIS Number'] || row['emisnumber'] || row['emisno'] || row['EMIS'] || '').trim();
-              const dateStr = String(row['Date'] || row['date'] || '').trim();
-              const status = String(row['Status'] || row['status'] || '').trim();
-              const std = String(row['Standard'] || row['standard'] || (attMonthlyStandard !== 'All' ? attMonthlyStandard : '')).trim();
-              const sec = String(row['Section'] || row['section'] || (attMonthlySection !== 'All' ? attMonthlySection : '')).trim().toUpperCase();
-              
-              if (!emisNumber || !status) return;
-              if (dateStr && !dateStr.startsWith(String(attMonthlyYear))) {
-                throw new Error(`Row ${index + 2}: Date ${dateStr} does not belong to selected year ${attMonthlyYear}.`);
-              }
-              
-              if (dateStr) {
-                recordsToImport.push({
-                  date: dateStr,
-                  emisNumber: emisNumber,
-                  standard: std,
-                  section: sec,
-                  status: status
-                });
-              }
-            });
-          } else {
-            const daysInMonth = new Date(parseInt(attMonthlyYear), parseInt(attMonthlyMonth), 0).getDate();
+          const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+          ];
+
+          workbook.SheetNames.forEach((sheetName) => {
+            if (sheetName === "Instructions") return;
+            
+            const worksheet = workbook.Sheets[sheetName];
+            const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
+            
+            let sheetMonthIndex = monthNames.indexOf(sheetName);
+            
             rawData.forEach((row, index) => {
               const emisNumber = String(row['Emis no'] || row['EMIS Number'] || row['emisnumber'] || row['emisno'] || row['EMIS'] || '').trim();
               if (!emisNumber) return;
+              
+              const monthColStr = String(row['MONTH'] || '').trim().toUpperCase();
+              let mIndex = sheetMonthIndex;
+              if (monthColStr) {
+                 const mIdx = monthNames.findIndex(mn => mn.toUpperCase() === monthColStr);
+                 if (mIdx !== -1) mIndex = mIdx;
+              }
+              
+              if (mIndex === -1 && attMonthlyMonth !== 'All') {
+                 mIndex = parseInt(attMonthlyMonth) - 1;
+              }
+              
+              if (mIndex === -1) return;
+              
+              const monthNum = mIndex + 1;
+              const daysInMonth = new Date(parseInt(attMonthlyYear), monthNum, 0).getDate();
               
               const std = String(row['class'] || row['Standard'] || row['standard'] || (attMonthlyStandard !== 'All' ? attMonthlyStandard : '')).trim();
               const sec = String(row['sec'] || row['Section'] || row['section'] || (attMonthlySection !== 'All' ? attMonthlySection : '')).trim().toUpperCase();
@@ -869,7 +801,7 @@ export function DataSync() {
                 const cellVal = String(row[dayStr] || '').trim();
                 if (cellVal && cellVal !== '-') {
                   recordsToImport.push({
-                    date: `${attMonthlyYear}-${attMonthlyMonth.padStart(2, '0')}-${String(i).padStart(2, '0')}`,
+                    date: `${attMonthlyYear}-${String(monthNum).padStart(2, '0')}-${String(i).padStart(2, '0')}`,
                     emisNumber: emisNumber,
                     standard: std,
                     section: sec,
@@ -878,7 +810,7 @@ export function DataSync() {
                 }
               }
             });
-          }
+          });
 
           if (recordsToImport.length === 0) {
             setError('No valid records found in the Excel file.');
