@@ -6,6 +6,7 @@ import { api } from '../lib/api';
 import { useClassConfig } from '../context/ClassConfigContext';
 import { Trash2, Plus, Edit, BookOpen, Link as LinkIcon, ExternalLink, Calendar } from 'lucide-react';
 import { useActivity } from '../context/ActivityContext';
+import { getAssignedSubjectsForClassSection } from '../lib/subjectUtils';
 
 export function Materials() {
   const [selectedClass, setSelectedClass] = useState('All');
@@ -23,23 +24,30 @@ export function Materials() {
     return () => clearActivityContext();
   }, [selectedClass, selectedSection, setActivityContext, clearActivityContext]);
   
+  const { dbUser } = useAuth();
+  
   let currentSubjects = [];
-  if (selectedClass === 'All') {
-    currentSubjects = [...new Set(classConfigs.flatMap(c => c.subjects))];
-  } else if (selectedSection === 'All') {
-    currentSubjects = [...new Set(classConfigs.filter(c => c.standard === selectedClass).flatMap(c => c.subjects))];
+  if (isAdding) {
+    currentSubjects = getAssignedSubjectsForClassSection(dbUser, classConfigs, selectedClass, selectedSection, true);
   } else {
-    currentSubjects = classConfigs.find(c => c.standard === selectedClass && c.section === selectedSection)?.subjects || [];
+    currentSubjects = getAssignedSubjectsForClassSection(dbUser, classConfigs, selectedClass, selectedSection, false);
   }
 
   const [formState, setFormState] = useState({
     title: '',
     description: '',
-    subject: 'Tamil',
+    subject: '', // initialize properly
     link: ''
   });
 
-  const { dbUser } = useAuth();
+  useEffect(() => {
+    if (isAdding && currentSubjects.length > 0 && (!formState.subject || !currentSubjects.includes(formState.subject))) {
+      setFormState(prev => ({ ...prev, subject: currentSubjects[0] }));
+    } else if (isAdding && currentSubjects.length === 0 && formState.subject !== '') {
+      setFormState(prev => ({ ...prev, subject: '' }));
+    }
+  }, [currentSubjects, isAdding, formState.subject]);
+
   
   let availableStandards = [];
   let availableSections = [];
@@ -133,7 +141,7 @@ export function Materials() {
     setFormState({
       title: '',
       description: '',
-      subject: currentSubjects[0] || 'Tamil',
+      subject: currentSubjects[0] || '',
       link: ''
     });
   };
@@ -233,8 +241,13 @@ export function Materials() {
                   value={formState.subject}
                   onChange={e => setFormState({...formState, subject: e.target.value})}
                   className="glass-input w-full dark:text-gray-900 [&>option]:bg-white dark:[&>option]:bg-white"
+                  disabled={currentSubjects.length === 0}
                 >
-                  {currentSubjects.map(s => <option key={s} value={s}>{s}</option>)}
+                  {currentSubjects.length === 0 ? (
+                    <option value="">No subjects assigned</option>
+                  ) : (
+                    currentSubjects.map(s => <option key={s} value={s}>{s}</option>)
+                  )}
                 </select>
               </div>
               <div className="md:col-span-2">

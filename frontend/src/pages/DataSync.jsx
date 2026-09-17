@@ -4,6 +4,8 @@ import { Database, Upload, Download, FileSpreadsheet, AlertCircle, CheckCircle2,
 import { api } from '../lib/api';
 import * as XLSX from 'xlsx';
 import { useActivity } from '../context/ActivityContext';
+import { useAuth } from '../context/AuthContext';
+import { getAssignedSubjectsForClassSection } from '../lib/subjectUtils';
 
 export function DataSync() {
   const [syncType, setSyncType] = useState('profiles'); // 'profiles', 'marks', 'attendance'
@@ -17,6 +19,8 @@ export function DataSync() {
   const [selectedStandard, setSelectedStandard] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedTerm, setSelectedTerm] = useState('');
+  
+  const { dbUser } = useAuth();
   
   // Attendance specific state
   const [attFromDate, setAttFromDate] = useState('');
@@ -244,8 +248,9 @@ export function DataSync() {
       setError(null);
       
       const config = classConfigs.find(c => c.standard === selectedStandard && c.section === selectedSection);
-      if (!config || !config.subjects || config.subjects.length === 0) {
-        setError('No subjects configured for this class.');
+      const authorizedSubjects = getAssignedSubjectsForClassSection(dbUser, classConfigs, selectedStandard, selectedSection, false);
+      if (!config || authorizedSubjects.length === 0) {
+        setError('No subjects configured/assigned for this class.');
         return;
       }
 
@@ -264,7 +269,7 @@ export function DataSync() {
           'Section': student.section
         };
         const termData = student.terms?.find(t => t.termName === selectedTerm);
-        config.subjects.forEach(subj => {
+        authorizedSubjects.forEach(subj => {
           const subjMark = termData?.marks?.find(m => m.subject.toLowerCase() === subj.toLowerCase());
           row[subj] = subjMark ? subjMark.score : '';
         });
@@ -297,8 +302,9 @@ export function DataSync() {
     setImportResults(null);
 
     const config = classConfigs.find(c => c.standard === selectedStandard && c.section === selectedSection);
-    if (!config || !config.subjects || config.subjects.length === 0) {
-      setError('No subjects configured for this class.');
+    const authorizedSubjects = getAssignedSubjectsForClassSection(dbUser, classConfigs, selectedStandard, selectedSection, false);
+    if (!config || authorizedSubjects.length === 0) {
+      setError('No subjects configured/assigned for this class.');
       setImporting(false);
       return;
     }
@@ -313,7 +319,7 @@ export function DataSync() {
           
           const recordsToImport = rows.map(row => {
             const marks = [];
-            config.subjects.forEach(subj => {
+            authorizedSubjects.forEach(subj => {
               const headerKey = Object.keys(row).find(k => k.toLowerCase() === subj.toLowerCase());
               if (headerKey && row[headerKey] !== '' && !isNaN(row[headerKey])) {
                 marks.push({
@@ -372,8 +378,9 @@ export function DataSync() {
       return;
     }
     const config = classConfigs.find(c => c.standard === selectedStandard && c.section === selectedSection);
-    if (!config || !config.subjects || config.subjects.length === 0) {
-      setError('No subjects configured for this class.');
+    const authorizedSubjects = getAssignedSubjectsForClassSection(dbUser, classConfigs, selectedStandard, selectedSection, false);
+    if (!config || authorizedSubjects.length === 0) {
+      setError('No subjects configured/assigned for this class.');
       return;
     }
 
@@ -384,7 +391,7 @@ export function DataSync() {
       'Section': selectedSection,
     }];
     
-    config.subjects.forEach(subj => {
+    authorizedSubjects.forEach(subj => {
       templateData[0][subj] = '95';
     });
 

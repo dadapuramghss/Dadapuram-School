@@ -8,8 +8,7 @@ import { useClassConfig } from '../context/ClassConfigContext';
 import { useActivity } from '../context/ActivityContext';
 import { compressImage, fileToBase64 } from '../lib/utils';
 import { Trash2, Plus, Calendar, BookOpen, Camera, Upload, Mic, Square, Play, Image as ImageIcon, FileText, Link as LinkIcon } from 'lucide-react';
-
-
+import { getAssignedSubjectsForClassSection } from '../lib/subjectUtils';
 
 export function Homework() {
   const [selectedClass, setSelectedClass] = useState('All');
@@ -26,22 +25,33 @@ export function Homework() {
     return () => clearActivityContext();
   }, [selectedClass, selectedSection, setActivityContext, clearActivityContext]);
   
-  let currentSubjects = [];
-  if (selectedClass === 'All') {
-    currentSubjects = [...new Set(classConfigs.flatMap(c => c.subjects))];
-  } else if (selectedSection === 'All') {
-    currentSubjects = [...new Set(classConfigs.filter(c => c.standard === selectedClass).flatMap(c => c.subjects))];
-  } else {
-    currentSubjects = classConfigs.find(c => c.standard === selectedClass && c.section === selectedSection)?.subjects || [];
-  }
-
+  const { dbUser } = useAuth();
+  
   const [newHomework, setNewHomework] = useState({
     title: '',
     description: '',
-    subject: 'Tamil',
+    subject: '', // initialize later
     dueDate: new Date().toISOString().split('T')[0],
     link: ''
   });
+
+  let currentSubjects = [];
+  if (isAdding) {
+    const targetSections = newHomework.sections?.length > 0 ? newHomework.sections : (selectedSection === 'All' ? [] : [selectedSection]);
+    currentSubjects = getAssignedSubjectsForClassSection(dbUser, classConfigs, selectedClass, targetSections, true);
+  } else {
+    currentSubjects = getAssignedSubjectsForClassSection(dbUser, classConfigs, selectedClass, selectedSection, false);
+  }
+
+  // Update subject when currentSubjects changes to ensure it's always a valid subject
+  useEffect(() => {
+    if (isAdding && currentSubjects.length > 0 && (!newHomework.subject || !currentSubjects.includes(newHomework.subject))) {
+      setNewHomework(prev => ({ ...prev, subject: currentSubjects[0] }));
+    } else if (isAdding && currentSubjects.length === 0 && newHomework.subject !== '') {
+      setNewHomework(prev => ({ ...prev, subject: '' }));
+    }
+  }, [currentSubjects, isAdding, newHomework.subject]);
+
 
   // Media state
   const [files, setFiles] = useState([]);
@@ -66,7 +76,7 @@ export function Homework() {
     return () => appState.setFormDirty('Homework', false);
   }, []);
 
-  const { dbUser } = useAuth();
+
   
   let availableStandards = [];
   let availableSections = [];
@@ -245,7 +255,7 @@ export function Homework() {
     setNewHomework({
       title: '',
       description: '',
-      subject: 'Tamil',
+      subject: currentSubjects[0] || '',
       dueDate: new Date().toISOString().split('T')[0],
       link: ''
     });
@@ -384,8 +394,13 @@ export function Homework() {
                   value={newHomework.subject}
                   onChange={e => setNewHomework({...newHomework, subject: e.target.value})}
                   className="glass-input w-full dark:text-gray-900 [&>option]:bg-white dark:[&>option]:bg-white"
+                  disabled={currentSubjects.length === 0}
                 >
-                  {currentSubjects.map(s => <option key={s} value={s}>{s}</option>)}
+                  {currentSubjects.length === 0 ? (
+                    <option value="">No subjects assigned</option>
+                  ) : (
+                    currentSubjects.map(s => <option key={s} value={s}>{s}</option>)
+                  )}
                 </select>
               </div>
               <div className="md:col-span-2">

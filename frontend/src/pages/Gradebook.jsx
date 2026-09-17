@@ -7,7 +7,7 @@ import { appState } from '../lib/appState';
 import { useClassConfig } from '../context/ClassConfigContext';
 import { useActivity } from '../context/ActivityContext';
 
-
+import { getAssignedSubjectsForClassSection } from '../lib/subjectUtils';
 
 export function Gradebook() {
   const [selectedClass, setSelectedClass] = useState('All');
@@ -26,14 +26,7 @@ export function Gradebook() {
     return () => clearActivityContext();
   }, [selectedClass, selectedSection, setActivityContext, clearActivityContext]);
   
-  let currentSubjects = [];
-  if (selectedClass === 'All') {
-    currentSubjects = [...new Set(classConfigs.flatMap(c => c.subjects))];
-  } else if (selectedSection === 'All') {
-    currentSubjects = [...new Set(classConfigs.filter(c => c.standard === selectedClass).flatMap(c => c.subjects))];
-  } else {
-    currentSubjects = classConfigs.find(c => c.standard === selectedClass && c.section === selectedSection)?.subjects || [];
-  }
+  const currentSubjects = getAssignedSubjectsForClassSection(dbUser, classConfigs, selectedClass, selectedSection, false);
   
   // Compute available standards and sections based on user role
   let availableStandards = [];
