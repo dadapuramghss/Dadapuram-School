@@ -227,6 +227,28 @@ export const api = {
   deleteClassConfig: (id) => fetchWithAuth(`/classes/${id}`, {
     method: 'DELETE'
   }),
+
+  // Timetable
+  getTimetable: (params) => {
+    const query = new URLSearchParams(params || {}).toString();
+    return fetchWithAuth(`/timetable?${query}`);
+  },
+  generateTimetable: (data) => fetchWithAuth('/timetable/generate', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+  validateTimetableChange: (data) => fetchWithAuth('/timetable/validate', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+  updateTimetableSlot: (id, data) => fetchWithAuth(`/timetable/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }),
+  publishTimetable: (data) => fetchWithAuth('/timetable/publish', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
 };
 
 export default api;

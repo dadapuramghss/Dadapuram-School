@@ -81,6 +81,9 @@ const RootRoute = () => {
   return <Navigate to="/teacher" replace />;
 };
 
+import { AdminTimetable } from './pages/AdminTimetable';
+import { TeacherTimetable } from './pages/TeacherTimetable';
+
 function AppRoutes() {
   return (
     <Routes>
@@ -106,6 +109,7 @@ function AppRoutes() {
         <Route path="profile" element={<Profile />} />
         <Route path="ai" element={<AiDashboard />} />
         <Route path="attendance" element={<Attendance />} />
+        <Route path="timetable" element={<TeacherTimetable />} />
         <Route path="developer-profile" element={<DeveloperProfile />} />
       </Route>
 
@@ -131,6 +135,7 @@ function AppRoutes() {
         <Route path="storage" element={<AdminStorage />} />
         <Route path="ai" element={<AiDashboard />} />
         <Route path="attendance" element={<Attendance />} />
+        <Route path="timetable" element={<AdminTimetable />} />
         <Route path="feedback" element={<StudentFeedback />} />
         <Route path="developer-profile" element={<DeveloperProfile />} />
       </Route>

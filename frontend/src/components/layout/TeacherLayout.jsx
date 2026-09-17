@@ -61,6 +61,7 @@ export function TeacherLayout() {
     { name: 'Circulars', path: '/teacher/circulars', exact: false, icon: MessageSquare },
     { name: 'Certificates', path: '/teacher/certificates', exact: false, icon: FileText },
     { name: 'Attendance', path: '/teacher/attendance', exact: false, icon: CalendarCheck },
+    { name: 'Timetable', path: '/teacher/timetable', exact: false, icon: CalendarCheck },
     { name: 'AI Analyst', path: '/teacher/ai', exact: false, icon: Bot },
   ].sort((a, b) => {
     if (a.name === 'Dashboard') return -1;

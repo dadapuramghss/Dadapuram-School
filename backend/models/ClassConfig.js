@@ -14,7 +14,32 @@ const classConfigSchema = new mongoose.Schema({
   subjects: [{
     type: String,
     trim: true
-  }]
+  }],
+  timetableConfig: {
+    workingDays: {
+      type: [String],
+      default: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    },
+    periodsPerDay: {
+      type: Number,
+      default: 8
+    },
+    periodTimings: [{
+      period: Number,
+      startTime: String,
+      endTime: String
+    }],
+    subjectFrequencies: [{
+      subjectId: String,
+      subjectName: String,
+      weeklyPeriods: Number,
+      type: {
+        type: String,
+        enum: ['subject', 'pt', 'art', 'activity', 'free'],
+        default: 'subject'
+      }
+    }]
+  }
 }, {
   timestamps: true
 });

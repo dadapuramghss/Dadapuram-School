@@ -65,6 +65,10 @@ const userSchema = new mongoose.Schema({
       type: String,
       enum: ['view', 'full'],
       default: 'full'
+    },
+    isClassTeacher: {
+      type: Boolean,
+      default: false
     }
   }]
 }, { timestamps: true });

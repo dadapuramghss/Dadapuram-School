@@ -22,6 +22,7 @@ const materialRoutes = require('./routes/materialRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const timetableRoutes = require('./routes/timetableRoutes');
 
 const http = require('http');
 const { Server } = require('socket.io');
@@ -67,6 +68,7 @@ app.use('/api/materials', materialRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/timetable', timetableRoutes);
 
 // Base route
 app.get('/', (req, res) => {

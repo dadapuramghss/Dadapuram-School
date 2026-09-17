@@ -15,7 +15,7 @@ export function AdminUsers() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [assignedClasses, setAssignedClasses] = useState([]);
-  const [newClass, setNewClass] = useState({ standard: '6', section: 'A', subject: '', accessLevel: 'full' });
+  const [newClass, setNewClass] = useState({ standard: '6', section: 'A', subject: '', accessLevel: 'full', isClassTeacher: false });
   const [editingAssignmentIndex, setEditingAssignmentIndex] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -83,6 +83,28 @@ export function AdminUsers() {
       return;
     }
 
+    if (newClass.isClassTeacher) {
+      // Check if this teacher is already class teacher for another class
+      const otherClassTeacherIndex = assignedClasses.findIndex(
+        (c, idx) => idx !== editingAssignmentIndex && c.isClassTeacher
+      );
+      if (otherClassTeacherIndex >= 0) {
+        alert("This teacher is already a Class Teacher for another class.");
+        return;
+      }
+
+      // Check if another teacher is already class teacher for this std+sec
+      const existingClassTeacherUser = users.find(u => 
+        u.uid !== selectedUser.uid && 
+        u.assignedClasses?.some(ac => ac.isClassTeacher && ac.standard === newClass.standard && ac.section === newClass.section)
+      );
+
+      if (existingClassTeacherUser) {
+        alert(`${newClass.standard}-${newClass.section} already has a Class Teacher (${existingClassTeacherUser.name}).`);
+        return;
+      }
+    }
+
     if (editingAssignmentIndex !== null) {
       // Update existing assignment at editing index
       const updatedClasses = [...assignedClasses];
@@ -95,7 +117,7 @@ export function AdminUsers() {
     }
 
     // Reset form to default Add mode but keep class/section selected for speed
-    setNewClass({ standard: newClass.standard, section: newClass.section, subject: '', accessLevel: 'full' });
+    setNewClass({ standard: newClass.standard, section: newClass.section, subject: '', accessLevel: 'full', isClassTeacher: false });
   };
 
   const startEditAssignment = (index) => {
@@ -105,7 +127,7 @@ export function AdminUsers() {
 
   const cancelEdit = () => {
     setEditingAssignmentIndex(null);
-    setNewClass({ standard: newClass.standard, section: newClass.section, subject: '', accessLevel: 'full' });
+    setNewClass({ standard: newClass.standard, section: newClass.section, subject: '', accessLevel: 'full', isClassTeacher: false });
   };
 
   const removeClass = (index) => {
@@ -447,7 +469,8 @@ export function AdminUsers() {
                         ...newClass, 
                         standard: newStandard,
                         section: validSections.includes(newClass.section) ? newClass.section : (validSections[0] || ''),
-                        subject: ''
+                        subject: '',
+                        isClassTeacher: false
                       });
                     }}
                     className="w-full bg-white border border-gray-200 rounded-lg p-2 text-gray-900 [&>option]:bg-white"
@@ -491,6 +514,17 @@ export function AdminUsers() {
                     <option value="view">View Only</option>
                   </select>
                 </div>
+                <div className="flex-1 space-y-1 flex items-center h-full pb-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                    <input 
+                      type="checkbox"
+                      checked={newClass.isClassTeacher || false}
+                      onChange={(e) => setNewClass({...newClass, isClassTeacher: e.target.checked})}
+                      className="w-4 h-4 text-adminSidebar rounded border-gray-300 focus:ring-adminSidebar"
+                    />
+                    Is Class Teacher
+                  </label>
+                </div>
                 <div className="flex items-center gap-2">
                   <NeonButton onClick={saveAssignment} variant="secondary" className="h-[42px] px-4 whitespace-nowrap">
                     {editingAssignmentIndex !== null ? 'Update' : 'Add'}
@@ -511,7 +545,7 @@ export function AdminUsers() {
                   <div className="flex flex-wrap gap-2">
                     {assignedClasses.map((cls, idx) => (
                       <div key={idx} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border ${cls.accessLevel === 'view' ? 'bg-adminAccent2/10 text-adminAccent2 border-adminAccent2/20' : 'bg-adminSidebar/10 text-adminSidebar border-adminSidebar/20'}`}>
-                        {cls.standard}-{cls.section} • {cls.subject || 'All Subjects'} ({cls.accessLevel === 'view' ? 'View' : 'Full'})
+                        {cls.standard}-{cls.section} • {cls.subject || 'All Subjects'} ({cls.accessLevel === 'view' ? 'View' : 'Full'}) {cls.isClassTeacher ? '• Class Teacher' : ''}
                         <button onClick={() => startEditAssignment(idx)} className="hover:text-blue-600 transition-colors ml-1" title="Edit">
                           ✎
                         </button>
