@@ -263,7 +263,7 @@ export function Students() {
             onChange={(e) => { setListStandard(e.target.value); setListSection('All'); }}
             className="glass-input w-full dark:!text-gray-900 [&>option]:bg-white dark:[&>option]:bg-white dark:[&>option]:text-gray-900"
           >
-            <option value="All">All Standards (Whole School)</option>
+            <option value="All">All Standards</option>
             {availableStandards.map(std => (
               <option key={std} value={std}>Standard {std}</option>
             ))}

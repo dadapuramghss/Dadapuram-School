@@ -406,7 +406,7 @@ export function Attendance() {
             className="w-full px-3 py-2 border rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-[#4C677C] disabled:opacity-50"
           >
             <option value="">Select</option>
-            {activeTab === 'monthly' && <option value="All">All Standards (Whole School)</option>}
+            {activeTab === 'monthly' && <option value="All">All Standards</option>}
             {standards.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>

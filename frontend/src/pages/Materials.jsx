@@ -187,7 +187,7 @@ export function Materials() {
               }}
               className="glass-input w-full font-bold text-[#2E1C40] dark:!text-gray-900 bg-white dark:bg-transparent shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/30 focus:ring-[#62D4CA] [&>option]:bg-white dark:[&>option]:bg-white"
             >
-              <option value="All">All Standards (Whole School)</option>
+              <option value="All">All Standards</option>
               {availableStandards.map(std => (
                 <option key={std} value={std}>Standard {std}</option>
               ))}
