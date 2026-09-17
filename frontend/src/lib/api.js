@@ -40,9 +40,12 @@ async function fetchWithAuth(endpoint, options = {}) {
         window.location.href = '/login?error=' + encodeURIComponent(errorData.error);
       }
 
-      const err = new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      const err = new Error(errorData.error || errorData.message || `HTTP error! status: ${response.status}`);
       if (errorData.validationErrors) {
         err.validationErrors = errorData.validationErrors;
+      }
+      if (errorData.errors) {
+        err.errors = errorData.errors;
       }
       throw err;
     }
