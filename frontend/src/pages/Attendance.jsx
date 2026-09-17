@@ -164,7 +164,52 @@ export function Attendance() {
     try {
       const attRes = await api.getAttendanceRangeReport(fromDate, toDate, standard, section, percentageCondition, percentageValue);
       if (attRes.success) {
-        setMonthlyData(attRes.students || []);
+        let studentsData = attRes.students || [];
+
+        const getGenderVal = (g) => {
+          if (!g) return 3;
+          const gl = g.toLowerCase();
+          if (gl === 'male') return 1;
+          if (gl === 'female') return 2;
+          return 3;
+        };
+
+        studentsData.sort((a, b) => {
+          // 1. Standard numeric
+          const numA = Number(a.standard);
+          const numB = Number(b.standard);
+          
+          if (!isNaN(numA) && !isNaN(numB)) {
+            if (numA !== numB) return numA - numB;
+          } else {
+            const strA = String(a.standard || '');
+            const strB = String(b.standard || '');
+            if (strA !== strB) return strA.localeCompare(strB);
+          }
+
+          // 2. Section natural alphanumeric
+          const secA = String(a.section || '');
+          const secB = String(b.section || '');
+          const secCmp = secA.localeCompare(secB, undefined, { numeric: true, sensitivity: 'base' });
+          if (secCmp !== 0) return secCmp;
+
+          // 3. Gender
+          const gA = getGenderVal(a.gender);
+          const gB = getGenderVal(b.gender);
+          if (gA !== gB) return gA - gB;
+
+          // 4. Name case-insensitive A-Z
+          const nameA = String(a.name || '').toLowerCase();
+          const nameB = String(b.name || '').toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+
+        // Regenerate S.No sequentially after sorting
+        studentsData.forEach((student, index) => {
+          student.sno = index + 1;
+        });
+
+        setMonthlyData(studentsData);
         setRangeDates(attRes.dates || []);
         setMonthlySummary(attRes.summary || null);
       }

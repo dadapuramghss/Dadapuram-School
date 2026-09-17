@@ -593,25 +593,34 @@ export function DataSync() {
         if (Object.keys(studentsMap).length > 0 || !isAllMonths) {
           let exportData = Object.values(studentsMap);
           exportData.sort((a, b) => {
-            const parseClass = (c) => {
-              const num = parseInt(c, 10);
-              return isNaN(num) ? c : num;
-            };
-            const classA = parseClass(a.class);
-            const classB = parseClass(b.class);
-            if (classA !== classB) {
-              if (typeof classA === 'number' && typeof classB === 'number') {
-                return classA - classB;
-              }
-              return String(classA).localeCompare(String(classB));
-            }
-            if (a.sec !== b.sec) return (a.sec || '').localeCompare(b.sec || '');
+            // 1. Standard numeric
+            const numA = Number(a.class);
+            const numB = Number(b.class);
             
+            if (!isNaN(numA) && !isNaN(numB)) {
+              if (numA !== numB) return numA - numB;
+            } else {
+              const strA = String(a.class || '');
+              const strB = String(b.class || '');
+              if (strA !== strB) return strA.localeCompare(strB);
+            }
+
+            // 2. Section natural alphanumeric
+            const secA = String(a.sec || '');
+            const secB = String(b.sec || '');
+            const secCmp = secA.localeCompare(secB, undefined, { numeric: true, sensitivity: 'base' });
+            if (secCmp !== 0) return secCmp;
+
+            // 3. Gender
             const priority = { 'Male': 1, 'Female': 2, 'Other': 3 };
-            const pA = priority[a.sortGender] || 4;
-            const pB = priority[b.sortGender] || 4;
+            const pA = priority[a.sortGender] || 3;
+            const pB = priority[b.sortGender] || 3;
             if (pA !== pB) return pA - pB;
-            return (a.sortName || '').localeCompare(b.sortName || '', 'en', { sensitivity: 'base' });
+
+            // 4. Name case-insensitive A-Z
+            const nameA = String(a.sortName || '').toLowerCase();
+            const nameB = String(b.sortName || '').toLowerCase();
+            return nameA.localeCompare(nameB);
           });
 
           let sNo = 1;
