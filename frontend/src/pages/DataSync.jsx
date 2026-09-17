@@ -586,12 +586,23 @@ export function DataSync() {
         if (Object.keys(studentsMap).length > 0 || !isAllMonths) {
           let exportData = Object.values(studentsMap);
           exportData.sort((a, b) => {
-            if (a.class !== b.class) return String(a.class).localeCompare(String(b.class));
-            if (a.sec !== b.sec) return a.sec.localeCompare(b.sec);
+            const parseClass = (c) => {
+              const num = parseInt(c, 10);
+              return isNaN(num) ? c : num;
+            };
+            const classA = parseClass(a.class);
+            const classB = parseClass(b.class);
+            if (classA !== classB) {
+              if (typeof classA === 'number' && typeof classB === 'number') {
+                return classA - classB;
+              }
+              return String(classA).localeCompare(String(classB));
+            }
+            if (a.sec !== b.sec) return (a.sec || '').localeCompare(b.sec || '');
             
-            const priority = { 'Male': 1, 'Female': 2 };
-            const pA = priority[a.sortGender] || 3;
-            const pB = priority[b.sortGender] || 3;
+            const priority = { 'Male': 1, 'Female': 2, 'Other': 3 };
+            const pA = priority[a.sortGender] || 4;
+            const pB = priority[b.sortGender] || 4;
             if (pA !== pB) return pA - pB;
             return (a.sortName || '').localeCompare(b.sortName || '', 'en', { sensitivity: 'base' });
           });
@@ -661,9 +672,23 @@ export function DataSync() {
       }
       
       students.sort((a, b) => {
-        const priority = { 'Male': 1, 'Female': 2 };
-        const pA = priority[a.gender] || 3;
-        const pB = priority[b.gender] || 3;
+        const parseClass = (c) => {
+          const num = parseInt(c, 10);
+          return isNaN(num) ? c : num;
+        };
+        const classA = parseClass(a.standard);
+        const classB = parseClass(b.standard);
+        if (classA !== classB) {
+          if (typeof classA === 'number' && typeof classB === 'number') {
+            return classA - classB;
+          }
+          return String(classA).localeCompare(String(classB));
+        }
+        if (a.section !== b.section) return (a.section || '').localeCompare(b.section || '');
+        
+        const priority = { 'Male': 1, 'Female': 2, 'Other': 3 };
+        const pA = priority[a.gender] || 4;
+        const pB = priority[b.gender] || 4;
         if (pA !== pB) return pA - pB;
         return (a.name || '').localeCompare(b.name || '', 'en', { sensitivity: 'base' });
       });
