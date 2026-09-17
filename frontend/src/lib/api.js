@@ -47,6 +47,12 @@ async function fetchWithAuth(endpoint, options = {}) {
       if (errorData.errors) {
         err.errors = errorData.errors;
       }
+      if (errorData.code) {
+        err.code = errorData.code;
+      }
+      if (errorData.missingAssignments) {
+        err.missingAssignments = errorData.missingAssignments;
+      }
       throw err;
     }
 

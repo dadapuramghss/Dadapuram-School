@@ -79,6 +79,8 @@ export function AdminTimetable() {
       console.error('Failed to generate timetable', err);
       setSummary({
         error: err.message || 'Generation failed',
+        code: err.code,
+        missingAssignments: err.missingAssignments,
         details: err.validationErrors || err.errors || []
       });
     } finally {
@@ -276,24 +278,66 @@ export function AdminTimetable() {
       </div>
 
       {summary && (
-        <GlassCard className={`p-4 border-l-4 ${summary.error ? 'border-red-500 bg-red-50' : 'border-green-500 bg-green-50'}`}>
-          <h3 className={`font-bold flex items-center ${summary.error ? 'text-red-800' : 'text-green-800'}`}>
-            {summary.error ? <AlertTriangle className="w-5 h-5 mr-2" /> : <CheckCircle className="w-5 h-5 mr-2" />}
-            {summary.error ? 'Generation Failed' : 'Generation Complete'}
-          </h3>
-          {summary.error && <p className="text-red-700 mt-2">{summary.error}</p>}
-          {summary.details && summary.details.length > 0 && (
-            <ul className="list-disc ml-6 mt-2 text-red-600 text-sm">
-              {summary.details.map((d, i) => <li key={i}>{d}</li>)}
-            </ul>
+        <GlassCard className="p-6">
+          {summary.message && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <h3 className="font-semibold text-green-800 mb-2">Generation Successful</h3>
+              <p className="text-sm text-green-700">{summary.message}</p>
+              {summary.warnings && summary.warnings.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-green-200">
+                  <h4 className="text-sm font-medium text-amber-800 mb-1">Warnings ({summary.warnings.length}):</h4>
+                  <ul className="list-disc pl-5 text-sm text-amber-700 space-y-1">
+                    {summary.warnings.map((w, idx) => <li key={idx}>{w}</li>)}
+                  </ul>
+                </div>
+              )}
+            </div>
           )}
-          {summary.message && <p className="text-green-700 mt-2">{summary.message} ({summary.scheduleCount} slots created)</p>}
-          {summary.warnings && summary.warnings.length > 0 && (
-            <div className="mt-3 p-3 bg-yellow-50 rounded text-yellow-800 text-sm border border-yellow-200">
-              <h4 className="font-semibold mb-1">Warnings:</h4>
-              <ul className="list-disc ml-5">
-                {summary.warnings.map((w, i) => <li key={i}>{w}</li>)}
-              </ul>
+          
+          {summary.error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <h3 className="font-semibold text-red-800 mb-2">
+                {summary.code === 'MISSING_TEACHER_ASSIGNMENTS' ? 'Timetable Setup Incomplete' : 'Generation Failed'}
+              </h3>
+              
+              {summary.code === 'MISSING_TEACHER_ASSIGNMENTS' ? (
+                <div className="text-sm text-red-700">
+                  <p className="mb-3">{summary.missingAssignments?.length || 0} teacher assignments are missing.</p>
+                  <div className="max-h-60 overflow-y-auto border border-red-200 rounded mb-3">
+                    <table className="w-full text-left bg-white">
+                      <thead className="bg-red-100 sticky top-0">
+                        <tr>
+                          <th className="p-2 border-b border-red-200">Standard</th>
+                          <th className="p-2 border-b border-red-200">Section</th>
+                          <th className="p-2 border-b border-red-200">Subject</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {summary.missingAssignments?.map((ma, idx) => (
+                          <tr key={idx} className="border-b border-red-100">
+                            <td className="p-2">{ma.standard}</td>
+                            <td className="p-2">{ma.section}</td>
+                            <td className="p-2 font-medium">{ma.subject}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <button 
+                    onClick={() => window.location.href = '/admin/users'}
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    Go to User Management
+                  </button>
+                </div>
+              ) : (
+                <ul className="list-disc pl-5 text-sm text-red-700 space-y-1">
+                  <li>{summary.error}</li>
+                  {summary.details && summary.details.map((errDetail, idx) => (
+                    <li key={idx}>{errDetail}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
         </GlassCard>

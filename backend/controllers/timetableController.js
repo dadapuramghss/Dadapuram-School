@@ -12,6 +12,7 @@ class TimetableGenerator {
     this.schedule = [];
     this.errors = [];
     this.warnings = [];
+    this.missingAssignments = [];
     
     // Quick lookups
     this.teacherSchedules = {}; // teacherId -> { day: { period: count } }
@@ -121,20 +122,36 @@ class TimetableGenerator {
       }
 
       for (const req of (targetFrequencies || [])) {
+        const targetStd = String(std).trim().toLowerCase();
+        const targetSec = String(sec).trim().toLowerCase();
+        const targetSubj = String(req.subjectName).trim().toLowerCase();
+
         // Find teacher for this subject in this class
         const matchingTeachers = this.teachers.filter(t => 
-          t.assignedClasses && t.assignedClasses.some(ac => 
-            ac.standard === std && ac.section === sec && ac.subject === req.subjectName
-          )
+          t.assignedClasses && t.assignedClasses.some(ac => {
+            if (String(ac.standard).trim().toLowerCase() !== targetStd) return false;
+            if (String(ac.section).trim().toLowerCase() !== targetSec) return false;
+            
+            // All Subjects check (null or empty)
+            if (!ac.subject || String(ac.subject).trim() === '') return true;
+            
+            // Specific subject check
+            return String(ac.subject).trim().toLowerCase() === targetSubj;
+          })
         );
 
         if (matchingTeachers.length === 0) {
-          this.errors.push(`Teacher not assigned: ${std}-${sec} → ${req.subjectName}`);
+          this.missingAssignments.push({
+            standard: std,
+            section: sec,
+            subject: req.subjectName
+          });
         } else if (matchingTeachers.length > 1) {
-          this.warnings.push(`Multiple teachers assigned for ${std}-${sec} → ${req.subjectName}. Using first one.`);
+          // If multiple match, we can't safely resolve ambiguity, fail generation for safety as requested
+          this.errors.push(`Ambiguous teacher assignment: Multiple teachers found for ${std}-${sec} → ${req.subjectName}. Please assign only one authorized teacher.`);
         }
 
-        if (matchingTeachers.length > 0) {
+        if (matchingTeachers.length === 1) {
           subjectReqs.push({
             subjectName: req.subjectName,
             subjectId: req.subjectId || req.subjectName,
@@ -152,6 +169,10 @@ class TimetableGenerator {
         subjects: subjectReqs,
         classTeacher: classTeachers[key]
       });
+    }
+
+    if (this.missingAssignments.length > 0) {
+      return { success: false, code: 'MISSING_TEACHER_ASSIGNMENTS', missingAssignments: this.missingAssignments };
     }
 
     if (this.errors.length > 0) return { success: false, errors: this.errors };
@@ -379,6 +400,13 @@ exports.generateTimetable = async (req, res) => {
     const result = await generator.run();
 
     if (!result.success) {
+      if (result.code === 'MISSING_TEACHER_ASSIGNMENTS') {
+        return res.status(400).json({ 
+          error: 'Timetable setup incomplete', 
+          code: 'MISSING_TEACHER_ASSIGNMENTS', 
+          missingAssignments: result.missingAssignments 
+        });
+      }
       return res.status(400).json({ message: 'Generation failed due to conflicts', errors: result.errors });
     }
 
