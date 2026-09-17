@@ -81,6 +81,7 @@ export function AdminTimetable() {
         error: err.message || 'Generation failed',
         code: err.code,
         missingAssignments: err.missingAssignments,
+        ambiguousAssignments: err.ambiguousAssignments,
         details: err.validationErrors || err.errors || []
       });
     } finally {
@@ -302,24 +303,43 @@ export function AdminTimetable() {
               
               {summary.code === 'MISSING_TEACHER_ASSIGNMENTS' ? (
                 <div className="text-sm text-red-700">
-                  <p className="mb-3">{summary.missingAssignments?.length || 0} teacher assignments are missing.</p>
-                  <div className="max-h-60 overflow-y-auto border border-red-200 rounded mb-3">
+                  <p className="mb-3">
+                    {(summary.missingAssignments?.length || 0) + (summary.ambiguousAssignments?.length || 0)} teacher assignments require attention.
+                  </p>
+                  <div className="max-h-[400px] overflow-y-auto border border-red-200 rounded mb-3">
                     <table className="w-full text-left bg-white">
-                      <thead className="bg-red-100 sticky top-0">
-                        <tr>
-                          <th className="p-2 border-b border-red-200">Standard</th>
-                          <th className="p-2 border-b border-red-200">Section</th>
-                          <th className="p-2 border-b border-red-200">Subject</th>
+                    <thead className="bg-red-100 sticky top-0">
+                      <tr>
+                        <th className="p-2 border-b border-red-200">Standard</th>
+                        <th className="p-2 border-b border-red-200">Section</th>
+                        <th className="p-2 border-b border-red-200">Subject</th>
+                        <th className="p-2 border-b border-red-200">Problem</th>
+                        <th className="p-2 border-b border-red-200">Details</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {summary.ambiguousAssignments?.map((aa, idx) => (
+                        <tr key={`amb-${idx}`} className="border-b border-red-100 bg-orange-50">
+                          <td className="p-2">{aa.standard}</td>
+                          <td className="p-2">{aa.section}</td>
+                          <td className="p-2 font-medium">{aa.subject}</td>
+                          <td className="p-2 font-medium text-orange-700">
+                            {aa.reason === 'AMBIGUOUS_EXACT_SUBJECT_ASSIGNMENT' ? 'Multiple exact teachers' : 'Multiple All Subjects teachers'}
+                          </td>
+                          <td className="p-2 text-xs">
+                            {aa.teachers.map(t => t.name).join(', ')}
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {summary.missingAssignments?.map((ma, idx) => (
-                          <tr key={idx} className="border-b border-red-100">
-                            <td className="p-2">{ma.standard}</td>
-                            <td className="p-2">{ma.section}</td>
-                            <td className="p-2 font-medium">{ma.subject}</td>
-                          </tr>
-                        ))}
+                      ))}
+                      {summary.missingAssignments?.map((ma, idx) => (
+                        <tr key={`miss-${idx}`} className="border-b border-red-100">
+                          <td className="p-2">{ma.standard}</td>
+                          <td className="p-2">{ma.section}</td>
+                          <td className="p-2 font-medium">{ma.subject}</td>
+                          <td className="p-2 text-red-600">Missing teacher</td>
+                          <td className="p-2 text-xs text-gray-500">-</td>
+                        </tr>
+                      ))}
                       </tbody>
                     </table>
                   </div>

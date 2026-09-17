@@ -53,6 +53,9 @@ async function fetchWithAuth(endpoint, options = {}) {
       if (errorData.missingAssignments) {
         err.missingAssignments = errorData.missingAssignments;
       }
+      if (errorData.ambiguousAssignments) {
+        err.ambiguousAssignments = errorData.ambiguousAssignments;
+      }
       throw err;
     }
 

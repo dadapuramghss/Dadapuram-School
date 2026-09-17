@@ -79,7 +79,29 @@ export function AdminUsers() {
     );
     
     if (duplicateIndex >= 0) {
-      alert("This assignment already exists.");
+      alert("This assignment already exists for this user.");
+      return;
+    }
+
+    // Cross-teacher duplicate validation
+    const targetStd = String(newClass.standard).trim().toLowerCase();
+    const targetSec = String(newClass.section).trim().toLowerCase();
+    const targetSubj = newClass.subject ? String(newClass.subject).trim().toLowerCase() : '';
+
+    const otherTeacherWithSame = users.find(u => {
+      if (u.uid === selectedUser.uid) return false;
+      return u.assignedClasses?.some(ac => {
+        if (String(ac.standard).trim().toLowerCase() !== targetStd) return false;
+        if (String(ac.section).trim().toLowerCase() !== targetSec) return false;
+        const acSubj = ac.subject ? String(ac.subject).trim().toLowerCase() : '';
+        if (targetSubj === '' && acSubj === '') return true; // Both All Subjects
+        if (targetSubj !== '' && acSubj === targetSubj) return true; // Both Exact Subject
+        return false;
+      });
+    });
+
+    if (otherTeacherWithSame) {
+      alert(`Duplicate assignment: ${otherTeacherWithSame.name} already has ${newClass.subject || 'All Subjects'} for ${newClass.standard}-${newClass.section}.`);
       return;
     }
 
@@ -217,7 +239,7 @@ export function AdminUsers() {
       closeModal();
     } catch (err) {
       console.error('Failed to update user', err);
-      alert('Failed to update user');
+      alert(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to update user');
     } finally {
       setIsProcessing(false);
     }
@@ -543,8 +565,27 @@ export function AdminUsers() {
                   <p className="text-sm text-gray-400 italic">No classes assigned yet.</p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
-                    {assignedClasses.map((cls, idx) => (
-                      <div key={idx} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border ${cls.accessLevel === 'view' ? 'bg-adminAccent2/10 text-adminAccent2 border-adminAccent2/20' : 'bg-adminSidebar/10 text-adminSidebar border-adminSidebar/20'}`}>
+                    {assignedClasses.map((cls, idx) => {
+                      // Check if a class is duplicated elsewhere
+                      const targetStd = String(cls.standard).trim().toLowerCase();
+                      const targetSec = String(cls.section).trim().toLowerCase();
+                      const targetSubj = cls.subject ? String(cls.subject).trim().toLowerCase() : '';
+                      const conflictingTeacher = users.find(u => {
+                        if (u.uid === selectedUser.uid) return false;
+                        return u.assignedClasses?.some(ac => {
+                          if (String(ac.standard).trim().toLowerCase() !== targetStd) return false;
+                          if (String(ac.section).trim().toLowerCase() !== targetSec) return false;
+                          const acSubj = ac.subject ? String(ac.subject).trim().toLowerCase() : '';
+                          if (targetSubj === '' && acSubj === '') return true;
+                          if (targetSubj !== '' && acSubj === targetSubj) return true;
+                          return false;
+                        });
+                      });
+                      const warning = conflictingTeacher ? `Warning: ${conflictingTeacher.name} also has this assignment.` : null;
+                      
+                      return (
+                      <div key={idx} title={warning || ''} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border ${warning ? 'bg-orange-50 text-orange-800 border-orange-300' : cls.accessLevel === 'view' ? 'bg-adminAccent2/10 text-adminAccent2 border-adminAccent2/20' : 'bg-adminSidebar/10 text-adminSidebar border-adminSidebar/20'}`}>
+                        {warning && <span title={warning} className="text-orange-500 font-bold cursor-help">⚠️</span>}
                         {cls.standard}-{cls.section} • {cls.subject || 'All Subjects'} ({cls.accessLevel === 'view' ? 'View' : 'Full'}) {cls.isClassTeacher ? '• Class Teacher' : ''}
                         <button onClick={() => startEditAssignment(idx)} className="hover:text-blue-600 transition-colors ml-1" title="Edit">
                           ✎
@@ -553,7 +594,7 @@ export function AdminUsers() {
                           &times;
                         </button>
                       </div>
-                    ))}
+                    )})}
                   </div>
                 )}
               </div>

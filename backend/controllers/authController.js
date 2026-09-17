@@ -175,6 +175,12 @@ exports.approveUser = async (req, res) => {
       const validatedClasses = [];
       const uniqueMap = new Map();
       
+      const allOtherTeachers = await User.find({ 
+        role: 'teacher', 
+        uid: { $ne: targetUid },
+        assignedClasses: { $exists: true, $not: {$size: 0} }
+      }).lean();
+
       for (const c of assignedClasses) {
         if (!c.standard || !c.section) {
           return res.status(400).json({ message: 'Standard and section are required for each assignment.' });
@@ -192,6 +198,31 @@ exports.approveUser = async (req, res) => {
           }
         }
         
+        const targetStd = String(c.standard).trim().toLowerCase();
+        const targetSec = String(c.section).trim().toLowerCase();
+        const targetSubj = subject ? String(subject).trim().toLowerCase() : '';
+
+        // Check for cross-teacher duplicates
+        for (const otherTeacher of allOtherTeachers) {
+          for (const ac of otherTeacher.assignedClasses || []) {
+            if (String(ac.standard).trim().toLowerCase() !== targetStd) continue;
+            if (String(ac.section).trim().toLowerCase() !== targetSec) continue;
+
+            const acSubj = ac.subject ? String(ac.subject).trim().toLowerCase() : '';
+            
+            if (targetSubj === '' && acSubj === '') {
+              return res.status(400).json({ 
+                error: `Duplicate teacher assignment: ${otherTeacher.name} already has All Subjects for ${c.standard}-${c.section}.`,
+                code: 'DUPLICATE_ALL_SUBJECT_ASSIGNMENT'
+              });
+            } else if (targetSubj !== '' && acSubj === targetSubj) {
+              return res.status(400).json({ 
+                error: `Duplicate teacher assignment: ${otherTeacher.name} already has ${subject} for ${c.standard}-${c.section}.`,
+                code: 'DUPLICATE_SUBJECT_ASSIGNMENT'
+              });
+            }
+          }
+        }
         const key = `${c.standard}-${c.section}-${subject || 'ALL'}`;
         if (!uniqueMap.has(key)) {
           uniqueMap.set(key, { ...c, subject });
