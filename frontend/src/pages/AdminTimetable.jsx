@@ -16,8 +16,9 @@ export function AdminTimetable() {
   
   const { classConfigs } = useClassConfig();
   const [viewMode, setViewMode] = useState('class'); // class, teacher
-  const [selectedStandard, setSelectedStandard] = useState('');
-  const [selectedSection, setSelectedSection] = useState('');
+  const [selectedStandard, setSelectedStandard] = useState('All');
+  const [selectedSection, setSelectedSection] = useState('All');
+  const [selectedStatus, setSelectedStatus] = useState('published');
   const [selectedTeacher, setSelectedTeacher] = useState('');
   const [teachers, setTeachers] = useState([]);
 
@@ -28,17 +29,11 @@ export function AdminTimetable() {
 
   useEffect(() => {
     fetchTeachers();
-    fetchTimetable();
-  }, [academicYear]);
+  }, []);
 
   useEffect(() => {
-    if (classConfigs.length > 0 && !selectedStandard) {
-      const standards = [...new Set(classConfigs.map(c => c.standard))].sort();
-      setSelectedStandard(standards[0] || '');
-      const sections = classConfigs.filter(c => c.standard === standards[0]).map(c => c.section).sort();
-      setSelectedSection(sections[0] || '');
-    }
-  }, [classConfigs]);
+    fetchTimetable();
+  }, [academicYear, selectedStandard, selectedSection, selectedStatus]);
 
   const fetchTeachers = async () => {
     try {
@@ -54,7 +49,11 @@ export function AdminTimetable() {
   const fetchTimetable = async () => {
     setLoading(true);
     try {
-      const res = await api.getTimetable({ academicYear });
+      const query = { academicYear };
+      if (selectedStandard !== 'All') query.standard = selectedStandard;
+      if (selectedSection !== 'All') query.section = selectedSection;
+      
+      const res = await api.getTimetable(query);
       setTimetable(res || []);
     } catch (err) {
       console.error('Failed to fetch timetable', err);
@@ -74,6 +73,7 @@ export function AdminTimetable() {
         warnings: res.warnings || [],
         scheduleCount: res.scheduleCount
       });
+      setSelectedStatus('draft'); // Switch to draft view so user can see it
       fetchTimetable();
     } catch (err) {
       console.error('Failed to generate timetable', err);
@@ -91,6 +91,7 @@ export function AdminTimetable() {
     try {
       await api.publishTimetable({ academicYear });
       alert('Timetable published successfully!');
+      setSelectedStatus('published'); // Switch to published view so user can see it
       fetchTimetable();
     } catch (err) {
       alert('Failed to publish: ' + err.message);
@@ -113,56 +114,133 @@ export function AdminTimetable() {
 
   // Render Grid
   const renderGrid = () => {
-    if (timetable.length === 0) {
-      return <div className="p-8 text-center text-gray-500">No timetable generated for this academic year yet.</div>;
+    // Filter the timetable by the selected status
+    const visibleTimetable = timetable.filter(t => t.status === selectedStatus);
+
+    if (visibleTimetable.length === 0) {
+      const msg = (selectedStandard === 'All' && selectedSection === 'All') 
+        ? `No ${selectedStatus} timetable generated for any class for this academic year.`
+        : `No ${selectedStatus} timetable generated for this class and section for this academic year.`;
+      return <div className="p-8 text-center text-gray-500">{msg}</div>;
     }
 
-    // Default to 8 periods
     const periods = [1, 2, 3, 4, 5, 6, 7, 8];
     const days = DEFAULT_WORKING_DAYS;
 
-    return (
-      <div className="overflow-x-auto mt-6 border border-gray-200 rounded-xl">
-        <table className="w-full text-center border-collapse">
-          <thead className="bg-gray-50 text-gray-700">
-            <tr>
-              <th className="p-3 border-b border-r font-medium border-gray-200">Day / Period</th>
-              {periods.map(p => (
-                <th key={p} className="p-3 border-b border-r font-medium border-gray-200">P{p}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {days.map(day => (
-              <tr key={day} className="border-b border-gray-200 hover:bg-gray-50/50">
-                <td className="p-3 border-r font-medium text-gray-800 bg-gray-50/30">{day}</td>
-                {periods.map(p => {
-                  const cellData = getCellData(day, p);
-                  
-                  return (
-                    <td 
-                      key={p} 
-                      className={`p-2 border-r border-gray-200 transition-colors ${cellData ? 'cursor-pointer hover:bg-blue-50' : 'bg-gray-100/50'}`}
-                      onClick={() => handleCellClick(day, p, cellData)}
-                    >
-                      {cellData ? (
-                        <div className="flex flex-col text-sm h-full justify-center">
-                          <span className="font-semibold text-gray-900">{viewMode === 'teacher' ? `${cellData.standard}-${cellData.section}` : cellData.subjectName}</span>
-                          <span className="text-gray-500 text-xs mt-1">{viewMode === 'teacher' ? cellData.subjectName : cellData.teacherName}</span>
-                          {cellData.status === 'draft' && <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-orange-400" title="Draft"></span>}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 text-xs">FREE</span>
-                      )}
-                    </td>
-                  );
-                })}
+    if (viewMode === 'class') {
+      const groups = {};
+      visibleTimetable.forEach(t => {
+        const key = `${t.standard}-${t.section}`;
+        if (!groups[key]) groups[key] = { standard: t.standard, section: t.section, slots: [] };
+        groups[key].slots.push(t);
+      });
+      const groupKeys = Object.keys(groups);
+      
+      // Sort groupKeys numerically by standard, then section
+      groupKeys.sort((a, b) => {
+        const stdA = parseInt(groups[a].standard, 10);
+        const stdB = parseInt(groups[b].standard, 10);
+        if (stdA !== stdB) return stdA - stdB;
+        return groups[a].section.localeCompare(groups[b].section, undefined, { numeric: true });
+      });
+
+      return (
+        <div className="space-y-8 mt-6">
+          {groupKeys.map(key => {
+            const { standard, section, slots } = groups[key];
+            return (
+              <div key={key}>
+                <h3 className="text-lg font-bold text-gray-800 mb-3 uppercase tracking-wider">
+                  STD {standard} — SECTION {section}
+                </h3>
+                <div className="overflow-x-auto border border-gray-200 rounded-xl">
+                  <table className="w-full text-center border-collapse">
+                    <thead className="bg-gray-50 text-gray-700">
+                      <tr>
+                        <th className="p-3 border-b border-r font-medium border-gray-200">Day / Period</th>
+                        {periods.map(p => (
+                          <th key={p} className="p-3 border-b border-r font-medium border-gray-200">P{p}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {days.map(day => (
+                        <tr key={day} className="border-b border-gray-200 hover:bg-gray-50/50">
+                          <td className="p-3 border-r font-medium text-gray-800 bg-gray-50/30">{day}</td>
+                          {periods.map(p => {
+                            const cellData = slots.find(t => t.day === day && t.period === p);
+                            return (
+                              <td 
+                                key={p} 
+                                className={`p-2 border-r border-gray-200 transition-colors ${cellData ? 'cursor-pointer hover:bg-blue-50' : 'bg-gray-100/50'}`}
+                                onClick={() => handleCellClick(day, p, cellData)}
+                              >
+                                {cellData ? (
+                                  <div className="flex flex-col text-sm h-full justify-center relative">
+                                    <span className="font-semibold text-gray-900">{cellData.subjectName}</span>
+                                    <span className="text-gray-500 text-xs mt-1">{cellData.teacherName}</span>
+                                    {cellData.status === 'draft' && <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-orange-400" title="Draft"></span>}
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-400 text-xs">FREE</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    } else {
+      // Teacher View rendering (Single Table)
+      return (
+        <div className="overflow-x-auto mt-6 border border-gray-200 rounded-xl">
+          <table className="w-full text-center border-collapse">
+            <thead className="bg-gray-50 text-gray-700">
+              <tr>
+                <th className="p-3 border-b border-r font-medium border-gray-200">Day / Period</th>
+                {periods.map(p => (
+                  <th key={p} className="p-3 border-b border-r font-medium border-gray-200">P{p}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
+            </thead>
+            <tbody>
+              {days.map(day => (
+                <tr key={day} className="border-b border-gray-200 hover:bg-gray-50/50">
+                  <td className="p-3 border-r font-medium text-gray-800 bg-gray-50/30">{day}</td>
+                  {periods.map(p => {
+                    const cellData = visibleTimetable.find(t => t.day === day && t.period === p && t.teacherId === selectedTeacher);
+                    return (
+                      <td 
+                        key={p} 
+                        className={`p-2 border-r border-gray-200 transition-colors ${cellData ? 'cursor-pointer hover:bg-blue-50' : 'bg-gray-100/50'}`}
+                        onClick={() => handleCellClick(day, p, cellData)}
+                      >
+                        {cellData ? (
+                          <div className="flex flex-col text-sm h-full justify-center relative">
+                            <span className="font-semibold text-gray-900">{cellData.standard}-{cellData.section}</span>
+                            <span className="text-gray-500 text-xs mt-1">{cellData.subjectName}</span>
+                            {cellData.status === 'draft' && <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-orange-400" title="Draft"></span>}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-xs">FREE</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
   };
 
   const draftsCount = timetable.filter(t => t.status === 'draft').length;
@@ -246,23 +324,36 @@ export function AdminTimetable() {
                 value={selectedStandard}
                 onChange={e => {
                   setSelectedStandard(e.target.value);
-                  const sections = classConfigs.filter(c => c.standard === e.target.value).map(c => c.section).sort();
-                  setSelectedSection(sections[0] || '');
+                  setSelectedSection('All');
                 }}
                 className="border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-sm w-32"
               >
-                {[...new Set(classConfigs.map(c => c.standard))].sort().map(std => (
-                  <option key={std} value={std}>Std {std}</option>
+                <option value="All">All Classes</option>
+                {[...new Set(classConfigs.map(c => parseInt(c.standard, 10)))].sort((a,b) => a - b).map(std => (
+                  <option key={std} value={std.toString()}>Std {std}</option>
                 ))}
               </select>
               <select 
                 value={selectedSection}
                 onChange={e => setSelectedSection(e.target.value)}
-                className="border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-sm w-24"
+                className="border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-sm w-32"
               >
-                {classConfigs.filter(c => c.standard === selectedStandard).map(c => c.section).sort().map(sec => (
+                <option value="All">All Sections</option>
+                {[...new Set(classConfigs
+                  .filter(c => selectedStandard === 'All' || c.standard == selectedStandard)
+                  .map(c => c.section))]
+                  .sort((a,b) => a.localeCompare(b, undefined, {numeric: true}))
+                  .map(sec => (
                   <option key={sec} value={sec}>Sec {sec}</option>
                 ))}
+              </select>
+              <select 
+                value={selectedStatus}
+                onChange={e => setSelectedStatus(e.target.value)}
+                className="border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-sm w-32"
+              >
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
               </select>
             </div>
           ) : (
