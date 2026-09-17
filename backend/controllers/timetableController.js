@@ -207,7 +207,8 @@ class TimetableGenerator {
         for (const d of workingDays) {
           if (ctSubjReq.weeklyPeriods > 0) {
             if (this.checkTeacherConflict(ctSubjReq.teacherId, d, 1) || this.checkTeacherDailyLimit(ctSubjReq.teacherId, d)) {
-              return false; // Impossible
+              this.warnings.push(`Could not schedule Class Teacher for ${cls.standard}-${cls.section} on ${d} due to conflict.`);
+              continue;
             }
             grid[d][1] = { ...ctSubjReq };
             this.assignTeacherSlot(ctSubjReq.teacherId, d, 1);
@@ -254,15 +255,15 @@ class TimetableGenerator {
           }
         }
         if (!placed) {
-          console.log(`Failed to place language ${langName} on day ${d}`);
-          return false;
+          this.warnings.push(`Failed to place language ${langName} on day ${d}`);
+          continue;
         }
       }
       return true;
     };
 
-    if (!scheduleLanguage('Tamil')) return false;
-    if (!scheduleLanguage('English')) return false;
+    scheduleLanguage('Tamil');
+    scheduleLanguage('English');
 
     const scheduleSpecial = (typeStr) => {
       const req = remaining.find(r => r.type === typeStr);
@@ -289,8 +290,8 @@ class TimetableGenerator {
       return req.weeklyPeriods === 0;
     };
 
-    if (!scheduleSpecial('pt')) return false;
-    if (!scheduleSpecial('art')) return false;
+    scheduleSpecial('pt');
+    scheduleSpecial('art');
 
     // Priority 4: Remaining subjects (Greedy approach)
     // To prevent the same subject 3 times a day, we sort subjects by remaining periods
@@ -322,9 +323,9 @@ class TimetableGenerator {
       const msg = `Could not schedule all periods for ${cls.standard}-${cls.section}. Remaining: ${unsatisfied.map(u => u.subjectName + '('+u.weeklyPeriods+')').join(', ')}`;
       console.log(msg);
       this.warnings.push(msg);
-      // We don't return false here if we want partial generation, but prompt asks to not generate invalid.
-      // However, if it's literally impossible to fit, we fail.
-      return false; 
+      // We return true here to allow partial generation so valid slots are saved.
+      // The warnings will be shown to the user on the frontend.
+      return true; 
     }
 
     return true;
