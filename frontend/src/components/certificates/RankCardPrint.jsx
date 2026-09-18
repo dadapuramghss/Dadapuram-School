@@ -39,43 +39,51 @@ export const RankCardPrint = React.forwardRef(({ student, language = 'TAMIL' }, 
   let totalScore = 0;
 
   return (
-    <div ref={ref} className={`print-certificate p-12 bg-white text-black ${isEnglish ? 'font-sans' : 'font-serif'} hidden`}>
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-center mb-2 uppercase">{t.title}</h1>
-        <h2 className="text-xl font-bold text-center mb-8">{t.schoolName}</h2>
+    <div ref={ref} className={`print-certificate ${isEnglish ? 'font-sans' : 'font-serif'} hidden`}>
+      <div className="w-[210mm] min-h-[297mm] mx-auto bg-white border border-gray-300 p-10 box-border flex flex-col text-black">
+        {/* Header Alignment */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-center mb-2 uppercase">{t.title}</h1>
+          <h2 className="text-xl font-bold text-center mb-2 uppercase">{t.schoolName}</h2>
+        </div>
 
-        <div className="flex justify-between mb-8 text-lg border-b-2 border-black pb-4">
-          <div>
-            <p><span className="font-semibold">{t.name}:</span> {isEnglish ? student.name : (student.tamilName || student.name)}</p>
+        {/* Student Information - Two Column Grid */}
+        <div className="grid grid-cols-2 gap-4 text-lg w-full mb-4">
+          <div className="flex flex-col gap-1">
+            <p className="break-words whitespace-normal"><span className="font-semibold">{t.name}:</span> {isEnglish ? student.name : (student.tamilName || student.name)}</p>
             <p><span className="font-semibold">{t.classSection}:</span> {student.standard} - {student.section}</p>
           </div>
-          <div className="text-right">
+          <div className="flex flex-col gap-1 text-right">
             <p><span className="font-semibold">{t.emisNumber}:</span> {student.emisNumber || student.admissionNumber || '-'}</p>
             <p><span className="font-semibold">{t.dob}:</span> {student.dob ? student.dob.split('-').reverse().join('-') : '-'}</p>
           </div>
         </div>
 
+        {/* Horizontal Divider */}
+        <hr className="border-t-2 border-black w-full mb-6" />
+
+        {/* Examination Sections */}
         {terms.length === 0 ? (
-          <p className="text-center text-lg italic mt-10">{t.noMarks}</p>
+          <p className="text-center text-lg italic mt-10 flex-grow">{t.noMarks}</p>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-8 flex-grow">
             {terms.map((term, i) => {
               const termTotal = term.marks.reduce((acc, curr) => acc + curr.score, 0);
               totalScore += termTotal;
               return (
-                <div key={i} className="mb-6">
-                  <h3 className="text-lg font-bold mb-3 uppercase">{translateTerm(term.termName)} {t.examSuffix}</h3>
-                  <table className="w-full text-left border-collapse border border-black">
+                <div key={i} className="w-full">
+                  <h3 className="text-lg font-bold mb-3 uppercase text-left">{translateTerm(term.termName)} {t.examSuffix}</h3>
+                  <table className="w-full text-left border-collapse border border-black" style={{ tableLayout: 'fixed' }}>
                     <thead>
                       <tr className="bg-gray-100">
-                        <th className="border border-black p-2 w-2/3">{t.subject}</th>
-                        <th className="border border-black p-2 text-center w-1/3">{t.marksObtained}</th>
+                        <th className="border border-black p-2 w-[70%] text-left font-bold">{t.subject}</th>
+                        <th className="border border-black p-2 w-[30%] text-center font-bold">{t.marksObtained}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {term.marks.map((m, idx) => (
                         <tr key={idx}>
-                          <td className="border border-black p-2 font-medium">{m.subject}</td>
+                          <td className="border border-black p-2 text-left font-medium">{m.subject}</td>
                           <td className="border border-black p-2 text-center">{m.score}</td>
                         </tr>
                       ))}
@@ -93,7 +101,8 @@ export const RankCardPrint = React.forwardRef(({ student, language = 'TAMIL' }, 
           </div>
         )}
 
-        <div className="mt-16 flex justify-between items-end px-8 font-bold">
+        {/* Signatures */}
+        <div className="mt-16 flex justify-between items-end px-8 font-bold text-lg pt-10">
           <div className="text-center">
             {t.classTeacherSign}
           </div>
