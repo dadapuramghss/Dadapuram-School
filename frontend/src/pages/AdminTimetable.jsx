@@ -284,7 +284,7 @@ export function AdminTimetable() {
           </h1>
           <p className="text-gray-500 mt-1">Generate, edit, and publish school timetables</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3 w-full sm:w-auto">
           <select 
             value={academicYear} 
             onChange={e => setAcademicYear(e.target.value)}
@@ -474,15 +474,15 @@ export function AdminTimetable() {
 
       <GlassCard className="p-0 overflow-hidden">
         <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 flex gap-4 flex-wrap items-center">
-          <div className="flex bg-white rounded-lg border border-gray-200 p-1">
+          <div className="flex w-full sm:w-auto bg-white rounded-lg border border-gray-200 p-1">
             <button 
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'class' ? 'bg-adminSidebar text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+              className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${viewMode === 'class' ? 'bg-adminSidebar text-white' : 'text-gray-600 hover:bg-gray-100'}`}
               onClick={() => setViewMode('class')}
             >
               Class View
             </button>
             <button 
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'teacher' ? 'bg-adminSidebar text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+              className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${viewMode === 'teacher' ? 'bg-adminSidebar text-white' : 'text-gray-600 hover:bg-gray-100'}`}
               onClick={() => setViewMode('teacher')}
             >
               Teacher View
@@ -492,14 +492,14 @@ export function AdminTimetable() {
           <div className="w-px h-6 bg-gray-300 mx-2 hidden sm:block"></div>
 
           {viewMode === 'class' ? (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 w-full md:w-auto mt-2 md:mt-0">
               <select 
                 value={selectedStandard}
                 onChange={e => {
                   setSelectedStandard(e.target.value);
                   setSelectedSection('All');
                 }}
-                className="border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-sm w-32"
+                className="border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-sm flex-1 md:flex-none md:w-32"
               >
                 <option value="All">All Classes</option>
                 {[...new Set(classConfigs.map(c => parseInt(c.standard, 10)))].sort((a,b) => a - b).map(std => (
@@ -509,7 +509,7 @@ export function AdminTimetable() {
               <select 
                 value={selectedSection}
                 onChange={e => setSelectedSection(e.target.value)}
-                className="border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-sm w-32"
+                className="border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-sm flex-1 md:flex-none md:w-32"
               >
                 <option value="All">All Sections</option>
                 {[...new Set(classConfigs
@@ -523,7 +523,7 @@ export function AdminTimetable() {
               <select 
                 value={selectedStatus}
                 onChange={e => setSelectedStatus(e.target.value)}
-                className="border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-sm w-32"
+                className="border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-sm w-full sm:w-auto sm:flex-1 md:flex-none md:w-32"
               >
                 <option value="published">Published</option>
                 <option value="draft">Draft</option>

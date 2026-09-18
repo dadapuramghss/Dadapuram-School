@@ -264,10 +264,10 @@ export function AdminUsers() {
         </NeonButton>
       </div>
 
-      <div className="flex space-x-4 mb-6">
+      <div className="flex flex-wrap gap-2 sm:gap-4 mb-6">
         <button
           onClick={() => setActiveTab('pending')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
             activeTab === 'pending' 
               ? 'bg-adminSidebar text-white shadow-sm' 
               : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-900'
@@ -277,7 +277,7 @@ export function AdminUsers() {
         </button>
         <button
           onClick={() => setActiveTab('approved')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
             activeTab === 'approved' 
               ? 'bg-adminSidebar text-white shadow-sm' 
               : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-900'
@@ -287,7 +287,7 @@ export function AdminUsers() {
         </button>
         <button
           onClick={() => setActiveTab('activity')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
             activeTab === 'activity' 
               ? 'bg-adminSidebar text-white shadow-sm' 
               : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-900'
@@ -470,7 +470,7 @@ export function AdminUsers() {
       {/* Modal for Assigning Classes */}
       {isModalOpen && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <GlassCard className="w-full max-w-lg p-6 space-y-6">
+          <GlassCard className="w-full max-w-lg p-6 space-y-6 max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold text-gray-900">
               {selectedUser.status === 'pending' ? 'Approve & Assign Classes' : 'Edit Assigned Classes'}
             </h2>
@@ -479,8 +479,8 @@ export function AdminUsers() {
             </p>
 
             <div className="space-y-4">
-              <div className="flex gap-4 items-end">
-                <div className="flex-1 space-y-1">
+              <div className="flex flex-col md:flex-row flex-wrap gap-4 items-start md:items-end">
+                <div className="w-full md:flex-1 space-y-1">
                   <label className="text-sm text-gray-600">Class/Standard</label>
                   <select 
                     value={newClass.standard}
@@ -501,7 +501,7 @@ export function AdminUsers() {
                     {availableStandards.map(n => <option key={n} value={n.toString()}>Standard {n}</option>)}
                   </select>
                 </div>
-                <div className="flex-1 space-y-1">
+                <div className="w-full md:flex-1 space-y-1">
                   <label className="text-sm text-gray-600">Section</label>
                   <select 
                     value={newClass.section}
@@ -513,7 +513,7 @@ export function AdminUsers() {
                     {classConfigs.filter(c => c.standard === newClass.standard).map(c => c.section).sort().map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
-                <div className="flex-1 space-y-1">
+                <div className="w-full md:flex-1 space-y-1">
                   <label className="text-sm text-gray-600">Subject</label>
                   <select 
                     value={newClass.subject || ''}
@@ -525,7 +525,7 @@ export function AdminUsers() {
                     {(classConfigs.find(c => c.standard === newClass.standard && c.section === newClass.section)?.subjects || []).sort().map(sub => <option key={sub} value={sub}>{sub}</option>)}
                   </select>
                 </div>
-                <div className="flex-1 space-y-1">
+                <div className="w-full md:flex-1 space-y-1">
                   <label className="text-sm text-gray-600">Access Level</label>
                   <select 
                     value={newClass.accessLevel}
@@ -536,7 +536,7 @@ export function AdminUsers() {
                     <option value="view">View Only</option>
                   </select>
                 </div>
-                <div className="flex-1 space-y-1 flex items-center h-full pb-2">
+                <div className="w-full md:flex-1 space-y-1 flex items-center md:h-full md:pb-2">
                   <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
                     <input 
                       type="checkbox"

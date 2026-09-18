@@ -350,24 +350,24 @@ export function Attendance() {
           <h1 className="text-2xl font-bold text-[#2E1C40]">Attendance Register</h1>
           <p className="text-sm text-gray-500">Manage daily period-wise attendance</p>
         </div>
-        <div className="flex bg-white rounded-xl p-1 shadow-sm border border-gray-100 w-fit">
+        <div className="flex flex-wrap w-full md:w-fit bg-white rounded-xl p-1 shadow-sm border border-gray-100">
           <button
             onClick={() => setActiveTab('take')}
-            className={cn("px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors", activeTab === 'take' ? "bg-[#2E1C40] text-white" : "text-gray-500 hover:bg-gray-50")}
+            className={cn("flex-1 md:flex-none justify-center px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors whitespace-nowrap", activeTab === 'take' ? "bg-[#2E1C40] text-white" : "text-gray-500 hover:bg-gray-50")}
           >
-            <Edit3 className="w-4 h-4" /> Take Attendance
+            <Edit3 className="w-4 h-4 flex-shrink-0" /> Take Attendance
           </button>
           <button
             onClick={() => setActiveTab('summary')}
-            className={cn("px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors", activeTab === 'summary' ? "bg-[#2E1C40] text-white" : "text-gray-500 hover:bg-gray-50")}
+            className={cn("flex-1 md:flex-none justify-center px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors whitespace-nowrap", activeTab === 'summary' ? "bg-[#2E1C40] text-white" : "text-gray-500 hover:bg-gray-50")}
           >
-            <BarChart2 className="w-4 h-4" /> Summary Report
+            <BarChart2 className="w-4 h-4 flex-shrink-0" /> Summary Report
           </button>
           <button
             onClick={() => setActiveTab('monthly')}
-            className={cn("px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors", activeTab === 'monthly' ? "bg-[#2E1C40] text-white" : "text-gray-500 hover:bg-gray-50")}
+            className={cn("flex-1 md:flex-none justify-center px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors whitespace-nowrap", activeTab === 'monthly' ? "bg-[#2E1C40] text-white" : "text-gray-500 hover:bg-gray-50")}
           >
-            <Calendar className="w-4 h-4" /> Monthly Attendance
+            <Calendar className="w-4 h-4 flex-shrink-0" /> Monthly Attendance
           </button>
         </div>
       </div>
@@ -388,16 +388,16 @@ export function Attendance() {
 
       {/* Attendance Mode Toggle */}
       {activeTab === 'take' && (
-        <div className="flex bg-white rounded-xl p-1 shadow-sm border border-gray-100 w-fit">
+        <div className="flex flex-wrap w-full sm:w-fit bg-white rounded-xl p-1 shadow-sm border border-gray-100">
           <button
             onClick={() => { setAttendanceType('daily'); setStudents([]); setIsSubmitted(false); }}
-            className={cn("px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors", attendanceType === 'daily' ? "bg-adminSidebar text-white" : "text-gray-500 hover:bg-gray-50")}
+            className={cn("flex-1 sm:flex-none justify-center px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors whitespace-nowrap", attendanceType === 'daily' ? "bg-adminSidebar text-white" : "text-gray-500 hover:bg-gray-50")}
           >
             Daily Attendance
           </button>
           <button
             onClick={() => { setAttendanceType('period'); setStudents([]); setIsSubmitted(false); }}
-            className={cn("px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors", attendanceType === 'period' ? "bg-adminSidebar text-white" : "text-gray-500 hover:bg-gray-50")}
+            className={cn("flex-1 sm:flex-none justify-center px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors whitespace-nowrap", attendanceType === 'period' ? "bg-adminSidebar text-white" : "text-gray-500 hover:bg-gray-50")}
           >
             Period Attendance
           </button>
