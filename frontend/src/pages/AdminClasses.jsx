@@ -35,7 +35,7 @@ export function AdminClasses() {
       
       const tt = config.timetableConfig || {};
       setTimetableData({
-        workingDays: tt.workingDays?.length ? tt.workingDays : [...DEFAULT_WORKING_DAYS],
+        workingDays: tt.workingDays !== undefined ? tt.workingDays : [...DEFAULT_WORKING_DAYS],
         periodsPerDay: tt.periodsPerDay || 8,
         periodTimings: tt.periodTimings || [],
         subjectFrequencies: tt.subjectFrequencies || config.subjects.map(s => ({
@@ -137,11 +137,14 @@ export function AdminClasses() {
 
   const toggleDay = (day) => {
     const days = [...timetableData.workingDays];
+    let newDays;
     if (days.includes(day)) {
-      setTimetableData({ ...timetableData, workingDays: days.filter(d => d !== day) });
+      newDays = days.filter(d => d !== day);
     } else {
-      setTimetableData({ ...timetableData, workingDays: [...days, day] });
+      newDays = [...days, day];
     }
+    newDays.sort((a, b) => ALL_DAYS.indexOf(a) - ALL_DAYS.indexOf(b));
+    setTimetableData({ ...timetableData, workingDays: newDays });
   };
 
   const updateFreq = (index, field, value) => {

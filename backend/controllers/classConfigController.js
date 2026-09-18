@@ -14,7 +14,7 @@ exports.getAllConfigs = async (req, res) => {
 // Create a new class configuration (standard + section)
 exports.createConfig = async (req, res) => {
   try {
-    const { standard, section, subjects } = req.body;
+    const { standard, section, subjects, timetableConfig } = req.body;
     
     if (!standard || !section) {
       return res.status(400).json({ error: 'Standard and section are required' });
@@ -29,7 +29,8 @@ exports.createConfig = async (req, res) => {
     const newConfig = new ClassConfig({
       standard,
       section,
-      subjects: subjects || []
+      subjects: subjects || [],
+      ...(timetableConfig && { timetableConfig })
     });
 
     await newConfig.save();
@@ -44,14 +45,32 @@ exports.createConfig = async (req, res) => {
 exports.updateConfig = async (req, res) => {
   try {
     const { id } = req.params;
-    const { subjects } = req.body;
+    const { subjects, timetableConfig } = req.body;
 
     const config = await ClassConfig.findById(id);
     if (!config) {
       return res.status(404).json({ error: 'Configuration not found' });
     }
 
-    config.subjects = subjects || config.subjects;
+    if (subjects !== undefined) config.subjects = subjects;
+    
+    if (timetableConfig !== undefined) {
+      if (!config.timetableConfig) {
+        config.timetableConfig = {};
+      }
+      if (timetableConfig.workingDays !== undefined) {
+        config.timetableConfig.workingDays = timetableConfig.workingDays;
+      }
+      if (timetableConfig.periodsPerDay !== undefined) {
+        config.timetableConfig.periodsPerDay = timetableConfig.periodsPerDay;
+      }
+      if (timetableConfig.periodTimings !== undefined) {
+        config.timetableConfig.periodTimings = timetableConfig.periodTimings;
+      }
+      if (timetableConfig.subjectFrequencies !== undefined) {
+        config.timetableConfig.subjectFrequencies = timetableConfig.subjectFrequencies;
+      }
+    }
     await config.save();
     
     res.json(config);
