@@ -97,17 +97,16 @@ export function Gradebook() {
   useEffect(() => {
     const newMarks = {};
     students.forEach(student => {
-      let studentTotal = 0;
-      
       currentSubjects.forEach(sub => {
-        let score = 0;
+        let score = '';
         
         if (selectedTerm === 'All Terms') {
           // Sum across all terms
           student.terms?.forEach(termData => {
             if (termData.marks) {
               const markObj = termData.marks.find(m => m.subject === sub);
-              if (markObj !== undefined) {
+              if (markObj !== undefined && markObj.score !== undefined && markObj.score !== null) {
+                if (score === '') score = 0;
                 score += Number(markObj.score);
               }
             }
@@ -117,7 +116,7 @@ export function Gradebook() {
           const termData = student.terms?.find(t => t.termName === selectedTerm);
           if (termData && termData.marks) {
             const markObj = termData.marks.find(m => m.subject === sub);
-            if (markObj !== undefined) {
+            if (markObj !== undefined && markObj.score !== undefined && markObj.score !== null) {
               score = Number(markObj.score);
             }
           }
@@ -146,8 +145,10 @@ export function Gradebook() {
         if (!studentUpdates[studentId]) {
           studentUpdates[studentId] = [];
         }
-        // Convert score to Number
-        studentUpdates[studentId].push({ subject, score: Number(score) });
+        // Convert score to Number only if it's an actual entered mark
+        if (score !== '' && score !== null && score !== undefined && score !== '—') {
+          studentUpdates[studentId].push({ subject, score: Number(score) });
+        }
       });
 
       // Submit all updates sequentially to prevent server overload (500 errors)
@@ -252,13 +253,16 @@ export function Gradebook() {
                     {currentSubjects.map(sub => (
                       <td key={sub} className="p-4">
                         <input 
-                          type="number"
-                          min="0"
-                          max={selectedTerm === 'All Terms' ? "300" : "100"}
-                          required
-                          value={marks[`${student._id}-${sub}`] !== undefined && marks[`${student._id}-${sub}`] !== '' ? marks[`${student._id}-${sub}`] : 0}
-                          onChange={(e) => handleMarkChange(student._id, sub, e.target.value)}
-                          className={`glass-input w-20 text-center font-bold text-[#2E1C40] dark:text-gray-900 bg-white dark:bg-[#121212] shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/50 ${!hasFullAccess ? 'opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-800 border-none shadow-none' : ''}`}
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          placeholder="—"
+                          value={marks[`${student._id}-${sub}`] === undefined || marks[`${student._id}-${sub}`] === null || marks[`${student._id}-${sub}`] === '' ? '' : marks[`${student._id}-${sub}`]}
+                          onChange={(e) => {
+                            let val = e.target.value.replace(/[^0-9]/g, '');
+                            handleMarkChange(student._id, sub, val === '' ? '' : Number(val));
+                          }}
+                          className={`glass-input w-20 text-center font-bold text-[#2E1C40] dark:text-gray-900 placeholder:text-[#2E1C40] dark:placeholder:text-gray-900 bg-white dark:bg-[#121212] shadow-sm border border-[#E5D9C4] dark:border-[#4C677C]/50 ${!hasFullAccess ? 'opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-800 border-none shadow-none' : ''}`}
                           disabled={!hasFullAccess}
                         />
                       </td>

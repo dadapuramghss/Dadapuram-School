@@ -583,7 +583,23 @@ export function AdminReports() {
     );
   };
 
-  const EXAMS = ['First Midterm', 'Quarterly', 'Second Midterm', 'Half-Yearly', 'Third Midterm', 'Annual'];
+  const activeExamsSet = new Set();
+  allStudents.forEach(student => {
+    if (student.terms) {
+      student.terms.forEach(term => {
+        if (term.marks && term.marks.some(m => m.score !== undefined && m.score !== null && m.score !== '—')) {
+          activeExamsSet.add(term.termName);
+        }
+      });
+    }
+  });
+
+  const standardTermOrder = ['First Midterm', 'Quarterly', 'Second Midterm', 'Half-Yearly', 'Third Midterm', 'Annual'];
+  const EXAMS = standardTermOrder.filter(exam => activeExamsSet.has(exam));
+  
+  Array.from(activeExamsSet).forEach(exam => {
+    if (!EXAMS.includes(exam)) EXAMS.push(exam);
+  });
 
   const handleDownloadGradeBookExcel = (abstractData, standards) => {
     const excelData = [];

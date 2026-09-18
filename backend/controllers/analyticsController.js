@@ -55,7 +55,7 @@ const getClassLeaderboard = async (req, res) => {
                   $and: [
                     { $ne: ["$terms.termName", null] },
                     { $ne: ["$terms.marks", null] },
-                    { $gt: ["$terms.marks.score", 0] }
+                    { $ne: ["$terms.marks.score", null] }
                   ]
                 },
                 "$terms.termName",

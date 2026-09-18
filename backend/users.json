@@ -1,0 +1,763 @@
+[
+  {
+    "_id": "6a5686226cd41b8a42b36827",
+    "uid": "bbp2J5SS4ENqu79dh0YywNAqej42",
+    "email": "dadapuramghss@gmail.com",
+    "name": "HM",
+    "role": "admin",
+    "status": "approved",
+    "createdAt": "2026-07-14T18:55:30.652Z",
+    "updatedAt": "2026-09-18T10:57:43.423Z",
+    "__v": 0,
+    "activeSection": null,
+    "activeStandard": null,
+    "lastActivityAt": "2026-09-18T10:57:43.423Z",
+    "lastLoginAt": "2026-09-18T01:18:31.220Z",
+    "loginCount": 6
+  },
+  {
+    "_id": "6a591d039504c44c0923d155",
+    "uid": "OgQ1B64E84TuLNRJ0Cn5QcEQ6G43",
+    "email": "bharathiarphd@gmail.com",
+    "name": "Botany sir",
+    "role": "teacher",
+    "status": "approved",
+    "assignedClasses": [
+      {
+        "standard": "12",
+        "section": "A2",
+        "subject": "Biology",
+        "accessLevel": "full",
+        "isClassTeacher": true,
+        "_id": "6a5ba71c8cc8a63b59ed595f"
+      },
+      {
+        "standard": "11",
+        "section": "B",
+        "subject": "Botany",
+        "accessLevel": "full",
+        "isClassTeacher": false,
+        "_id": "6a5ba71c8cc8a63b59ed5960"
+      },
+      {
+        "standard": "12",
+        "section": "B",
+        "subject": "Zoology",
+        "accessLevel": "full",
+        "isClassTeacher": false,
+        "_id": "6a5ba71c8cc8a63b59ed5961"
+      },
+      {
+        "standard": "11",
+        "section": "A2",
+        "subject": "Biology",
+        "accessLevel": "full",
+        "isClassTeacher": false,
+        "_id": "6aa387b7cbb2bc63ea05c167"
+      }
+    ],
+    "createdAt": "2026-07-16T18:03:47.883Z",
+    "updatedAt": "2026-09-17T17:38:29.041Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa24df976591d0908fc64b4",
+    "uid": "KQy0zxulEWb3LU5c6sXpoTTNbWZ2",
+    "email": "gdeiva77@gmail.com",
+    "name": "deivasigamani govindasamy",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "6",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2564c76591d0908fc665a"
+      },
+      {
+        "standard": "7",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2564c76591d0908fc665b"
+      },
+      {
+        "standard": "9",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2564c76591d0908fc665c"
+      },
+      {
+        "standard": "10",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2564c76591d0908fc665d"
+      }
+    ],
+    "createdAt": "2026-09-10T06:28:09.617Z",
+    "updatedAt": "2026-09-10T07:03:40.480Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa24e0376591d0908fc64b5",
+    "uid": "l1Ya79LVlOQJEDZwJrXOBn8ha7x2",
+    "email": "subalakshmimurugan98@gmail.com",
+    "name": "Lakshmi M",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "10",
+        "section": "A",
+        "subject": "Tamil",
+        "accessLevel": "full",
+        "isClassTeacher": false,
+        "_id": "6aa2538576591d0908fc650f"
+      },
+      {
+        "standard": "10",
+        "section": "C",
+        "subject": "Tamil",
+        "accessLevel": "full",
+        "isClassTeacher": false,
+        "_id": "6aa2538576591d0908fc6510"
+      },
+      {
+        "standard": "9",
+        "section": "B",
+        "subject": "Tamil",
+        "accessLevel": "full",
+        "isClassTeacher": false,
+        "_id": "6aa253ec76591d0908fc6525"
+      }
+    ],
+    "createdAt": "2026-09-10T06:28:19.704Z",
+    "updatedAt": "2026-09-17T17:35:12.047Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa24e0576591d0908fc64b6",
+    "uid": "797U9EcQDJhtRb15NVecqkdYgF02",
+    "email": "asreyangkumar@gmail.com",
+    "name": "sreyangkumar a",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "9",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2563076591d0908fc6642"
+      },
+      {
+        "standard": "10",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2563076591d0908fc6643"
+      },
+      {
+        "standard": "8",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2563076591d0908fc6644"
+      }
+    ],
+    "createdAt": "2026-09-10T06:28:21.487Z",
+    "updatedAt": "2026-09-10T07:03:12.808Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa24e0676591d0908fc64b7",
+    "uid": "gZE8mmcaqaTVGwowX8Xk7P5Mm0E2",
+    "email": "g7hjoy@gmail.com",
+    "name": "AYRA. ELUMALAI",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "11",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa256e276591d0908fc6748"
+      },
+      {
+        "standard": "11",
+        "section": "A1",
+        "accessLevel": "full",
+        "_id": "6aa256e276591d0908fc6749"
+      },
+      {
+        "standard": "11",
+        "section": "A2",
+        "accessLevel": "full",
+        "_id": "6aa256e276591d0908fc674a"
+      },
+      {
+        "standard": "11",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa256e276591d0908fc674b"
+      },
+      {
+        "standard": "12",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa256e276591d0908fc674c"
+      },
+      {
+        "standard": "12",
+        "section": "A1",
+        "accessLevel": "full",
+        "_id": "6aa256e276591d0908fc674d"
+      },
+      {
+        "standard": "12",
+        "section": "A2",
+        "accessLevel": "full",
+        "_id": "6aa256e276591d0908fc674e"
+      },
+      {
+        "standard": "12",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa256e276591d0908fc674f"
+      }
+    ],
+    "createdAt": "2026-09-10T06:28:22.350Z",
+    "updatedAt": "2026-09-10T07:06:10.405Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa24e0a76591d0908fc64b8",
+    "uid": "XpguaLn1JcOrdD4SSvpt8JBLrkU2",
+    "email": "kotiarun91@gmail.com",
+    "name": "Koti Arun",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "7",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2576576591d0908fc6875"
+      },
+      {
+        "standard": "8",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2576576591d0908fc6876"
+      },
+      {
+        "standard": "8",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2576576591d0908fc6877"
+      },
+      {
+        "standard": "9",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2576576591d0908fc6878"
+      }
+    ],
+    "createdAt": "2026-09-10T06:28:26.147Z",
+    "updatedAt": "2026-09-10T07:08:21.281Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa24e1a76591d0908fc64b9",
+    "uid": "r6EVbdid8SNJ3D6aqqS8ARqKyeJ3",
+    "email": "rajvinan@gmail.com",
+    "name": "raj vin",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "10",
+        "section": "C",
+        "subject": "Maths",
+        "accessLevel": "full",
+        "isClassTeacher": false,
+        "_id": "6aac25f9cbe0599fb6088d89"
+      }
+    ],
+    "createdAt": "2026-09-10T06:28:42.732Z",
+    "updatedAt": "2026-09-17T17:40:09.702Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa24e3c76591d0908fc64bf",
+    "uid": "oGa4pGIEV0Nn2HqBWfNzUsImeuM2",
+    "email": "harimuthu1969@gmail.com",
+    "name": "muthulingam natesan",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "11",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2567476591d0908fc667f"
+      },
+      {
+        "standard": "11",
+        "section": "A1",
+        "accessLevel": "full",
+        "_id": "6aa2567476591d0908fc6680"
+      },
+      {
+        "standard": "11",
+        "section": "A2",
+        "accessLevel": "full",
+        "_id": "6aa2567476591d0908fc6681"
+      },
+      {
+        "standard": "11",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2567476591d0908fc6682"
+      },
+      {
+        "standard": "12",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2567476591d0908fc6683"
+      },
+      {
+        "standard": "12",
+        "section": "A1",
+        "accessLevel": "full",
+        "_id": "6aa2567476591d0908fc6684"
+      },
+      {
+        "standard": "12",
+        "section": "A2",
+        "accessLevel": "full",
+        "_id": "6aa2567476591d0908fc6685"
+      },
+      {
+        "standard": "12",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2567476591d0908fc6686"
+      }
+    ],
+    "createdAt": "2026-09-10T06:29:16.562Z",
+    "updatedAt": "2026-09-10T07:04:20.545Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa24e5776591d0908fc64c0",
+    "uid": "mXrS1kYuF8hVtAebzbN4omB0Rp02",
+    "email": "vasumathijeba85@gmail.com",
+    "name": "Vasu Mathi",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "6",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2573a76591d0908fc67e9"
+      },
+      {
+        "standard": "6",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2573a76591d0908fc67ea"
+      },
+      {
+        "standard": "7",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2573a76591d0908fc67eb"
+      },
+      {
+        "standard": "7",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2573a76591d0908fc67ec"
+      },
+      {
+        "standard": "9",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2573a76591d0908fc67ed"
+      },
+      {
+        "standard": "10",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2573a76591d0908fc67ee"
+      }
+    ],
+    "createdAt": "2026-09-10T06:29:43.413Z",
+    "updatedAt": "2026-09-10T07:07:38.060Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa24e5776591d0908fc64c1",
+    "uid": "VJ7F1H2DgIhtzBmSZwefoEgttMy1",
+    "email": "dlkamalanathan@gmail.com",
+    "name": "kamal nathan",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "6",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2628b76591d0908fc6bf7"
+      },
+      {
+        "standard": "6",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2628b76591d0908fc6bf8"
+      },
+      {
+        "standard": "7",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2628b76591d0908fc6bf9"
+      },
+      {
+        "standard": "7",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2628b76591d0908fc6bfa"
+      },
+      {
+        "standard": "8",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2628b76591d0908fc6bfb"
+      },
+      {
+        "standard": "8",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2628b76591d0908fc6bfc"
+      },
+      {
+        "standard": "9",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2628b76591d0908fc6bfd"
+      },
+      {
+        "standard": "9",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2628b76591d0908fc6bfe"
+      }
+    ],
+    "createdAt": "2026-09-10T06:29:43.437Z",
+    "updatedAt": "2026-09-10T07:55:55.614Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa24e5f76591d0908fc64c2",
+    "uid": "W5Xz67uvsbNfszJis6qYvsWB9de2",
+    "email": "meghaharish261981@gmail.com",
+    "name": "Megha Harish",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "10",
+        "section": "C",
+        "subject": "Science",
+        "accessLevel": "full",
+        "isClassTeacher": false,
+        "_id": "6aac2661cbe0599fb6088e68"
+      }
+    ],
+    "createdAt": "2026-09-10T06:29:51.981Z",
+    "updatedAt": "2026-09-17T17:41:53.093Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa24e8a76591d0908fc64cd",
+    "uid": "8iRdggxWHdSTX24YraXSsgCPDaP2",
+    "email": "sudhamalarkodi1983@gmail.com",
+    "name": "SUDHA MALARKODI",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "6",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2570976591d0908fc67c2"
+      },
+      {
+        "standard": "7",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2570976591d0908fc67c3"
+      },
+      {
+        "standard": "9",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2570976591d0908fc67c4"
+      },
+      {
+        "standard": "10",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2570976591d0908fc67c5"
+      }
+    ],
+    "createdAt": "2026-09-10T06:30:34.976Z",
+    "updatedAt": "2026-09-10T07:06:49.860Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa24e9076591d0908fc64ce",
+    "uid": "tS65Mu01meQGxlILugk6fIEisHM2",
+    "email": "kalyanikandasamy1975@gmail.com",
+    "name": "Kalyani Vinayagamurthy",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "6",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2548176591d0908fc656f"
+      },
+      {
+        "standard": "6",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2548176591d0908fc6570"
+      },
+      {
+        "standard": "7",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa2548176591d0908fc6571"
+      },
+      {
+        "standard": "7",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2548176591d0908fc6572"
+      },
+      {
+        "standard": "8",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa2548176591d0908fc6573"
+      }
+    ],
+    "createdAt": "2026-09-10T06:30:40.581Z",
+    "updatedAt": "2026-09-10T06:56:01.052Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa24eee76591d0908fc64d9",
+    "uid": "ma8zCKlANEMoAWuhxf6i9l465On2",
+    "email": "arasudm89@gmail.com",
+    "name": "Mani Arasu",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "10",
+        "section": "C",
+        "subject": "English",
+        "accessLevel": "full",
+        "isClassTeacher": true,
+        "_id": "6aa2543a76591d0908fc6547"
+      },
+      {
+        "standard": "10",
+        "section": "A",
+        "subject": "English",
+        "accessLevel": "full",
+        "isClassTeacher": false,
+        "_id": "6aa2543a76591d0908fc6548"
+      },
+      {
+        "standard": "8",
+        "section": "A",
+        "subject": "English",
+        "accessLevel": "full",
+        "isClassTeacher": false,
+        "_id": "6aa2543a76591d0908fc6549"
+      }
+    ],
+    "createdAt": "2026-09-10T06:32:14.312Z",
+    "updatedAt": "2026-09-17T17:34:12.615Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa24f1976591d0908fc64da",
+    "uid": "gVuNpnKFliXSGXHPZb1jJVLQyZI2",
+    "email": "kanniga123000@gmail.com",
+    "name": "KANNIGA PARAMESWARI S R",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "11",
+        "section": "A1",
+        "accessLevel": "full",
+        "_id": "6aa253de76591d0908fc651d"
+      },
+      {
+        "standard": "11",
+        "section": "B",
+        "accessLevel": "full",
+        "_id": "6aa253de76591d0908fc651e"
+      },
+      {
+        "standard": "12",
+        "section": "A1",
+        "accessLevel": "full",
+        "_id": "6aa253de76591d0908fc651f"
+      }
+    ],
+    "createdAt": "2026-09-10T06:32:57.285Z",
+    "updatedAt": "2026-09-10T06:53:18.368Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa25c0676591d0908fc6baa",
+    "uid": "wNIforoe6pM4bNZCQvECBPsu1LP2",
+    "email": "vendamayil@gmail.com",
+    "name": "Venda Venda",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "11",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa272d376591d0908fc6d3b"
+      },
+      {
+        "standard": "11",
+        "section": "A1",
+        "accessLevel": "full",
+        "_id": "6aa272d376591d0908fc6d3c"
+      },
+      {
+        "standard": "11",
+        "section": "A2",
+        "accessLevel": "full",
+        "_id": "6aa272d376591d0908fc6d3d"
+      },
+      {
+        "standard": "12",
+        "section": "A",
+        "accessLevel": "full",
+        "_id": "6aa272d376591d0908fc6d3e"
+      },
+      {
+        "standard": "12",
+        "section": "A1",
+        "accessLevel": "full",
+        "_id": "6aa272d376591d0908fc6d3f"
+      },
+      {
+        "standard": "12",
+        "section": "A2",
+        "accessLevel": "full",
+        "_id": "6aa272d376591d0908fc6d40"
+      }
+    ],
+    "createdAt": "2026-09-10T07:28:06.481Z",
+    "updatedAt": "2026-09-10T09:05:23.537Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aa2722e76591d0908fc6ce2",
+    "uid": "G0WVWpVUU3dIu9AMaa4gk8WZtDS2",
+    "email": "nandakumarmannar4@gmail.com",
+    "name": "Nandakumar Mannar",
+    "role": "teacher",
+    "status": "approved",
+    "isActive": true,
+    "assignedClasses": [
+      {
+        "standard": "10",
+        "section": "B",
+        "subject": "Social Science",
+        "accessLevel": "full",
+        "isClassTeacher": false,
+        "_id": "6aa272ae76591d0908fc6d23"
+      },
+      {
+        "standard": "10",
+        "section": "C",
+        "subject": "Social Science",
+        "accessLevel": "full",
+        "isClassTeacher": false,
+        "_id": "6aa272ae76591d0908fc6d24"
+      },
+      {
+        "standard": "9",
+        "section": "B",
+        "subject": "Social Science",
+        "accessLevel": "full",
+        "isClassTeacher": false,
+        "_id": "6aa272ae76591d0908fc6d25"
+      },
+      {
+        "standard": "6",
+        "section": "B",
+        "subject": "Social Science",
+        "accessLevel": "full",
+        "isClassTeacher": false,
+        "_id": "6aa272ae76591d0908fc6d26"
+      },
+      {
+        "standard": "10",
+        "section": "A",
+        "subject": "Social Science",
+        "accessLevel": "full",
+        "isClassTeacher": true,
+        "_id": "6aac2459cbe0599fb6088c8f"
+      }
+    ],
+    "createdAt": "2026-09-10T09:02:38.358Z",
+    "updatedAt": "2026-09-18T10:03:47.813Z",
+    "__v": 0
+  },
+  {
+    "_id": "6aac2c4dcb15d6818d772f46",
+    "uid": "system-admin",
+    "__v": 0,
+    "activeSection": null,
+    "activeStandard": null,
+    "assignedClasses": [],
+    "createdAt": "2026-09-17T18:07:09.433Z",
+    "email": "admin@system.com",
+    "isActive": true,
+    "lastActivityAt": null,
+    "lastLoginAt": null,
+    "loginCount": 0,
+    "name": "System Admin",
+    "role": "admin",
+    "status": "approved",
+    "updatedAt": "2026-09-17T18:07:09.433Z"
+  }
+]

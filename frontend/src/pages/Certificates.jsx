@@ -14,6 +14,7 @@ export function Certificates() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [rankData, setRankData] = useState({ classRank: null, classTotal: null, schoolRank: null, schoolTotal: null });
 
   // Filters
   const [filters, setFilters] = useState({
@@ -81,6 +82,38 @@ export function Certificates() {
       setSelectedStudent(null);
     }
   };
+
+  useEffect(() => {
+    const fetchRanks = async () => {
+      if (certificateType === 'RANK' && selectedStudent) {
+        try {
+          const [classRes, schoolRes] = await Promise.all([
+            api.getLeaderboard(selectedStudent.standard, selectedStudent.section),
+            api.getLeaderboard('All', 'All')
+          ]);
+          
+          const classLb = classRes.data || [];
+          const schoolLb = schoolRes.data || [];
+          
+          const classStudent = classLb.find(s => s._id === selectedStudent._id);
+          const schoolStudent = schoolLb.find(s => s._id === selectedStudent._id);
+          
+          setRankData({
+            classRank: classStudent?.rank || null,
+            classTotal: classLb.length || null,
+            schoolRank: schoolStudent?.rank || null,
+            schoolTotal: schoolLb.length || null
+          });
+        } catch (err) {
+          console.warn("Failed to fetch ranks for Rank Card", err);
+          setRankData({ classRank: null, classTotal: null, schoolRank: null, schoolTotal: null });
+        }
+      } else {
+        setRankData({ classRank: null, classTotal: null, schoolRank: null, schoolTotal: null });
+      }
+    };
+    fetchRanks();
+  }, [certificateType, selectedStudent]);
 
   const handlePrint = () => {
     if (!certificateType) {
@@ -287,7 +320,7 @@ export function Certificates() {
       {certificateType === 'STUDY' ? (
         <StudyCertificatePrint ref={printRef} student={selectedStudent} language={filters.language} />
       ) : (
-        <RankCardPrint ref={printRef} student={selectedStudent} language={filters.language} />
+        <RankCardPrint ref={printRef} student={selectedStudent} language={filters.language} rankData={rankData} />
       )}
 
     </div>
