@@ -246,6 +246,35 @@ const updateStudentMarks = async (req, res) => {
   }
 };
 
+// Clear Term Marks completely for a class and section
+const clearTermMarks = async (req, res) => {
+  try {
+    const { standard, section, termName } = req.body;
+    
+    if (!standard || !section || !termName) {
+      return res.status(400).json({ error: 'Standard, section, and termName are required' });
+    }
+
+    if (!isAuthorizedForClass(req.dbUser, standard, section, true)) {
+      return res.status(403).json({ error: 'Not authorized for full access to this class and section' });
+    }
+
+    const result = await Student.updateMany(
+      { standard, section },
+      { $pull: { terms: { termName } } }
+    );
+
+    res.status(200).json({ 
+      success: true, 
+      message: `Successfully cleared all marks for ${termName}`,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('Error clearing term marks:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // Bulk Update Marks
 const bulkUpdateMarks = async (req, res) => {
   try {
@@ -708,5 +737,6 @@ module.exports = {
   bulkAddStudents,
   bulkDeleteStudents,
   fixDbIndex,
-  fixSubjects
+  fixSubjects,
+  clearTermMarks
 };

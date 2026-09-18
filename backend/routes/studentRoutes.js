@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { addStudent, getStudentsByClass, getStudentById, updateStudentMarks, bulkUpdateMarks, universalBulkUpdateMarks, updateStudent, deleteStudent, bulkAddStudents, bulkDeleteStudents, fixDbIndex, fixSubjects } = require('../controllers/studentController');
+const { addStudent, getStudentsByClass, getStudentById, updateStudentMarks, bulkUpdateMarks, universalBulkUpdateMarks, updateStudent, deleteStudent, bulkAddStudents, bulkDeleteStudents, fixDbIndex, fixSubjects, clearTermMarks } = require('../controllers/studentController');
 
 // Public route to fix DB indexes
 router.get('/fix-db-index', fixDbIndex);
@@ -17,6 +17,7 @@ router.post('/bulk', bulkAddStudents);
 // Admin marks import routes
 router.post('/bulk-marks', bulkUpdateMarks);
 router.post('/bulk-marks-universal', universalBulkUpdateMarks);
+router.post('/clear-term', clearTermMarks);
 router.post('/bulk-delete', bulkDeleteStudents);
 router.post('/', addStudent);
 router.get('/', getStudentsByClass);

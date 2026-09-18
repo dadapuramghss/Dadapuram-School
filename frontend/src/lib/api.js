@@ -92,6 +92,11 @@ export const api = {
     body: JSON.stringify({ termName, marks })
   }),
 
+  clearTermMarks: (standard, section, termName) => fetchWithAuth(`/students/clear-term`, {
+    method: 'POST',
+    body: JSON.stringify({ standard, section, termName })
+  }),
+
   updateStudent: (studentId, data) => fetchWithAuth(`/students/${studentId}`, {
     method: 'PUT',
     body: JSON.stringify(data)

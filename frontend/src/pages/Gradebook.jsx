@@ -16,6 +16,7 @@ export function Gradebook() {
   const [students, setStudents] = useState([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   const { dbUser } = useAuth();
   const { classConfigs } = useClassConfig();
@@ -166,6 +167,25 @@ export function Gradebook() {
     }
   };
 
+  const handleClearTerm = async () => {
+    if (selectedTerm === 'All Terms') return;
+    
+    if (window.confirm(`WARNING: This will permanently remove all ${selectedTerm} marks for Class ${selectedClass} - ${selectedSection}.\nThe examination will no longer be included in Rank Cards, Reports, totals, maximum marks, percentages, or rankings.\n\nAre you sure you want to continue?`)) {
+      setIsClearing(true);
+      try {
+        await api.clearTermMarks(selectedClass, selectedSection, selectedTerm);
+        alert(`Successfully cleared all marks for ${selectedTerm}.`);
+        appState.setFormDirty('Gradebook', false);
+        await loadStudents();
+      } catch (err) {
+        console.error('Failed to clear term marks', err);
+        alert('Error clearing term marks.');
+      } finally {
+        setIsClearing(false);
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-black text-[#2E1C40] dark:text-gray-900 drop-shadow-sm">
@@ -276,16 +296,31 @@ export function Gradebook() {
             </table>
           </div>
           
-          <div className="mt-6 flex justify-end">
-            {hasFullAccess ? (
-              <NeonButton type="submit" disabled={isSaving} className="bg-adminSidebar text-white text-[#2E1C40]">
-                {isSaving ? 'Saving...' : `Save ${selectedTerm} Marks`}
-              </NeonButton>
-            ) : (
-              <p className="text-[#4C677C]/60 dark:text-gray-400 text-sm italic">
-                {isReportView ? 'Report views are read-only.' : 'You have view-only access to this class.'}
-              </p>
-            )}
+          <div className="mt-6 flex justify-between items-center">
+            <div>
+              {hasFullAccess && selectedTerm !== 'All Terms' && (
+                <button 
+                  type="button" 
+                  onClick={handleClearTerm}
+                  disabled={isSaving || isClearing}
+                  className="text-red-500 font-bold hover:text-red-700 transition-colors text-sm underline decoration-red-500/30 hover:decoration-red-700"
+                >
+                  Clear / Reset {selectedTerm} Marks
+                </button>
+              )}
+            </div>
+            
+            <div className="flex justify-end">
+              {hasFullAccess ? (
+                <NeonButton type="submit" disabled={isSaving || isClearing} className="bg-adminSidebar text-white text-[#2E1C40]">
+                  {isSaving ? 'Saving...' : `Save ${selectedTerm} Marks`}
+                </NeonButton>
+              ) : (
+                <p className="text-[#4C677C]/60 dark:text-gray-400 text-sm italic">
+                  {isReportView ? 'Report views are read-only.' : 'You have view-only access to this class.'}
+                </p>
+              )}
+            </div>
           </div>
         </form>
       </GlassCard>
