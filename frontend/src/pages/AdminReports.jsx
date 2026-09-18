@@ -19,7 +19,8 @@ export function AdminReports() {
     toDate: '',
     standard: 'All',
     section: 'All',
-    percentage: ''
+    percentage: '',
+    percentageMode: 'above'
   });
 
   // Matrix specific state
@@ -828,7 +829,8 @@ export function AdminReports() {
         attFilters.toDate, 
         attFilters.standard, 
         attFilters.section, 
-        percentageToSend
+        percentageToSend,
+        attFilters.percentageMode
       );
       if (res.success) {
         setAttReportData(res.data);
@@ -903,16 +905,26 @@ export function AdminReports() {
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Percentage</label>
-              <input
-                type="number"
-                placeholder="Enter percentage"
-                value={attFilters.percentage}
-                onChange={e => setAttFilters({...attFilters, percentage: e.target.value})}
-                className={`w-full bg-gray-50 border ${String(attFilters.percentage).trim() !== '' && (isNaN(parseFloat(attFilters.percentage)) || parseFloat(attFilters.percentage) < 0 || parseFloat(attFilters.percentage) > 100) ? 'border-red-500' : 'border-gray-200'} text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none`}
-                min="0"
-                max="100"
-                step="any"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  placeholder="Enter percentage"
+                  value={attFilters.percentage}
+                  onChange={e => setAttFilters({...attFilters, percentage: e.target.value})}
+                  className={`w-full bg-gray-50 border ${String(attFilters.percentage).trim() !== '' && (isNaN(parseFloat(attFilters.percentage)) || parseFloat(attFilters.percentage) < 0 || parseFloat(attFilters.percentage) > 100) ? 'border-red-500' : 'border-gray-200'} text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none`}
+                  min="0"
+                  max="100"
+                  step="any"
+                />
+                <select
+                  value={attFilters.percentageMode}
+                  onChange={e => setAttFilters({...attFilters, percentageMode: e.target.value})}
+                  className="bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none"
+                >
+                  <option value="above">Above</option>
+                  <option value="below">Below</option>
+                </select>
+              </div>
               {String(attFilters.percentage).trim() !== '' && (isNaN(parseFloat(attFilters.percentage)) || parseFloat(attFilters.percentage) < 0 || parseFloat(attFilters.percentage) > 100) && (
                 <p className="text-red-500 text-xs mt-1">Percentage must be between 0 and 100.</p>
               )}
@@ -971,14 +983,24 @@ export function AdminReports() {
              <div className="p-6 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="w-full sm:w-1/3">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Percentage</label>
-                  <input 
-                    type="number"
-                    placeholder="Enter percentage"
-                    value={attFilters.percentage}
-                    onChange={e => setAttFilters({...attFilters, percentage: e.target.value})}
-                    className={`w-full bg-white border ${String(attFilters.percentage).trim() !== '' && (isNaN(parseFloat(attFilters.percentage)) || parseFloat(attFilters.percentage) < 0 || parseFloat(attFilters.percentage) > 100) ? 'border-red-500' : 'border-gray-200'} text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none`}
-                    min="0" max="100" step="any"
-                  />
+                  <div className="flex gap-2">
+                    <input 
+                      type="number"
+                      placeholder="Enter percentage"
+                      value={attFilters.percentage}
+                      onChange={e => setAttFilters({...attFilters, percentage: e.target.value})}
+                      className={`w-full bg-white border ${String(attFilters.percentage).trim() !== '' && (isNaN(parseFloat(attFilters.percentage)) || parseFloat(attFilters.percentage) < 0 || parseFloat(attFilters.percentage) > 100) ? 'border-red-500' : 'border-gray-200'} text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none`}
+                      min="0" max="100" step="any"
+                    />
+                    <select
+                      value={attFilters.percentageMode}
+                      onChange={e => setAttFilters({...attFilters, percentageMode: e.target.value})}
+                      className="bg-white border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none"
+                    >
+                      <option value="above">Above</option>
+                      <option value="below">Below</option>
+                    </select>
+                  </div>
                   {String(attFilters.percentage).trim() !== '' && (isNaN(parseFloat(attFilters.percentage)) || parseFloat(attFilters.percentage) < 0 || parseFloat(attFilters.percentage) > 100) && (
                     <p className="text-red-500 text-xs mt-1">Percentage must be between 0 and 100.</p>
                   )}

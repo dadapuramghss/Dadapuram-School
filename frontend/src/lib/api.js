@@ -194,11 +194,12 @@ export const api = {
     method: 'POST',
     body: JSON.stringify(records)
   }),
-  getAttendanceReport: (fromDate, toDate, standard, section, percentage) => {
+  getAttendanceReport: (fromDate, toDate, standard, section, percentage, percentageMode) => {
     let url = `/attendance/report?standard=${standard}&section=${section}`;
     if (fromDate) url += `&fromDate=${fromDate}`;
     if (toDate) url += `&toDate=${toDate}`;
     if (percentage) url += `&percentage=${encodeURIComponent(percentage)}`;
+    if (percentageMode) url += `&percentageMode=${encodeURIComponent(percentageMode)}`;
     return fetchWithAuth(url);
   },
   getMonthlyAttendance: (standard, section, year, month) => {

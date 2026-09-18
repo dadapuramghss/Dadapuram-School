@@ -379,7 +379,7 @@ exports.bulkImportDailyAttendance = async (req, res) => {
 
 exports.getAttendanceReport = async (req, res) => {
   try {
-    const { fromDate, toDate, standard, section, percentage } = req.query;
+    const { fromDate, toDate, standard, section, percentage, percentageMode } = req.query;
     
     // Base match for daily attendance
     const matchStage = {
@@ -456,7 +456,12 @@ exports.getAttendanceReport = async (req, res) => {
     if (percentage && percentage !== 'All') {
       const parsedPct = parseFloat(percentage);
       if (!isNaN(parsedPct)) {
-        reportArray = reportArray.filter(r => r.percentage === parsedPct);
+        if (percentageMode === 'below') {
+          reportArray = reportArray.filter(r => r.percentage < parsedPct);
+        } else {
+          // Default to 'above'
+          reportArray = reportArray.filter(r => r.percentage >= parsedPct);
+        }
       }
     }
     
