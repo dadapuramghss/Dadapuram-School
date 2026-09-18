@@ -56,6 +56,15 @@ async function fetchWithAuth(endpoint, options = {}) {
       if (errorData.ambiguousAssignments) {
         err.ambiguousAssignments = errorData.ambiguousAssignments;
       }
+      if (errorData.missingClassTeachers) {
+        err.missingClassTeachers = errorData.missingClassTeachers;
+      }
+      if (errorData.duplicateClassTeachers) {
+        err.duplicateClassTeachers = errorData.duplicateClassTeachers;
+      }
+      if (errorData.conflicts) {
+        err.conflicts = errorData.conflicts;
+      }
       throw err;
     }
 
@@ -245,6 +254,7 @@ export const api = {
     const query = new URLSearchParams(params || {}).toString();
     return fetchWithAuth(`/timetable?${query}`);
   },
+  checkReadinessTimetable: (params) => fetchWithAuth(`/timetable/readiness?${new URLSearchParams(params)}`),
   generateTimetable: (data) => fetchWithAuth('/timetable/generate', {
     method: 'POST',
     body: JSON.stringify(data)

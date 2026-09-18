@@ -20,6 +20,7 @@ const verifyAdminOrSelf = (req, res, next) => {
 };
 
 router.get('/', verifyAdminOrSelf, timetableController.getTimetable);
+router.get('/readiness', verifyAdmin, timetableController.checkReadiness);
 router.post('/generate', verifyAdmin, timetableController.generateTimetable);
 router.post('/validate', verifyAdmin, timetableController.validateChange);
 router.post('/publish', verifyAdmin, timetableController.publishTimetable);

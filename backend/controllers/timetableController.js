@@ -11,9 +11,12 @@ class TimetableGenerator {
     this.academicYear = academicYear;
     this.schedule = [];
     this.errors = [];
+    this.conflicts = [];
     this.warnings = [];
     this.missingAssignments = [];
     this.ambiguousAssignments = [];
+    this.missingClassTeachers = [];
+    this.duplicateClassTeachers = [];
     
     // Quick lookups
     this.teacherSchedules = {}; // teacherId -> { day: { period: count } }
@@ -63,7 +66,7 @@ class TimetableGenerator {
     this.initTeacherTracking();
 
     // 1. Check Class Teacher constraints
-    const classTeachers = {}; // std_sec -> teacher
+    const classTeachersMap = {}; // std_sec -> array of { teacher, subject }
     const teacherToClass = {}; // teacherUid -> array of std_sec
 
     for (const t of this.teachers) {
@@ -71,11 +74,8 @@ class TimetableGenerator {
       for (const ac of t.assignedClasses) {
         if (ac.isClassTeacher) {
           const key = `${ac.standard}_${ac.section}`;
-          if (classTeachers[key] && classTeachers[key].teacher.uid !== t.uid) {
-            this.errors.push(`Class Teacher Conflict: ${key} already has a Class Teacher.`);
-          } else {
-            classTeachers[key] = { teacher: t, subject: ac.subject };
-          }
+          if (!classTeachersMap[key]) classTeachersMap[key] = [];
+          classTeachersMap[key].push({ teacher: t, subject: ac.subject });
 
           if (!teacherToClass[t.uid]) teacherToClass[t.uid] = [];
           if (!teacherToClass[t.uid].includes(key)) {
@@ -101,6 +101,21 @@ class TimetableGenerator {
       const std = config.standard;
       const sec = config.section;
       const key = `${std}_${sec}`;
+      
+      const ctCandidates = classTeachersMap[key] || [];
+      let finalClassTeacher = null;
+
+      if (ctCandidates.length === 0) {
+        this.missingClassTeachers.push({ standard: std, section: sec });
+      } else if (ctCandidates.length > 1) {
+        this.duplicateClassTeachers.push({
+          standard: std, 
+          section: sec, 
+          teachers: ctCandidates.map(c => ({ name: c.teacher.name, uid: c.teacher.uid }))
+        });
+      } else {
+        finalClassTeacher = ctCandidates[0];
+      }
       
       let workingDays = config.timetableConfig?.workingDays?.length ? config.timetableConfig.workingDays : workingDaysDefault;
       let periodsPerDay = config.timetableConfig?.periodsPerDay || 8;
@@ -191,16 +206,23 @@ class TimetableGenerator {
         standard: std, section: sec,
         workingDays, periodsPerDay,
         subjects: subjectReqs,
-        classTeacher: classTeachers[key]
+        classTeacher: finalClassTeacher
       });
     }
 
-    if (this.missingAssignments.length > 0 || this.ambiguousAssignments.length > 0) {
+    if (
+      this.missingAssignments.length > 0 || 
+      this.ambiguousAssignments.length > 0 ||
+      this.missingClassTeachers.length > 0 ||
+      this.duplicateClassTeachers.length > 0
+    ) {
       return { 
         success: false, 
-        code: 'MISSING_TEACHER_ASSIGNMENTS', 
+        code: 'TIMETABLE_SETUP_INCOMPLETE', 
         missingAssignments: this.missingAssignments,
-        ambiguousAssignments: this.ambiguousAssignments
+        ambiguousAssignments: this.ambiguousAssignments,
+        missingClassTeachers: this.missingClassTeachers,
+        duplicateClassTeachers: this.duplicateClassTeachers
       };
     }
 
@@ -213,7 +235,7 @@ class TimetableGenerator {
       
       let success = this.scheduleClass(cls, classGrid);
       if (!success) {
-        this.errors.push(`Failed to generate timetable for ${cls.standard}-${cls.section} due to constraint conflicts.`);
+        // If any class fails to fully schedule, we abort generation for the whole timetable.
         break;
       }
 
@@ -240,6 +262,14 @@ class TimetableGenerator {
       }
     }
 
+    if (this.conflicts.length > 0) {
+      return { 
+        success: false, 
+        code: 'TIMETABLE_GENERATION_CONFLICT', 
+        conflicts: this.conflicts 
+      };
+    }
+    
     if (this.errors.length > 0) return { success: false, errors: this.errors };
     return { success: true, schedule: this.schedule, warnings: this.warnings };
   }
@@ -251,19 +281,19 @@ class TimetableGenerator {
     let remaining = subjects.map(s => ({ ...s }));
     
     // Priority 1: Class Teacher P1
-    if (classTeacher && classTeacher.subject) {
-      const ctSubjReq = remaining.find(r => r.subjectName === classTeacher.subject);
-      if (ctSubjReq) {
-        for (const d of workingDays) {
-          if (ctSubjReq.weeklyPeriods > 0) {
-            if (this.checkTeacherConflict(ctSubjReq.teacherId, d, 1) || this.checkTeacherDailyLimit(ctSubjReq.teacherId, d)) {
-              this.warnings.push(`Could not schedule Class Teacher for ${cls.standard}-${cls.section} on ${d} due to conflict.`);
-              continue;
-            }
-            grid[d][1] = { ...ctSubjReq };
-            this.assignTeacherSlot(ctSubjReq.teacherId, d, 1);
-            ctSubjReq.weeklyPeriods--;
+    if (classTeacher) {
+      for (const d of workingDays) {
+        const ctSubjReq = remaining.find(r => r.teacherId === classTeacher.teacher.uid && r.weeklyPeriods > 0);
+        if (ctSubjReq) {
+          if (this.checkTeacherConflict(ctSubjReq.teacherId, d, 1) || this.checkTeacherDailyLimit(ctSubjReq.teacherId, d)) {
+            this.warnings.push(`Could not schedule Class Teacher for ${cls.standard}-${cls.section} on ${d} due to conflict.`);
+            continue;
           }
+          grid[d][1] = { ...ctSubjReq };
+          this.assignTeacherSlot(ctSubjReq.teacherId, d, 1);
+          ctSubjReq.weeklyPeriods--;
+        } else {
+          this.warnings.push(`Class Teacher ${classTeacher.teacher.name} has no available subjects for P1 on ${d} in ${cls.standard}-${cls.section}`);
         }
       }
     }
@@ -370,12 +400,17 @@ class TimetableGenerator {
     // Check if any required periods are left (strict check could fail generation if they are)
     const unsatisfied = remaining.filter(r => r.weeklyPeriods > 0);
     if (unsatisfied.length > 0) {
-      const msg = `Could not schedule all periods for ${cls.standard}-${cls.section}. Remaining: ${unsatisfied.map(u => u.subjectName + '('+u.weeklyPeriods+')').join(', ')}`;
-      console.log(msg);
-      this.warnings.push(msg);
-      // We return true here to allow partial generation so valid slots are saved.
-      // The warnings will be shown to the user on the frontend.
-      return true; 
+      unsatisfied.forEach(u => {
+        this.conflicts.push({
+          type: 'UNSATISFIED_SUBJECT_PERIODS',
+          standard: cls.standard,
+          section: cls.section,
+          subject: u.subjectName,
+          teacher: u.teacherName,
+          reason: `Could not schedule ${u.weeklyPeriods} required period(s) for ${u.subjectName} due to teacher constraints or full schedule.`
+        });
+      });
+      return false; // Fail generation for the whole timetable
     }
 
     return true;
@@ -429,12 +464,21 @@ exports.generateTimetable = async (req, res) => {
     const result = await generator.run();
 
     if (!result.success) {
-      if (result.code === 'MISSING_TEACHER_ASSIGNMENTS') {
+      if (result.code === 'TIMETABLE_SETUP_INCOMPLETE') {
         return res.status(400).json({ 
           error: 'Timetable setup incomplete', 
-          code: 'MISSING_TEACHER_ASSIGNMENTS', 
+          code: 'TIMETABLE_SETUP_INCOMPLETE', 
           missingAssignments: result.missingAssignments,
-          ambiguousAssignments: result.ambiguousAssignments 
+          ambiguousAssignments: result.ambiguousAssignments,
+          missingClassTeachers: result.missingClassTeachers,
+          duplicateClassTeachers: result.duplicateClassTeachers
+        });
+      }
+      if (result.code === 'TIMETABLE_GENERATION_CONFLICT') {
+        return res.status(400).json({ 
+          error: 'Timetable generation failed due to constraint conflicts', 
+          code: 'TIMETABLE_GENERATION_CONFLICT', 
+          conflicts: result.conflicts
         });
       }
       return res.status(400).json({ message: 'Generation failed due to conflicts', errors: result.errors });
@@ -454,7 +498,40 @@ exports.generateTimetable = async (req, res) => {
       warnings: result.warnings
     });
   } catch (error) {
-    console.error(error);
+    res.status(500).json({ message: error.message, errors: [error.message] });
+  }
+};
+
+exports.checkReadiness = async (req, res) => {
+  try {
+    const { academicYear = '2026-27' } = req.query;
+    
+    const configs = await ClassConfig.find();
+    const teachers = await User.find({ role: 'teacher', status: 'approved', isActive: true });
+
+    const generator = new TimetableGenerator(configs, teachers, academicYear);
+    
+    // Run only the setup phase
+    generator.initTeacherTracking();
+    
+    // Simulate setup check logic manually or we can call run() and intercept it?
+    // Run() will naturally stop at TIMETABLE_SETUP_INCOMPLETE
+    const result = await generator.run();
+
+    if (!result.success && result.code === 'TIMETABLE_SETUP_INCOMPLETE') {
+      return res.json({ 
+        ready: false,
+        code: 'TIMETABLE_SETUP_INCOMPLETE', 
+        missingAssignments: result.missingAssignments,
+        ambiguousAssignments: result.ambiguousAssignments,
+        missingClassTeachers: result.missingClassTeachers,
+        duplicateClassTeachers: result.duplicateClassTeachers
+      });
+    }
+
+    // If it passed setup, it started generation. We ignore the generated schedule.
+    return res.json({ ready: true, code: 'READY' });
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };

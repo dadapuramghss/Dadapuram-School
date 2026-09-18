@@ -29,6 +29,7 @@ export function AdminTimetable() {
 
   useEffect(() => {
     fetchTeachers();
+    fetchReadiness();
   }, []);
 
   useEffect(() => {
@@ -43,6 +44,28 @@ export function AdminTimetable() {
       }
     } catch (err) {
       console.error('Failed to fetch teachers', err);
+    }
+  };
+
+  const fetchReadiness = async () => {
+    try {
+      const res = await api.checkReadinessTimetable({ academicYear });
+      if (res && res.ready) {
+        setSummary({ code: 'READY' });
+      }
+    } catch (err) {
+      if (err.code === 'TIMETABLE_SETUP_INCOMPLETE') {
+        setSummary({
+          code: err.code,
+          error: err.error,
+          missingAssignments: err.missingAssignments,
+          ambiguousAssignments: err.ambiguousAssignments,
+          missingClassTeachers: err.missingClassTeachers,
+          duplicateClassTeachers: err.duplicateClassTeachers,
+        });
+      } else {
+        console.error('Failed to check readiness', err);
+      }
     }
   };
 
@@ -82,6 +105,9 @@ export function AdminTimetable() {
         code: err.code,
         missingAssignments: err.missingAssignments,
         ambiguousAssignments: err.ambiguousAssignments,
+        missingClassTeachers: err.missingClassTeachers,
+        duplicateClassTeachers: err.duplicateClassTeachers,
+        conflicts: err.conflicts,
         details: err.validationErrors || err.errors || []
       });
     } finally {
@@ -294,61 +320,144 @@ export function AdminTimetable() {
               )}
             </div>
           )}
+          {summary && summary.code === 'READY' && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+              <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-green-800 mb-1">READY TO GENERATE</h3>
+                <ul className="text-sm text-green-700 space-y-1">
+                  <li>✓ Teacher assignments complete</li>
+                  <li>✓ Class Teachers complete</li>
+                  <li>✓ No ambiguous assignments</li>
+                </ul>
+              </div>
+            </div>
+          )}
           
-          {summary.error && (
+          {summary && summary.code !== 'READY' && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
               <h3 className="font-semibold text-red-800 mb-2">
-                {summary.code === 'MISSING_TEACHER_ASSIGNMENTS' ? 'Timetable Setup Incomplete' : 'Generation Failed'}
+                {summary.code === 'TIMETABLE_SETUP_INCOMPLETE' || summary.code === 'MISSING_TEACHER_ASSIGNMENTS' ? 'TIMETABLE SETUP INCOMPLETE' : 'Generation Failed'}
               </h3>
               
-              {summary.code === 'MISSING_TEACHER_ASSIGNMENTS' ? (
+              {summary.code === 'TIMETABLE_SETUP_INCOMPLETE' || summary.code === 'MISSING_TEACHER_ASSIGNMENTS' ? (
                 <div className="text-sm text-red-700">
-                  <p className="mb-3">
-                    {(summary.missingAssignments?.length || 0) + (summary.ambiguousAssignments?.length || 0)} teacher assignments require attention.
+                  <p className="mb-3 font-semibold">
+                    The following setup issues must be resolved before generating the timetable:
                   </p>
-                  <div className="max-h-[400px] overflow-y-auto border border-red-200 rounded mb-3">
-                    <table className="w-full text-left bg-white">
-                    <thead className="bg-red-100 sticky top-0">
-                      <tr>
-                        <th className="p-2 border-b border-red-200">Standard</th>
-                        <th className="p-2 border-b border-red-200">Section</th>
-                        <th className="p-2 border-b border-red-200">Subject</th>
-                        <th className="p-2 border-b border-red-200">Problem</th>
-                        <th className="p-2 border-b border-red-200">Details</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {summary.ambiguousAssignments?.map((aa, idx) => (
-                        <tr key={`amb-${idx}`} className="border-b border-red-100 bg-orange-50">
-                          <td className="p-2">{aa.standard}</td>
-                          <td className="p-2">{aa.section}</td>
-                          <td className="p-2 font-medium">{aa.subject}</td>
-                          <td className="p-2 font-medium text-orange-700">
-                            {aa.reason === 'AMBIGUOUS_EXACT_SUBJECT_ASSIGNMENT' ? 'Multiple exact teachers' : 'Multiple All Subjects teachers'}
-                          </td>
-                          <td className="p-2 text-xs">
-                            {aa.teachers.map(t => t.name).join(', ')}
-                          </td>
-                        </tr>
-                      ))}
-                      {summary.missingAssignments?.map((ma, idx) => (
-                        <tr key={`miss-${idx}`} className="border-b border-red-100">
-                          <td className="p-2">{ma.standard}</td>
-                          <td className="p-2">{ma.section}</td>
-                          <td className="p-2 font-medium">{ma.subject}</td>
-                          <td className="p-2 text-red-600">Missing teacher</td>
-                          <td className="p-2 text-xs text-gray-500">-</td>
-                        </tr>
-                      ))}
-                      </tbody>
-                    </table>
+                  
+                  {summary.missingClassTeachers?.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="font-bold mb-1">Missing Class Teachers ({summary.missingClassTeachers.length})</h4>
+                      <table className="w-full text-left bg-white border border-red-200">
+                        <thead className="bg-red-100"><tr><th className="p-2">Standard</th><th className="p-2">Section</th></tr></thead>
+                        <tbody>
+                          {summary.missingClassTeachers.map((mct, idx) => (
+                            <tr key={`mct-${idx}`} className="border-t border-red-100"><td className="p-2">{mct.standard}</td><td className="p-2">{mct.section}</td></tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {summary.duplicateClassTeachers?.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="font-bold mb-1">Duplicate Class Teachers ({summary.duplicateClassTeachers.length})</h4>
+                      <table className="w-full text-left bg-white border border-red-200">
+                        <thead className="bg-red-100"><tr><th className="p-2">Standard</th><th className="p-2">Section</th><th className="p-2">Teachers</th></tr></thead>
+                        <tbody>
+                          {summary.duplicateClassTeachers.map((dct, idx) => (
+                            <tr key={`dct-${idx}`} className="border-t border-red-100 bg-orange-50">
+                              <td className="p-2">{dct.standard}</td><td className="p-2">{dct.section}</td>
+                              <td className="p-2 text-xs">{dct.teachers.map(t => t.name).join(', ')}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {summary.ambiguousAssignments?.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="font-bold mb-1">Ambiguous Assignments ({summary.ambiguousAssignments.length})</h4>
+                      <table className="w-full text-left bg-white border border-red-200">
+                        <thead className="bg-red-100"><tr><th className="p-2">Standard</th><th className="p-2">Section</th><th className="p-2">Subject</th><th className="p-2">Reason</th><th className="p-2">Teachers</th></tr></thead>
+                        <tbody>
+                          {summary.ambiguousAssignments.map((aa, idx) => (
+                            <tr key={`amb-${idx}`} className="border-t border-red-100 bg-orange-50">
+                              <td className="p-2">{aa.standard}</td><td className="p-2">{aa.section}</td><td className="p-2 font-medium">{aa.subject}</td>
+                              <td className="p-2 font-medium text-orange-700">{aa.reason === 'AMBIGUOUS_EXACT_SUBJECT_ASSIGNMENT' ? 'Multiple exact teachers' : 'Multiple All Subjects teachers'}</td>
+                              <td className="p-2 text-xs">{aa.teachers.map(t => t.name).join(', ')}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {summary.missingAssignments?.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="font-bold mb-1">Missing Subject Teachers ({summary.missingAssignments.length})</h4>
+                      <table className="w-full text-left bg-white border border-red-200">
+                        <thead className="bg-red-100"><tr><th className="p-2">Standard</th><th className="p-2">Section</th><th className="p-2">Subject</th></tr></thead>
+                        <tbody>
+                          {summary.missingAssignments.map((ma, idx) => (
+                            <tr key={`miss-${idx}`} className="border-t border-red-100">
+                              <td className="p-2">{ma.standard}</td><td className="p-2">{ma.section}</td><td className="p-2 font-medium">{ma.subject}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  <div className="flex gap-4 mt-4 mb-4">
+                    <button
+                      onClick={fetchReadiness}
+                      className="flex items-center gap-2 px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium bg-white"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      Refresh Setup Status
+                    </button>
                   </div>
+
                   <button 
                     onClick={() => window.location.href = '/admin/users'}
                     className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                   >
                     Go to User Management
                   </button>
+                </div>
+              ) : summary.code === 'TIMETABLE_GENERATION_CONFLICT' ? (
+                <div className="text-sm text-red-700">
+                  <p className="mb-3 font-semibold">
+                    The timetable could not be completely scheduled due to the following constraint conflicts:
+                  </p>
+                  
+                  {summary.conflicts?.length > 0 && (
+                    <div className="mb-4">
+                      <table className="w-full text-left bg-white border border-red-200">
+                        <thead className="bg-red-100">
+                          <tr>
+                            <th className="p-2">Class</th>
+                            <th className="p-2">Subject</th>
+                            <th className="p-2">Teacher</th>
+                            <th className="p-2">Reason</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {summary.conflicts.map((c, idx) => (
+                            <tr key={`conf-${idx}`} className="border-t border-red-100">
+                              <td className="p-2">{c.standard}-{c.section}</td>
+                              <td className="p-2 font-medium">{c.subject}</td>
+                              <td className="p-2">{c.teacher}</td>
+                              <td className="p-2 text-red-800">{c.reason}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <ul className="list-disc pl-5 text-sm text-red-700 space-y-1">
