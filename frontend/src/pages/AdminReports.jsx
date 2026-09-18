@@ -19,7 +19,7 @@ export function AdminReports() {
     toDate: '',
     standard: 'All',
     section: 'All',
-    percentage: 'All'
+    percentage: ''
   });
 
   // Matrix specific state
@@ -814,14 +814,21 @@ export function AdminReports() {
   };
 
   const fetchAttendanceReport = async () => {
+    const pctStr = String(attFilters.percentage).trim();
+    const pct = parseFloat(pctStr);
+    if (pctStr !== '' && (isNaN(pct) || pct < 0 || pct > 100)) {
+      return;
+    }
+
     setAttReportLoading(true);
     try {
+      const percentageToSend = pctStr === '' ? 'All' : pctStr;
       const res = await api.getAttendanceReport(
         attFilters.fromDate, 
         attFilters.toDate, 
         attFilters.standard, 
         attFilters.section, 
-        attFilters.percentage
+        percentageToSend
       );
       if (res.success) {
         setAttReportData(res.data);
@@ -896,17 +903,27 @@ export function AdminReports() {
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Percentage</label>
-              <select value={attFilters.percentage} onChange={e => setAttFilters({...attFilters, percentage: e.target.value})} className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none">
-                <option value="All">All</option>
-                <option value="90% and Above">90% and Above</option>
-                <option value="80%–89%">80%–89%</option>
-                <option value="75%–79%">75%–79%</option>
-                <option value="Below 75%">Below 75%</option>
-              </select>
+              <input
+                type="number"
+                placeholder="Enter percentage"
+                value={attFilters.percentage}
+                onChange={e => setAttFilters({...attFilters, percentage: e.target.value})}
+                className={`w-full bg-gray-50 border ${String(attFilters.percentage).trim() !== '' && (isNaN(parseFloat(attFilters.percentage)) || parseFloat(attFilters.percentage) < 0 || parseFloat(attFilters.percentage) > 100) ? 'border-red-500' : 'border-gray-200'} text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none`}
+                min="0"
+                max="100"
+                step="any"
+              />
+              {String(attFilters.percentage).trim() !== '' && (isNaN(parseFloat(attFilters.percentage)) || parseFloat(attFilters.percentage) < 0 || parseFloat(attFilters.percentage) > 100) && (
+                <p className="text-red-500 text-xs mt-1">Percentage must be between 0 and 100.</p>
+              )}
             </div>
           </div>
           <div className="mt-6 flex justify-end gap-3">
-             <button onClick={fetchAttendanceReport} disabled={attReportLoading} className="flex items-center gap-2 bg-[#2E1C40] hover:bg-[#4C677C] text-white px-6 py-2.5 rounded-xl font-bold transition-colors disabled:opacity-50">
+             <button 
+               onClick={fetchAttendanceReport} 
+               disabled={attReportLoading || (String(attFilters.percentage).trim() !== '' && (isNaN(parseFloat(attFilters.percentage)) || parseFloat(attFilters.percentage) < 0 || parseFloat(attFilters.percentage) > 100))} 
+               className="flex items-center gap-2 bg-[#2E1C40] hover:bg-[#4C677C] text-white px-6 py-2.5 rounded-xl font-bold transition-colors disabled:opacity-50"
+             >
                {attReportLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/> : <Search className="w-4 h-4" />}
                Generate Report
              </button>
@@ -950,6 +967,30 @@ export function AdminReports() {
                       ))}
                    </tbody>
                 </table>
+             </div>
+             <div className="p-6 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="w-full sm:w-1/3">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Percentage</label>
+                  <input 
+                    type="number"
+                    placeholder="Enter percentage"
+                    value={attFilters.percentage}
+                    onChange={e => setAttFilters({...attFilters, percentage: e.target.value})}
+                    className={`w-full bg-white border ${String(attFilters.percentage).trim() !== '' && (isNaN(parseFloat(attFilters.percentage)) || parseFloat(attFilters.percentage) < 0 || parseFloat(attFilters.percentage) > 100) ? 'border-red-500' : 'border-gray-200'} text-gray-900 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#FCA311] outline-none`}
+                    min="0" max="100" step="any"
+                  />
+                  {String(attFilters.percentage).trim() !== '' && (isNaN(parseFloat(attFilters.percentage)) || parseFloat(attFilters.percentage) < 0 || parseFloat(attFilters.percentage) > 100) && (
+                    <p className="text-red-500 text-xs mt-1">Percentage must be between 0 and 100.</p>
+                  )}
+                </div>
+                <button 
+                  onClick={fetchAttendanceReport} 
+                  disabled={attReportLoading || (String(attFilters.percentage).trim() !== '' && (isNaN(parseFloat(attFilters.percentage)) || parseFloat(attFilters.percentage) < 0 || parseFloat(attFilters.percentage) > 100))} 
+                  className="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#2E1C40] hover:bg-[#4C677C] text-white px-6 py-2.5 rounded-xl font-bold transition-colors disabled:opacity-50 mt-4 sm:mt-0"
+                >
+                  {attReportLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/> : <Search className="w-4 h-4" />}
+                  Generate Report
+                </button>
              </div>
           </div>
         )}

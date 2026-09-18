@@ -454,14 +454,9 @@ exports.getAttendanceReport = async (req, res) => {
     });
     
     if (percentage && percentage !== 'All') {
-      if (percentage === '90% and Above') {
-        reportArray = reportArray.filter(r => r.percentage >= 90);
-      } else if (percentage === '80%–89%') {
-        reportArray = reportArray.filter(r => r.percentage >= 80 && r.percentage < 90);
-      } else if (percentage === '75%–79%') {
-        reportArray = reportArray.filter(r => r.percentage >= 75 && r.percentage < 80);
-      } else if (percentage === 'Below 75%') {
-        reportArray = reportArray.filter(r => r.percentage < 75);
+      const parsedPct = parseFloat(percentage);
+      if (!isNaN(parsedPct)) {
+        reportArray = reportArray.filter(r => r.percentage === parsedPct);
       }
     }
     
