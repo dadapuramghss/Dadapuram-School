@@ -55,11 +55,11 @@ const getClassLeaderboard = async (req, res) => {
                   $and: [
                     { $ne: ["$terms.termName", null] },
                     { $ne: ["$terms.marks", null] },
-                    { $ne: ["$terms.marks.score", null] }
+                    { $isNumber: "$terms.marks.score" }
                   ]
                 },
                 "$terms.termName",
-                "$$REMOVE"
+                null
               ]
             }
           }
@@ -75,8 +75,8 @@ const getClassLeaderboard = async (req, res) => {
                { $expr:
                   { $and:
                      [
-                       { $eq: [ "$standard",  "$std" ] },
-                       { $eq: [ "$section", "$sec" ] }
+                       { $eq: [ "$standard",  "$$std" ] },
+                       { $eq: [ "$section", "$$sec" ] }
                      ]
                   }
                }
@@ -88,7 +88,15 @@ const getClassLeaderboard = async (req, res) => {
       {
         $addFields: {
           config: { $arrayElemAt: ["$config", 0] },
-          termsCount: { $size: "$termsSet" }
+          termsCount: {
+            $size: {
+              $filter: {
+                input: "$termsSet",
+                as: "term",
+                cond: { $ne: ["$$term", null] }
+              }
+            }
+          }
         }
       },
       {
@@ -217,11 +225,11 @@ const getDashboardStats = async (req, res) => {
                   $and: [
                     { $ne: ["$terms.termName", null] },
                     { $ne: ["$terms.marks", null] },
-                    { $gt: ["$terms.marks.score", 0] }
+                    { $isNumber: "$terms.marks.score" }
                   ]
                 },
                 "$terms.termName",
-                "$$REMOVE"
+                null
               ]
             }
           }
@@ -254,7 +262,15 @@ const getDashboardStats = async (req, res) => {
       {
         $addFields: {
           config: { $arrayElemAt: ["$config", 0] },
-          termsCount: { $size: "$termsSet" }
+          termsCount: {
+            $size: {
+              $filter: {
+                input: "$termsSet",
+                as: "term",
+                cond: { $ne: ["$$term", null] }
+              }
+            }
+          }
         }
       },
       {
@@ -354,11 +370,11 @@ const getDashboardStats = async (req, res) => {
                   $and: [
                     { $ne: ["$terms.termName", null] },
                     { $ne: ["$terms.marks", null] },
-                    { $gt: ["$terms.marks.score", 0] }
+                    { $isNumber: "$terms.marks.score" }
                   ]
                 },
                 "$terms.termName",
-                "$$REMOVE"
+                null
               ]
             }
           }
@@ -391,7 +407,15 @@ const getDashboardStats = async (req, res) => {
       {
         $addFields: {
           config: { $arrayElemAt: ["$config", 0] },
-          termsCount: { $size: "$termsSet" }
+          termsCount: {
+            $size: {
+              $filter: {
+                input: "$termsSet",
+                as: "term",
+                cond: { $ne: ["$$term", null] }
+              }
+            }
+          }
         }
       },
       {
@@ -491,11 +515,11 @@ const getDashboardStats = async (req, res) => {
                   $and: [
                     { $ne: ["$terms.termName", null] },
                     { $ne: ["$terms.marks", null] },
-                    { $gt: ["$terms.marks.score", 0] }
+                    { $isNumber: "$terms.marks.score" }
                   ]
                 },
                 "$terms.termName",
-                "$$REMOVE"
+                null
               ]
             }
           }
@@ -528,7 +552,15 @@ const getDashboardStats = async (req, res) => {
       {
         $addFields: {
           config: { $arrayElemAt: ["$config", 0] },
-          termsCount: { $size: "$termsSet" }
+          termsCount: {
+            $size: {
+              $filter: {
+                input: "$termsSet",
+                as: "term",
+                cond: { $ne: ["$$term", null] }
+              }
+            }
+          }
         }
       },
       {
@@ -663,7 +695,7 @@ const getDashboardStats = async (req, res) => {
                { $expr:
                   { $and:
                      [
-                       { $eq: [ "$standard",  "$std" ] },
+                       { $eq: [ "$standard", "$std" ] },
                        { $eq: [ "$section", "$sec" ] }
                      ]
                   }
@@ -780,11 +812,11 @@ const getDashboardStats = async (req, res) => {
                   $and: [
                     { $ne: ["$terms.termName", null] },
                     { $ne: ["$terms.marks", null] },
-                    { $gt: ["$terms.marks.score", 0] }
+                    { $isNumber: "$terms.marks.score" }
                   ]
                 },
                 "$terms.termName",
-                "$$REMOVE"
+                null
               ]
             }
           }
@@ -799,7 +831,7 @@ const getDashboardStats = async (req, res) => {
                { $expr:
                   { $and:
                      [
-                       { $eq: [ "$standard",  "$std" ] },
+                       { $eq: [ "$standard", "$std" ] },
                        { $eq: [ "$section", "$sec" ] }
                      ]
                   }
@@ -812,7 +844,15 @@ const getDashboardStats = async (req, res) => {
       {
         $addFields: {
           config: { $arrayElemAt: ["$config", 0] },
-          termsCount: { $size: "$termsSet" }
+          termsCount: {
+            $size: {
+              $filter: {
+                input: "$termsSet",
+                as: "term",
+                cond: { $ne: ["$$term", null] }
+              }
+            }
+          }
         }
       },
       {
